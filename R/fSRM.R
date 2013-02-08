@@ -1,9 +1,9 @@
 te2 <- function(x, ...) {
-	print("te2")
-	print(x)
+	#print("te2")
+	#print(x)
 	args <- list(...)
-	print(args[["y"]])
-	print(args[["z"]])
+	#print(args[["y"]])
+	#print(args[["z"]])
 }
 te2(1)
 

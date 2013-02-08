@@ -27,18 +27,18 @@ s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)
 s1
 
 # take a look at the lavaan output
-summary(s1$res)
+summary(s1$model)
 
 # show the model syntax:
-cat(s1$model)
+cat(s1$syntax)
 
 # ... add intragenerational similarity (now results are identical to Cook, 2000)
 s2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")))
 s2
 
 # compare modelfits with and without IGSIM; you need the workaround of defining new variables ...
-S1 <- s1$res
-S2 <- s2$res
+S1 <- s1$model
+S2 <- s2$model
 anova(S1, S2)
 
 
@@ -46,7 +46,7 @@ anova(S1, S2)
 s3 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")), err=2)
 s3
 
-S3 <- s3$res
+S3 <- s3$model
 anova(S2, S3)
 
 # --> you get better CFI, TLI, Chi2, AIC and BIC. The less restricted model s3 is NOT significantly worse than s2, so s3 would be preferable.
