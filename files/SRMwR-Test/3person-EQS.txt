@@ -1,0 +1,985 @@
+   EQS, A STRUCTURAL EQUATION PROGRAM          MULTIVARIATE SOFTWARE, INC.
+   COPYRIGHT BY P.M. BENTLER                   VERSION 6.1 (\cf1 C ) 1985 - 2005 (B83).
+ 
+ 
+     PROGRAM CONTROL INFORMATION
+ 
+      1  /TITLE                                                                          
+      2  3 person srm with replications                                                  
+      3  /SPECIFICATIONS                                                                 
+      4  DATA='c:\\nsf\\anx rep2.ess';                                                     
+      5  VARIABLES=12; CASES=208;                                                        
+      6  METHOD=ML; ANALYSIS=COVARIANCE; MATRIX=RAW;                                     
+      7  /LABELS                                                                         
+      8  V1=V1; V2=V2; V3=V3; V4=V4; V5=V5;                                              
+      9  V6=V6; V7=V7; V8=V8; V9=V9; V10=V10;                                            
+     10  V11=V11; V12=V12; f1=m_act; f2=f_act; f3=c_act;                                 
+     11  f4=f_prt; f5=c_prt; f6=m_prt; f7=mfrel; f8=mcrel;                               
+     12  f9=fmrel; f10=fc_rel; f11=cm_rel; f12=cf_rel;                                   
+     13  /EQUATIONS                                                                      
+     14  V1 =   1F1 + 1F4 + 1F7 + E1;                                                    
+     15  V2 =   1F1 + 1F4 + 1F7 + E2;                                                    
+     16  V3 =   1F1 + 1F5 + 1F8 + E3;                                                    
+     17  V4 =   1F1 + 1F5 + 1F8 + E4;                                                    
+     18  V5 =   1F2 + 1F6 + 1F9 + E5;                                                    
+     19  V6 =   1F2 + 1F6 + 1F9 + E6;                                                    
+     20  V7 =   1F2 + 1F5 + 1F10 + E7;                                                   
+     21  V8 =   1F2 + 1F5 + 1F10 + E8;                                                   
+     22  V9 =   1F3 + 1F6 + 1F11 + E9;                                                   
+     23  V10 =   1F3 + 1F6 + 1F11 + E10;                                                 
+     24  V11 =   1F3 + 1F4 + 1F12 + E11;                                                 
+     25  V12 =   1F3 + 1F4 + 1F12 + E12;                                                 
+     26  /VARIANCES                                                                      
+     27   F1 = *;                                                                        
+     28   F2 = *;                                                                        
+     29   F3 = *;                                                                        
+     30   F4 = *;                                                                        
+     31   F5 = *;                                                                        
+     32   F6 = *;                                                                        
+     33   F7 = *;                                                                        
+     34   F8 = *;                                                                        
+     35   F9 = *;                                                                        
+     36   F10 = *;                                                                       
+     37   F11 = *;                                                                       
+     38   F12 = *;                                                                       
+     39   E1 = *;                                                                        
+     40   E2 = *;                                                                        
+     41   E3 = *;                                                                        
+     42   E4 = *;                                                                        
+     43   E5 = *;                                                                        
+     44   E6 = *;                                                                        
+     45   E7 = *;                                                                        
+     46   E8 = *;                                                                        
+     47   E9 = *;                                                                        
+     48   E10 = *;                                                                       
+     49   E11 = *;                                                                       
+     50   E12 = *;                                                                       
+     51  /COVARIANCES                                                                    
+     52  F4,F2 = *;                                                                      
+  
+  25-Feb-06      PAGE :  2  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+     53  F5,F3 = *;                                                                      
+     54  F6,F1 = *;                                                                      
+     55  f7,f9=*;                                                                        
+     56  f8,f11=*;                                                                       
+     57  f10,f12=*;                                                                      
+     58  E3,E1 = *;                                                                      
+     59  E4,E2 = *;                                                                      
+     60  E5,E1 = *;                                                                      
+     61  E5,E3 = *;                                                                      
+     62  E6,E2 = *;                                                                      
+     63  E6,E4 = *;                                                                      
+     64  E7,E1 = *;                                                                      
+     65  E7,E3 = *;                                                                      
+     66  E7,E5 = *;                                                                      
+     67  E8,E2 = *;                                                                      
+     68  E8,E4 = *;                                                                      
+     69  E8,E6 = *;                                                                      
+     70  E9,E1 = *;                                                                      
+     71  E9,E3 = *;                                                                      
+     72  E9,E5 = *;                                                                      
+     73  E9,E7 = *;                                                                      
+     74  E10,E2 = *;                                                                     
+     75  E10,E4 = *;                                                                     
+     76  E10,E6 = *;                                                                     
+     77  E10,E8 = *;                                                                     
+     78  E11,E1 = *;                                                                     
+     79  E11,E3 = *;                                                                     
+     80  E11,E5 = *;                                                                     
+     81  E11,E7 = *;                                                                     
+     82  E11,E9 = *;                                                                     
+     83  E12,E2 = *;                                                                     
+     84  E12,E4 = *;                                                                     
+     85  E12,E6 = *;                                                                     
+     86  E12,E8 = *;                                                                     
+     87  E12,E10 = *;                                                                    
+     88  /PRINT                                                                          
+     89  FIT=ALL;                                                                        
+     90  TABLE=EQUATION;                                                                 
+     91  /END                                                                            
+ 
+ 
+        91 RECORDS OF INPUT MODEL FILE WERE READ
+ 
+ 
+     DATA IS READ FROM c:\\nsf\\anx rep2.ess                                                                                                             
+     THERE ARE  12 VARIABLES AND   208 CASES
+     IT IS A RAW DATA ESS FILE
+  
+  25-Feb-06      PAGE :  3  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+ 
+   SAMPLE STATISTICS BASED ON COMPLETE CASES
+ 
+ 
+                             UNIVARIATE STATISTICS
+                             ---------------------
+ 
+ 
+    VARIABLE           V1         V2         V3         V4         V5    
+ 
+    MEAN               1.9119     1.7461     1.9135     1.7837     1.9359
+ 
+    SKEWNESS (G1)       .8576     1.4002      .7315     1.2260     1.0510
+ 
+    KURTOSIS (G2)      -.1462     1.3681      .2170     1.0643      .6486
+ 
+    STANDARD DEV.       .9040      .9638      .7836      .8542      .9198
+ 
+ 
+    VARIABLE           V6         V7         V8         V9         V10   
+ 
+    MEAN               1.8405     2.0789     1.9225     1.7036     1.7554
+ 
+    SKEWNESS (G1)      1.2317      .5793      .5558     1.2152     1.3672
+ 
+    KURTOSIS (G2)       .9566     -.3604     -.5382     1.3610     1.4686
+ 
+    STANDARD DEV.       .9650      .7793      .7948      .7344      .8633
+ 
+ 
+    VARIABLE           V11        V12   
+ 
+    MEAN               1.9425     1.9709
+ 
+    SKEWNESS (G1)       .7911      .8903
+ 
+    KURTOSIS (G2)       .3867      .0220
+ 
+    STANDARD DEV.       .8184      .9486
+ 
+ 
+                             MULTIVARIATE KURTOSIS
+                             ---------------------
+ 
+    MARDIA'S COEFFICIENT (G2,P) =     40.3219
+    NORMALIZED ESTIMATE =             15.8626
+ 
+ 
+                      ELLIPTICAL THEORY KURTOSIS ESTIMATES
+                      ------------------------------------
+ 
+    MARDIA-BASED KAPPA =       .2400 MEAN SCALED UNIVARIATE KURTOSIS =      .1791
+ 
+    MARDIA-BASED KAPPA IS USED IN COMPUTATION. KAPPA=            .2400
+ 
+ 
+    CASE NUMBERS WITH LARGEST CONTRIBUTION TO NORMALIZED MULTIVARIATE KURTOSIS:
+    ---------------------------------------------------------------------------
+ 
+    CASE NUMBER        42           46           79          126          145
+ 
+    ESTIMATE       753.2615     467.4054    1052.5789     432.9901     761.6132
+  
+  25-Feb-06      PAGE :  4  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   COVARIANCE  MATRIX TO BE ANALYZED:  12 VARIABLES (SELECTED FROM  12 VARIABLES)
+   BASED ON   208 CASES.
+ 
+ 
+                          V1         V2         V3         V4         V5    
+                          V  1       V  2       V  3       V  4       V  5
+        V1     V  1        .817
+        V2     V  2        .685       .929
+        V3     V  3        .165       .188       .614
+        V4     V  4        .212       .274       .536       .730
+        V5     V  5        .227       .289       .047       .018       .846
+        V6     V  6        .230       .283       .082       .082       .762
+        V7     V  7        .061       .036       .185       .143       .195
+        V8     V  8        .010       .020       .143       .097       .175
+        V9     V  9        .129       .158       .076       .135       .050
+        V10    V 10        .113       .123       .152       .189       .076
+        V11    V 11        .103       .073       .099       .086       .013
+        V12    V 12        .120       .125       .173       .168       .034
+ 
+ 
+                          V6         V7         V8         V9         V10   
+                          V  6       V  7       V  8       V  9       V 10
+        V6     V  6        .931
+        V7     V  7        .194       .607
+        V8     V  8        .189       .473       .632
+        V9     V  9        .061       .044       .049       .539
+        V10    V 10        .091       .127       .103       .427       .745
+        V11    V 11        .028       .170       .145       .247       .312
+        V12    V 12        .064       .179       .155       .293       .425
+ 
+ 
+                          V11        V12   
+                          V 11       V 12
+        V11    V 11        .670
+        V12    V 12        .596       .900
+ 
+ 
+ 
+   BENTLER-WEEKS STRUCTURAL REPRESENTATION:
+ 
+         NUMBER OF DEPENDENT VARIABLES = 12
+             DEPENDENT V'S :     1    2    3    4    5    6    7    8    9   10
+             DEPENDENT V'S :    11   12
+ 
+         NUMBER OF INDEPENDENT VARIABLES = 24
+             INDEPENDENT F'S :     1    2    3    4    5    6    7    8    9   10
+             INDEPENDENT F'S :    11   12
+             INDEPENDENT E'S :     1    2    3    4    5    6    7    8    9   10
+             INDEPENDENT E'S :    11   12
+ 
+         NUMBER OF FREE PARAMETERS =  60
+         NUMBER OF FIXED NONZERO PARAMETERS =  48
+ 
+  *** WARNING MESSAGES ABOVE, IF ANY, REFER TO INDEPENDENCE MODEL.
+      CALCULATIONS FOR USER'S MODEL NOW BEGIN.
+ 
+ 
+   3RD STAGE OF COMPUTATION REQUIRED     40381 WORDS OF MEMORY.
+   PROGRAM ALLOCATED   2000000 WORDS
+ 
+   DETERMINANT OF INPUT MATRIX IS    .28349D-04
+ 
+   PARAMETER ESTIMATES APPEAR IN ORDER,
+   NO SPECIAL PROBLEMS WERE ENCOUNTERED DURING OPTIMIZATION.
+ 
+ 
+ 
+   RESIDUAL COVARIANCE MATRIX  (S-SIGMA) :       
+ 
+ 
+                          V1         V2         V3         V4         V5    
+                          V  1       V  2       V  3       V  4       V  5
+        V1     V  1       -.006
+        V2     V  2        .007       .018
+        V3     V  3       -.004      -.020       .003
+        V4     V  4        .004      -.010       .004       .006
+        V5     V  5       -.029       .009      -.034      -.074      -.006
+        V6     V  6       -.050      -.008      -.010      -.051      -.019
+        V7     V  7       -.005       .005       .009      -.003      -.009
+        V8     V  8       -.021      -.010      -.003      -.019      -.018
+        V9     V  9        .046       .066       .026       .020      -.008
+        V10    V 10        .021       .035       .037       .024       .003
+        V11    V 11        .013       .002       .024      -.006      -.004
+        V12    V 12        .050       .043       .080       .047       .003
+ 
+ 
+                          V6         V7         V8         V9         V10   
+                          V  6       V  7       V  8       V  9       V 10
+        V6     V  6       -.032
+        V7     V  7        .000       .006
+        V8     V  8       -.011      -.003      -.013
+        V9     V  9       -.012      -.012      -.043      -.007
+        V10    V 10        .002       .035       .001      -.001       .013
+        V11    V 11       -.003       .011      -.006      -.009       .012
+        V12    V 12        .007       .029       .005      -.007       .020
+ 
+ 
+                          V11        V12   
+                          V 11       V 12
+        V11    V 11        .004
+        V12    V 12        .011       .018
+ 
+ 
+                      AVERAGE ABSOLUTE  COVARIANCE  RESIDUALS     =         .0175
+         AVERAGE OFF-DIAGONAL ABSOLUTE  COVARIANCE  RESIDUALS     =         .0187
+ 
+ 
+ 
+   STANDARDIZED RESIDUAL MATRIX:                 
+ 
+ 
+                          V1         V2         V3         V4         V5    
+                          V  1       V  2       V  3       V  4       V  5
+        V1     V  1       -.008
+        V2     V  2        .008       .019
+        V3     V  3       -.006      -.026       .004
+        V4     V  4        .005      -.012       .006       .008
+        V5     V  5       -.035       .011      -.048      -.094      -.007
+        V6     V  6       -.057      -.008      -.013      -.061      -.022
+        V7     V  7       -.007       .006       .015      -.005      -.012
+        V8     V  8       -.029      -.013      -.005      -.028      -.025
+        V9     V  9        .069       .094       .045       .033      -.011
+        V10    V 10        .027       .042       .055       .032       .004
+        V11    V 11        .018       .003       .038      -.009      -.006
+        V12    V 12        .058       .047       .108       .058       .004
+ 
+ 
+                          V6         V7         V8         V9         V10   
+                          V  6       V  7       V  8       V  9       V 10
+        V6     V  6       -.034
+        V7     V  7        .001       .010
+        V8     V  8       -.015      -.004      -.020
+        V9     V  9       -.016      -.021      -.075      -.014
+        V10    V 10        .002       .052       .002      -.001       .017
+        V11    V 11       -.004       .018      -.009      -.015       .017
+        V12    V 12        .008       .039       .006      -.010       .024
+ 
+ 
+                          V11        V12   
+                          V 11       V 12
+        V11    V 11        .007
+        V12    V 12        .014       .020
+ 
+ 
+                      AVERAGE ABSOLUTE STANDARDIZED RESIDUALS     =         .0235
+         AVERAGE OFF-DIAGONAL ABSOLUTE STANDARDIZED RESIDUALS     =         .0253
+  
+  25-Feb-06      PAGE :  5  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+   LARGEST STANDARDIZED RESIDUALS:
+ 
+       NO.    PARAMETER   ESTIMATE      NO.    PARAMETER   ESTIMATE
+       ---    ---------   --------      ---    ---------   --------
+        1     V12, V3         .108      11     V10, V7         .052
+        2     V9,  V2         .094      12     V5,  V3        -.048
+        3     V5,  V4        -.094      13     V12, V2         .047
+        4     V9,  V8        -.075      14     V9,  V3         .045
+        5     V9,  V1         .069      15     V10, V2         .042
+        6     V6,  V4        -.061      16     V12, V7         .039
+        7     V12, V4         .058      17     V11, V3         .038
+        8     V12, V1         .058      18     V5,  V1        -.035
+        9     V6,  V1        -.057      19     V6,  V6        -.034
+       10     V10, V3         .055      20     V9,  V4         .033
+ 
+ 
+ 
+   DISTRIBUTION OF STANDARDIZED RESIDUALS
+ 
+ 
+ 
+      ----------------------------------------                       
+      \cf2 !                                      !                        
+    40-                    *                 -                       
+      \cf2 !                 *  *                 !                        
+      \cf2 !                 *  *                 !                        
+      \cf2 !                 *  *                 !                        
+      \cf2 !                 *  *                 !            RANGE      FREQ PERCENT 
+    30-                 *  *                 -                       
+      \cf2 !                 *  *                 !    1   -0.5  -  --       0    .00% 
+      \cf2 !                 *  *                 !    2   -0.4  -  -0.5     0    .00% 
+      \cf2 !                 *  *                 !    3   -0.3  -  -0.4     0    .00% 
+      \cf2 !                 *  *                 !    4   -0.2  -  -0.3     0    .00% 
+    20-                 *  *                 -    5   -0.1  -  -0.2     0    .00%
+      \cf2 !                 *  *                 !    6    0.0  -  -0.1    37  47.44% 
+      \cf2 !                 *  *                 !    7    0.1  -   0.0    40  51.28% 
+      \cf2 !                 *  *                 !    8    0.2  -   0.1     1   1.28% 
+      \cf2 !                 *  *                 !    9    0.3  -   0.2     0    .00% 
+    10-                 *  *                 -    A    0.4  -   0.3     0    .00%
+      \cf2 !                 *  *                 !    B    0.5  -   0.4     0    .00% 
+      \cf2 !                 *  *                 !    C     ++  -   0.5     0    .00% 
+      \cf2 !                 *  *                 !    ------------------------------- 
+      \cf2 !                 *  *  *              !            TOTAL        78 100.00% 
+      ----------------------------------------                       
+         1  2  3  4  5  6  7  8  9  A  B  \cf1 C       EACH "*" REPRESENTS  2 RESIDUALS
+  
+  25-Feb-06      PAGE :  6  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+ 
+ 
+   GOODNESS OF FIT SUMMARY FOR METHOD = ML    
+ 
+   INDEPENDENCE MODEL CHI-SQUARE        =    1403.164 ON    66 DEGREES OF FREEDOM
+ 
+   INDEPENDENCE AIC =  1271.16353   INDEPENDENCE CAIC =   984.88602
+          MODEL AIC =   -18.45147          MODEL CAIC =   -96.52715
+ 
+   CHI-SQUARE =       17.549 BASED ON      18 DEGREES OF FREEDOM
+   PROBABILITY VALUE FOR THE CHI-SQUARE STATISTIC IS       .48574
+ 
+   THE NORMAL THEORY RLS CHI-SQUARE FOR THIS ML SOLUTION IS         17.491.
+ 
+   FIT INDICES
+   -----------
+   BENTLER-BONETT     NORMED FIT INDEX =      .987
+   BENTLER-BONETT NON-NORMED FIT INDEX =     1.001
+   COMPARATIVE FIT INDEX (CFI)         =     1.000
+   BOLLEN   (IFI) FIT INDEX            =     1.000
+   MCDONALD (MFI) FIT INDEX            =     1.001
+   LISREL    GFI  FIT INDEX            =      .986
+   LISREL   AGFI  FIT INDEX            =      .940
+   ROOT MEAN-SQUARE RESIDUAL (RMR)     =      .025
+   STANDARDIZED RMR                    =      .033
+   ROOT MEAN-SQUARE ERROR OF APPROXIMATION (RMSEA)    =      .000
+   90% CONFIDENCE INTERVAL OF RMSEA  (        .000,        .060)
+ 
+   RELIABILITY COEFFICIENTS
+   ------------------------
+   CRONBACH'S ALPHA                    =      .789
+   COEFFICIENT ALPHA FOR AN OPTIMAL SHORT SCALE                =      .923
+   BASED ON THE FOLLOWING  2 VARIABLES
+     V5        V6    
+   RELIABILITY COEFFICIENT RHO         =      .926
+   GREATEST LOWER BOUND RELIABILITY                            =      .952
+   GLB RELIABILITY FOR AN OPTIMAL SHORT SCALE                  =      .952
+   BASED ON ALL VARIABLES
+   BENTLER'S DIMENSION-FREE LOWER BOUND RELIABILITY            =      .952
+   SHAPIRO'S LOWER BOUND RELIABILITY FOR A WEIGHTED COMPOSITE  =      .956
+   WEIGHTS THAT ACHIEVE SHAPIRO'S LOWER BOUND:
+     V1        V2        V3        V4        V5        V6    
+       .308      .352      .277      .302      .410      .425
+     V7        V8        V9        V10       V11       V12   
+       .257      .234      .152      .194      .175      .228
+ 
+ 
+ 
+ 
+                          ITERATIVE SUMMARY
+ 
+                      PARAMETER
+   ITERATION          ABS CHANGE         ALPHA                FUNCTION
+       1                .246358         1.00000                .11231
+       2                .008244         1.00000                .08591
+       3                .001923         1.00000                .08484
+       4                .000479         1.00000                .08478
+  
+  25-Feb-06      PAGE :  7  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+   MEASUREMENT EQUATIONS WITH STANDARD ERRORS AND TEST STATISTICS
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+ 
+ 
+    V1    =V1  =   1.000 F1    + 1.000 F4    + 1.000 F7    + 1.000 E1  
+                                                                   
+                                                                   
+ 
+    V2    =V2  =   1.000 F1    + 1.000 F4    + 1.000 F7    + 1.000 E2  
+                                                                   
+                                                                   
+ 
+    V3    =V3  =   1.000 F1    + 1.000 F5    + 1.000 F8    + 1.000 E3  
+                                                                   
+                                                                   
+ 
+    V4    =V4  =   1.000 F1    + 1.000 F5    + 1.000 F8    + 1.000 E4  
+                                                                   
+                                                                   
+ 
+    V5    =V5  =   1.000 F2    + 1.000 F6    + 1.000 F9    + 1.000 E5  
+                                                                   
+                                                                   
+ 
+    V6    =V6  =   1.000 F2    + 1.000 F6    + 1.000 F9    + 1.000 E6  
+                                                                   
+                                                                   
+ 
+    V7    =V7  =   1.000 F2    + 1.000 F5    + 1.000 F10   + 1.000 E7  
+                                                                   
+                                                                   
+ 
+    V8    =V8  =   1.000 F2    + 1.000 F5    + 1.000 F10   + 1.000 E8  
+                                                                   
+                                                                   
+ 
+    V9    =V9  =   1.000 F3    + 1.000 F6    + 1.000 F11   + 1.000 E9  
+                                                                   
+                                                                   
+ 
+    V10   =V10 =   1.000 F3    + 1.000 F6    + 1.000 F11   + 1.000 E10 
+                                                                   
+                                                                   
+ 
+    V11   =V11 =   1.000 F3    + 1.000 F4    + 1.000 F12   + 1.000 E11 
+                                                                   
+                                                                   
+ 
+    V12   =V12 =   1.000 F3    + 1.000 F4    + 1.000 F12   + 1.000 E12 
+                                                                   
+                                                                   
+ 
+  
+  25-Feb-06      PAGE :  8  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   VARIANCES OF INDEPENDENT VARIABLES
+   ----------------------------------
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+                   V                                F
+                  ---                              ---
+                                 I F1  -M_ACT                .208*I              
+                                 I                           .048 I              
+                                 I                          4.311@I              
+                                 I                                I              
+                                 I F2  -F_ACT                .193*I              
+                                 I                           .048 I              
+                                 I                          3.998@I              
+                                 I                                I              
+                                 I F3  -C_ACT                .300*I              
+                                 I                           .047 I              
+                                 I                          6.408@I              
+                                 I                                I              
+                                 I F4  -F_PRT                .071*I              
+                                 I                           .046 I              
+                                 I                          1.528 I              
+                                 I                                I              
+                                 I F5  -C_PRT                .146*I              
+                                 I                           .039 I              
+                                 I                          3.692@I              
+                                 I                                I              
+                                 I F6  -M_PRT                .073*I              
+                                 I                           .043 I              
+                                 I                          1.700 I              
+                                 I                                I              
+                                 I F7  -MFREL                .399*I              
+                                 I                           .083 I              
+                                 I                          4.786@I              
+                                 I                                I              
+                                 I F8  -MCREL                .178*I              
+                                 I                           .061 I              
+                                 I                          2.922@I              
+                                 I                                I              
+                                 I F9  -FMREL                .515*I              
+                                 I                           .087 I              
+                                 I                          5.948@I              
+                                 I                                I              
+                                 I F10 -FC_REL               .136*I              
+                                 I                           .062 I              
+                                 I                          2.189@I              
+                                 I                                I              
+                                 I F11 -CM_REL               .055*I              
+                                 I                           .058 I              
+                                 I                           .958 I              
+                                 I                                I              
+                                 I F12 -CF_REL               .214*I              
+                                 I                           .067 I              
+                                 I                          3.186@I              
+                                 I                                I              
+  
+  25-Feb-06      PAGE :  9  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   VARIANCES OF INDEPENDENT VARIABLES
+   ----------------------------------
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+                   E                                D
+                  ---                              ---
+  E1  -  V1                 .146*I                                I              
+                            .038 I                                I              
+                           3.786@I                                I              
+                                 I                                I              
+  E2  -  V2                 .233*I                                I              
+                            .041 I                                I              
+                           5.635@I                                I              
+                                 I                                I              
+  E3  -  V3                 .080*I                                I              
+                            .028 I                                I              
+                           2.843@I                                I              
+                                 I                                I              
+  E4  -  V4                 .192*I                                I              
+                            .032 I                                I              
+                           5.926@I                                I              
+                                 I                                I              
+  E5  -  V5                 .070*I                                I              
+                            .031 I                                I              
+                           2.243@I                                I              
+                                 I                                I              
+  E6  -  V6                 .182*I                                I              
+                            .035 I                                I              
+                           5.151@I                                I              
+                                 I                                I              
+  E7  -  V7                 .126*I                                I              
+                            .029 I                                I              
+                           4.344@I                                I              
+                                 I                                I              
+  E8  -  V8                 .169*I                                I              
+                            .031 I                                I              
+                           5.430@I                                I              
+                                 I                                I              
+  E9  -  V9                 .119*I                                I              
+                            .033 I                                I              
+                           3.577@I                                I              
+                                 I                                I              
+  E10 -  V10                .305*I                                I              
+                            .041 I                                I              
+                           7.385@I                                I              
+                                 I                                I              
+  E11 -  V11                .080*I                                I              
+                            .034 I                                I              
+                           2.353@I                                I              
+                                 I                                I              
+  E12 -  V12                .297*I                                I              
+                            .043 I                                I              
+                           6.841@I                                I              
+                                 I                                I              
+  
+  25-Feb-06      PAGE : 10  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   COVARIANCES AMONG INDEPENDENT VARIABLES
+   ---------------------------------------
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+                   V                                F
+                  ---                              ---
+                                 I F6  -M_PRT                .092*I              
+                                 I F1  -M_ACT                .035 I              
+                                 I                          2.654@I              
+                                 I                                I              
+                                 I F4  -F_PRT                .031*I              
+                                 I F2  -F_ACT                .036 I              
+                                 I                           .859 I              
+                                 I                                I              
+                                 I F5  -C_PRT                .093*I              
+                                 I F3  -C_ACT                .031 I              
+                                 I                          2.993@I              
+                                 I                                I              
+                                 I F9  -FMREL                .156*I              
+                                 I F7  -MFREL                .064 I              
+                                 I                          2.438@I              
+                                 I                                I              
+                                 I F11 -CM_REL              -.070*I              
+                                 I F8  -MCREL                .044 I              
+                                 I                         -1.587 I              
+                                 I                                I              
+                                 I F12 -CF_REL               .027*I              
+                                 I F10 -FC_REL               .049 I              
+                                 I                           .558 I              
+                                 I                                I              
+  
+  25-Feb-06      PAGE : 11  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   COVARIANCES AMONG INDEPENDENT VARIABLES
+   ---------------------------------------
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+                   E                                D
+                  ---                              ---
+  E3  -  V3                -.039*I                                I              
+  E1  -  V1                 .024 I                                I              
+                          -1.648 I                                I              
+                                 I                                I              
+  E5  -  V5                -.023*I                                I              
+  E1  -  V1                 .025 I                                I              
+                           -.912 I                                I              
+                                 I                                I              
+  E7  -  V7                 .034*I                                I              
+  E1  -  V1                 .024 I                                I              
+                           1.451 I                                I              
+                                 I                                I              
+  E9  -  V9                -.009*I                                I              
+  E1  -  V1                 .025 I                                I              
+                           -.358 I                                I              
+                                 I                                I              
+  E11 -  V11                .019*I                                I              
+  E1  -  V1                 .025 I                                I              
+                            .765 I                                I              
+                                 I                                I              
+  E4  -  V4                 .075*I                                I              
+  E2  -  V2                 .027 I                                I              
+                           2.784@I                                I              
+                                 I                                I              
+  E6  -  V6                 .011*I                                I              
+  E2  -  V2                 .027 I                                I              
+                            .416 I                                I              
+                                 I                                I              
+  E8  -  V8                -.001*I                                I              
+  E2  -  V2                 .025 I                                I              
+                           -.033 I                                I              
+                                 I                                I              
+  E10 -  V10               -.003*I                                I              
+  E2  -  V2                 .029 I                                I              
+                           -.121 I                                I              
+                                 I                                I              
+  E12 -  V12                .011*I                                I              
+  E2  -  V2                 .030 I                                I              
+                            .364 I                                I              
+                                 I                                I              
+  E5  -  V5                -.010*I                                I              
+  E3  -  V3                 .021 I                                I              
+                           -.501 I                                I              
+                                 I                                I              
+  E7  -  V7                 .030*I                                I              
+  E3  -  V3                 .021 I                                I              
+                           1.446 I                                I              
+                                 I                                I              
+  
+  25-Feb-06      PAGE : 12  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   COVARIANCES AMONG INDEPENDENT VARIABLES (CONTINUED)
+   ---------------------------------------------------
+ 
+  E9  -  V9                -.064*I                                I              
+  E3  -  V3                 .021 I                                I              
+                          -3.009@I                                I              
+                                 I                                I              
+  E11 -  V11               -.017*I                                I              
+  E3  -  V3                 .021 I                                I              
+                           -.816 I                                I              
+                                 I                                I              
+  E6  -  V6                 .041*I                                I              
+  E4  -  V4                 .024 I                                I              
+                           1.718 I                                I              
+                                 I                                I              
+  E8  -  V8                -.029*I                                I              
+  E4  -  V4                 .023 I                                I              
+    <                             I                                I              
+  E10 -  V10                .050*I                                I              
+  E4  -  V4                 .026 I                                I              
+                           1.960 I                                I              
+                                 I                                I              
+  E12 -  V12                .029*I                                I              
+  E4  -  V4                 .026 I                                I              
+                           1.087 I                                I              
+                                 I                                I              
+  E7  -  V7                 .010*I                                I              
+  E5  -  V5                 .021 I                                I              
+                            .473 I                                I              
+                                 I                                I              
+  E9  -  V9                -.015*I                                I              
+  E5  -  V5                 .021 I                                I              
+                           -.711 I                                I              
+                                 I                                I              
+  E11 -  V11               -.013*I                                I              
+  E5  -  V5                 .022 I                                I              
+                           -.604 I                                I              
+                                 I                                I              
+  E8  -  V8                 .007*I                                I              
+  E6  -  V6                 .023 I                                I              
+                            .310 I                                I              
+                                 I                                I              
+  E10 -  V10                .016*I                                I              
+  E6  -  V6                 .026 I                                I              
+                            .637 I                                I              
+                                 I                                I              
+  E12 -  V12                .026*I                                I              
+  E6  -  V6                 .027 I                                I              
+                            .948 I                                I              
+                                 I                                I              
+  
+  25-Feb-06      PAGE : 13  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   COVARIANCES AMONG INDEPENDENT VARIABLES (CONTINUED)
+   ---------------------------------------------------
+ 
+  E9  -  V9                -.036*I                                I              
+  E7  -  V7                 .022 I                                I              
+                          -1.688 I                                I              
+                                 I                                I              
+  E11 -  V11                .008*I                                I              
+  E7  -  V7                 .022 I                                I              
+                            .356 I                                I              
+                                 I                                I              
+  E10 -  V10                .009*I                                I              
+  E8  -  V8                 .025 I                                I              
+                            .371 I                                I              
+                                 I                                I              
+  E12 -  V12               -.001*I                                I              
+  E8  -  V8                 .026 I                                I              
+                           -.030 I                                I              
+                                 I                                I              
+  E11 -  V11               -.044*I                                I              
+  E9  -  V9                 .025 I                                I              
+                          -1.752 I                                I              
+                                 I                                I              
+  E12 -  V12                .105*I                                I              
+  E10 -  V10                .032 I                                I              
+                           3.293@I                                I              
+                                 I                                I              
+  
+  25-Feb-06      PAGE : 14  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+   STANDARDIZED SOLUTION:                                              R-SQUARED
+ 
+ 
+ 
+    V1    =V1  =   .503 F1    + .293 F4    + .696 F7    + .421 E1           .823 
+    V2    =V2  =   .478 F1    + .279 F4    + .662 F7    + .506 E2           .744 
+    V3    =V3  =   .583 F1    + .488 F5    + .540 F8    + .361 E3           .869 
+    V4    =V4  =   .536 F1    + .448 F5    + .496 F8    + .515 E4           .734 
+    V5    =V5  =   .476 F2    + .292 F6    + .778 F9    + .287 E5           .917 
+    V6    =V6  =   .448 F2    + .275 F6    + .731 F9    + .435 E6           .811 
+    V7    =V7  =   .567 F2    + .492 F5    + .476 F10   + .458 E7           .790 
+    V8    =V8  =   .548 F2    + .475 F5    + .460 F10   + .512 E8           .737 
+    V9    =V9  =   .741 F3    + .365 F6    + .317 F11   + .466 E9           .783 
+    V10   =V10 =   .640 F3    + .315 F6    + .274 F11   + .645 E10          .584 
+    V11   =V11 =   .672 F3    + .326 F4    + .567 F12   + .347 E11          .879 
+    V12   =V12 =   .583 F3    + .283 F4    + .493 F12   + .580 E12          .663 
+  
+  25-Feb-06      PAGE : 15  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   CORRELATIONS AMONG INDEPENDENT VARIABLES
+   ---------------------------------------
+ 
+                   V                                F
+                  ---                              ---
+                                 I F6  -M_PRT                .747*I              
+                                 I F1  -M_ACT                     I              
+                                 I                                I              
+                                 I F4  -F_PRT                .266*I              
+                                 I F2  -F_ACT                     I              
+                                 I                                I              
+                                 I F5  -C_PRT                .443*I              
+                                 I F3  -C_ACT                     I              
+                                 I                                I              
+                                 I F9  -FMREL                .345*I              
+                                 I F7  -MFREL                     I              
+                                 I                                I              
+                                 I F11 -CM_REL              -.705*I              
+                                 I F8  -MCREL                     I              
+                                 I                                I              
+                                 I F12 -CF_REL               .159*I              
+                                 I F10 -FC_REL                    I              
+                                 I                                I              
+  
+  25-Feb-06      PAGE : 16  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   CORRELATIONS AMONG INDEPENDENT VARIABLES
+   ---------------------------------------
+ 
+                   E                                D
+                  ---                              ---
+  E3  -  V3                -.362*I                                I              
+  E1  -  V1                      I                                I              
+                                 I                                I              
+  E5  -  V5                -.223*I                                I              
+  E1  -  V1                      I                                I              
+                                 I                                I              
+  E7  -  V7                 .253*I                                I              
+  E1  -  V1                      I                                I              
+                                 I                                I              
+  E9  -  V9                -.067*I                                I              
+  E1  -  V1                      I                                I              
+                                 I                                I              
+  E11 -  V11                .180*I                                I              
+  E1  -  V1                      I                                I              
+                                 I                                I              
+  E4  -  V4                 .354*I                                I              
+  E2  -  V2                      I                                I              
+                                 I                                I              
+  E6  -  V6                 .055*I                                I              
+  E2  -  V2                      I                                I              
+                                 I                                I              
+  E8  -  V8                -.004*I                                I              
+  E2  -  V2                      I                                I              
+                                 I                                I              
+  E10 -  V10               -.013*I                                I              
+  E2  -  V2                      I                                I              
+                                 I                                I              
+  E12 -  V12                .041*I                                I              
+  E2  -  V2                      I                                I              
+                                 I                                I              
+  E5  -  V5                -.139*I                                I              
+  E3  -  V3                      I                                I              
+                                 I                                I              
+  E7  -  V7                 .297*I                                I              
+  E3  -  V3                      I                                I              
+                                 I                                I              
+  E9  -  V9                -.657*I                                I              
+  E3  -  V3                      I                                I              
+                                 I                                I              
+  E11 -  V11               -.218*I                                I              
+  E3  -  V3                      I                                I              
+                                 I                                I              
+  E6  -  V6                 .219*I                                I              
+  E4  -  V4                      I                                I              
+                                 I                                I              
+  E8  -  V8                -.161*I                                I              
+  E4  -  V4                      I                                I              
+                                 I                                I              
+  
+  25-Feb-06      PAGE : 17  EQS     Licensee:                               
+   TITLE:   3 person srm with replications                              
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   CORRELATIONS AMONG INDEPENDENT VARIABLES (CONTINUED)
+   ---------------------------------------------------
+ 
+  E10 -  V10                .208*I                                I              
+  E4  -  V4                      I                                I              
+                                 I                                I              
+  E12 -  V12                .120*I                                I              
+  E4  -  V4                      I                                I              
+                                 I                                I              
+  E7  -  V7                 .108*I                                I              
+  E5  -  V5                      I                                I              
+                                 I                                I              
+  E9  -  V9                -.167*I                                I              
+  E5  -  V5                      I                                I              
+                                 I                                I              
+  E11 -  V11               -.178*I                                I              
+  E5  -  V5                      I                                I              
+                                 I                                I              
+  E8  -  V8                 .041*I                                I              
+  E6  -  V6                      I                                I              
+                                 I                                I              
+  E10 -  V10                .070*I                                I              
+  E6  -  V6                      I                                I              
+                                 I                                I              
+  E12 -  V12                .110*I                                I              
+  E6  -  V6                      I                                I              
+                                 I                                I              
+  E9  -  V9                -.298*I                                I              
+  E7  -  V7                      I                                I              
+                                 I                                I              
+  E11 -  V11                .079*I                                I              
+  E7  -  V7                      I                                I              
+                                 I                                I              
+  E10 -  V10                .041*I                                I              
+  E8  -  V8                      I                                I              
+                                 I                                I              
+  E12 -  V12               -.004*I                                I              
+  E8  -  V8                      I                                I              
+                                 I                                I              
+  E11 -  V11               -.446*I                                I              
+  E9  -  V9                      I                                I              
+                                 I                                I              
+  E12 -  V12                .351*I                                I              
+  E10 -  V10                     I                                I              
+                                 I                                I              
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  -------------------------------------------------------------------------------
+                            E N D    O F    M E T H O D
+  -------------------------------------------------------------------------------
+ 
+   Execution begins at 17:56:52   
+   Execution ends   at 17:56:53   
+   Elapsed time =       1.00 seconds 
+ 
+ 

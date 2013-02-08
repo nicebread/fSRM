@@ -1,0 +1,2029 @@
+
+                                DATE:  4/26/2001
+                                  TIME: 23:33
+
+
+                                L I S R E L  8.30
+
+                                       BY
+
+                         Karl G. J”reskog & Dag S”rbom
+
+
+
+                    This program is published exclusively by
+                    Scientific Software International, Inc.
+                       7383 N. Lincoln Avenue, Suite 100
+                        Lincolnwood, IL 60712, U.S.A. 
+            Phone: (800)247-6113, (847)675-0720, Fax: (847)675-2140
+        Copyright by Scientific Software International, Inc., 1981-2000 
+          Use of this program is subject to the terms specified in the
+                        Universal Copyright Convention.
+                          Website: www.ssicentral.com
+
+ The following lines were read from file D:\SUSAN\LISREL\SBSRMB~2\SRMVRIE1.SPL:
+
+ SRM big5 extraversion
+ da ni=24 no=271 ma=cm
+ cm fi=srmvrie.txt
+ la
+ w1pevrvm w1pevrvo w1pevrvj w1pevrmv w1pevrmo w1pevrmj w1pevrov w1pevrom w1pevroj w1pevrjv w1pevrjm w1pevrjo
+ w1p2vrvm w1p2vrvo w1p2vrvj w1p2vrmv w1p2vrmo w1p2vrmj w1p2vrov w1p2vrom w1p2vroj w1p2vrjv w1p2vrjm w1p2vrjo
+ mo ny=24 ne=21 ly=fu,fi be=fu,fi ps=sy,fi te=sy,fi
+ le
+ 1actv 2actm 3acto 4actj 5parv 6parm 7paro 8parj 9relvm 10relvo 11relvj 12relmv 13relmo
+ 14relmj 15relov 16relom 17reloj 18reljv 19reljm 20reljo 21fam
+ ma ly
+ *
+ 1 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1
+ 1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 1
+ 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 1
+ 0 1 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1
+ 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 1
+ 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1
+ 0 0 1 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1
+ 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1
+ 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 1
+ 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1
+ 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1
+ 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1
+ 1 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1
+ 1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 1
+ 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 1
+ 0 1 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1
+ 0 1 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 1
+ 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1
+ 0 0 1 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1
+ 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1
+ 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 1
+ 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1
+ 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1
+ 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1
+ fr ps 1 1 ps 2 2 ps 3 3 ps 4 4 ps 5 5 ps 6 6 ps 7 7 ps 8 8 ps 9 9 ps 10 10 ps 11 11
+ fr ps 12 12 ps 13 13 ps 14 14 ps 15 15 ps 16 16 ps 17 17 ps 18 18 ps 19 19 ps 20 20 ps 21 21
+ !fr ps 1 5 ps 2 6 ps 3 7 ps 4 8 ps 9 12 ps 10 15 ps 11 18 ps 13 16 ps 14 19 ps 17 20
+ !fr ps 10 13 ps 11 14 ps 15 18 ps 16 19
+ !fr ps 10 11 ps 13 14 ps 15 16 ps 18 19
+ fr ps 3 7 ps 4 8 ps 17 20 ps 13 14
+ !fi ps 6 6 ps 18 18 ps 19 19
+ fr te 1 1 te 2 2 te 3 3 te 4 4 te 5 5 te 6 6 te 7 7 te 8 8 te 9 9 te 10 10 te 11 11 te 12 12
+ fr te 13 13 te 14 14 te 15 15 te 16 16 te 17 17 te 18 18 te 19 19 te 20 20 te 21 21 te 22 22
+ fr te 23 23 te 24 24
+ fr te 2 3 te 5 6 te 7 8 te 10 11 te 14 15 te 17 18 te 19 20 te 22 23
+ fr te 1 2 te 1 3 te 4 5 te 4 6 te 7 9 te 8 9 te 10 12 te 11 12 te 13 14 te 13 15 te 16 17 te 16 18
+ fr te 19 21 te 20 21 te 22 24 te 23 24
+ ou ad=off rs nd=5 ns sc
+
+ SRM big5 extraversion                                                          
+
+                           Number of Input Variables 24
+                           Number of Y - Variables   24
+                           Number of X - Variables    0
+                           Number of ETA - Variables 21
+                           Number of KSI - Variables  0
+                           Number of Observations   271
+
+ SRM big5 extraversion                                                          
+
+         Covariance Matrix to be Analyzed        
+
+            w1pevrvm   w1pevrvo   w1pevrvj   w1pevrmv   w1pevrmo   w1pevrmj   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm    0.38392
+ w1pevrvo    0.20092    0.55369
+ w1pevrvj    0.18634    0.14379    0.49147
+ w1pevrmv    0.05357    0.07008    0.02528    0.47651
+ w1pevrmo    0.03276    0.16199   -0.02552    0.25636    0.56779
+ w1pevrmj    0.04824   -0.00620    0.16869    0.19982    0.13650    0.49491
+ w1pevrov    0.00400    0.11291    0.07620    0.16960    0.11335    0.10605
+ w1pevrom    0.03943    0.12463    0.07692    0.05489    0.12770    0.08402
+ w1pevroj    0.00471    0.06781    0.19012    0.10481    0.07928    0.22131
+ w1pevrjv    0.04524    0.05251    0.10748    0.11640    0.06166    0.09390
+ w1pevrjm    0.05992    0.05153    0.09133    0.11293    0.11244    0.10037
+ w1pevrjo    0.04634    0.21963    0.10512    0.13535    0.15056    0.05961
+ w1p2vrvm    0.34478    0.22742    0.15281    0.06908    0.05714    0.03273
+ w1p2vrvo    0.19463    0.45643    0.16472    0.09834    0.16511    0.03018
+ w1p2vrvj    0.19590    0.15450    0.42837    0.01097   -0.01171    0.14077
+ w1p2vrmv    0.05806    0.06395    0.02523    0.42233    0.25157    0.19708
+ w1p2vrmo    0.05791    0.17340   -0.01995    0.20599    0.51086    0.14177
+ w1p2vrmj    0.03127   -0.02538    0.17827    0.16896    0.11295    0.42979
+ w1p2vrov   -0.01133    0.10287    0.06685    0.14286    0.13178    0.09280
+ w1p2vrom    0.01847    0.08716    0.06166    0.03823    0.10083    0.08293
+ w1p2vroj   -0.00843    0.04402    0.14186    0.05018    0.07075    0.17059
+ w1p2vrjv    0.05014    0.04523    0.13462    0.11349    0.05628    0.10186
+ w1p2vrjm    0.05932    0.01921    0.09853    0.09203    0.06441    0.14748
+ w1p2vrjo    0.01286    0.12119    0.15361    0.06373    0.08127    0.13610
+
+         Covariance Matrix to be Analyzed        
+
+            w1pevrov   w1pevrom   w1pevroj   w1pevrjv   w1pevrjm   w1pevrjo   
+            --------   --------   --------   --------   --------   --------
+ w1pevrov    0.83654
+ w1pevrom    0.42751    0.62814
+ w1pevroj    0.51865    0.45876    1.15800
+ w1pevrjv    0.20170    0.11904    0.19683    0.72757
+ w1pevrjm    0.14371    0.13299    0.17354    0.39566    0.54949
+ w1pevrjo    0.26335    0.23591    0.37121    0.45625    0.35909    1.23930
+ w1p2vrvm   -0.00184    0.01723   -0.02695    0.01139    0.05369    0.04902
+ w1p2vrvo    0.16409    0.13675    0.08494    0.05325    0.07228    0.18005
+ w1p2vrvj    0.05639    0.05747    0.14350    0.09178    0.06724    0.04975
+ w1p2vrmv    0.17659    0.03234    0.07085    0.12778    0.10835    0.11203
+ w1p2vrmo    0.11085    0.15088    0.07530    0.04347    0.08660    0.13384
+ w1p2vrmj    0.09216    0.04549    0.20141    0.10166    0.10181    0.05555
+ w1p2vrov    0.72025    0.46542    0.52139    0.16110    0.12618    0.22186
+ w1p2vrom    0.37842    0.50453    0.46914    0.14032    0.15930    0.20677
+ w1p2vroj    0.52985    0.50588    0.98990    0.14058    0.15442    0.31265
+ w1p2vrjv    0.21938    0.15455    0.22474    0.51290    0.38215    0.46974
+ w1p2vrjm    0.08220    0.15283    0.15149    0.33791    0.43005    0.31514
+ w1p2vrjo    0.15651    0.23462    0.39161    0.41916    0.34787    0.87583
+
+         Covariance Matrix to be Analyzed        
+
+            w1p2vrvm   w1p2vrvo   w1p2vrvj   w1p2vrmv   w1p2vrmo   w1p2vrmj   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrvm    0.46584
+ w1p2vrvo    0.23259    0.53666
+ w1p2vrvj    0.17798    0.18610    0.49651
+ w1p2vrmv    0.08667    0.10524    0.01277    0.52931
+ w1p2vrmo    0.08488    0.17859   -0.00831    0.24055    0.63455
+ w1p2vrmj    0.01346    0.00958    0.15255    0.17149    0.13905    0.51554
+ w1p2vrov    0.01525    0.14737    0.05042    0.16815    0.14054    0.07467
+ w1p2vrom    0.01615    0.08146    0.04293    0.03415    0.13199    0.07569
+ w1p2vroj    0.00262    0.07033    0.12455    0.03042    0.07950    0.16048
+ w1p2vrjv    0.01013    0.01249    0.12103    0.09956    0.05086    0.11840
+ w1p2vrjm    0.02578   -0.00692    0.06958    0.08106    0.06249    0.16998
+ w1p2vrjo    0.00655    0.09641    0.10788    0.04352    0.08705    0.15478
+
+         Covariance Matrix to be Analyzed        
+
+            w1p2vrov   w1p2vrom   w1p2vroj   w1p2vrjv   w1p2vrjm   w1p2vrjo   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrov    0.91975
+ w1p2vrom    0.50757    0.68014
+ w1p2vroj    0.63974    0.60267    1.34430
+ w1p2vrjv    0.19584    0.17607    0.22350    0.86856
+ w1p2vrjm    0.09367    0.18437    0.12604    0.56448    0.78844
+ w1p2vrjo    0.19743    0.23609    0.34902    0.56174    0.52864    1.17950
+
+
+ SRM big5 extraversion                                                          
+
+ Parameter Specifications
+
+         PSI         
+
+               1actv      2actm      3acto      4actj      5parv      6parm
+            --------   --------   --------   --------   --------   --------
+    1actv          1
+    2actm          0          2
+    3acto          0          0          3
+    4actj          0          0          0          4
+    5parv          0          0          0          0          5
+    6parm          0          0          0          0          0          6
+    7paro          0          0          7          0          0          0
+    8parj          0          0          0          9          0          0
+   9relvm          0          0          0          0          0          0
+  10relvo          0          0          0          0          0          0
+  11relvj          0          0          0          0          0          0
+  12relmv          0          0          0          0          0          0
+  13relmo          0          0          0          0          0          0
+  14relmj          0          0          0          0          0          0
+  15relov          0          0          0          0          0          0
+  16relom          0          0          0          0          0          0
+  17reloj          0          0          0          0          0          0
+  18reljv          0          0          0          0          0          0
+  19reljm          0          0          0          0          0          0
+  20reljo          0          0          0          0          0          0
+    21fam          0          0          0          0          0          0
+
+         PSI         
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv
+            --------   --------   --------   --------   --------   --------
+    7paro          8
+    8parj          0         10
+   9relvm          0          0         11
+  10relvo          0          0          0         12
+  11relvj          0          0          0          0         13
+  12relmv          0          0          0          0          0         14
+  13relmo          0          0          0          0          0          0
+  14relmj          0          0          0          0          0          0
+  15relov          0          0          0          0          0          0
+  16relom          0          0          0          0          0          0
+  17reloj          0          0          0          0          0          0
+  18reljv          0          0          0          0          0          0
+  19reljm          0          0          0          0          0          0
+  20reljo          0          0          0          0          0          0
+    21fam          0          0          0          0          0          0
+
+         PSI         
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv
+            --------   --------   --------   --------   --------   --------
+  13relmo         15
+  14relmj         16         17
+  15relov          0          0         18
+  16relom          0          0          0         19
+  17reloj          0          0          0          0         20
+  18reljv          0          0          0          0          0         21
+  19reljm          0          0          0          0          0          0
+  20reljo          0          0          0          0         23          0
+    21fam          0          0          0          0          0          0
+
+         PSI         
+
+             19reljm    20reljo      21fam
+            --------   --------   --------
+  19reljm         22
+  20reljo          0         24
+    21fam          0          0         25
+
+         THETA-EPS   
+
+            w1pevrvm   w1pevrvo   w1pevrvj   w1pevrmv   w1pevrmo   w1pevrmj
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm         26
+ w1pevrvo         27         28
+ w1pevrvj         29         30         31
+ w1pevrmv          0          0          0         32
+ w1pevrmo          0          0          0         33         34
+ w1pevrmj          0          0          0         35         36         37
+ w1pevrov          0          0          0          0          0          0
+ w1pevrom          0          0          0          0          0          0
+ w1pevroj          0          0          0          0          0          0
+ w1pevrjv          0          0          0          0          0          0
+ w1pevrjm          0          0          0          0          0          0
+ w1pevrjo          0          0          0          0          0          0
+ w1p2vrvm          0          0          0          0          0          0
+ w1p2vrvo          0          0          0          0          0          0
+ w1p2vrvj          0          0          0          0          0          0
+ w1p2vrmv          0          0          0          0          0          0
+ w1p2vrmo          0          0          0          0          0          0
+ w1p2vrmj          0          0          0          0          0          0
+ w1p2vrov          0          0          0          0          0          0
+ w1p2vrom          0          0          0          0          0          0
+ w1p2vroj          0          0          0          0          0          0
+ w1p2vrjv          0          0          0          0          0          0
+ w1p2vrjm          0          0          0          0          0          0
+ w1p2vrjo          0          0          0          0          0          0
+
+         THETA-EPS   
+
+            w1pevrov   w1pevrom   w1pevroj   w1pevrjv   w1pevrjm   w1pevrjo
+            --------   --------   --------   --------   --------   --------
+ w1pevrov         38
+ w1pevrom         39         40
+ w1pevroj         41         42         43
+ w1pevrjv          0          0          0         44
+ w1pevrjm          0          0          0         45         46
+ w1pevrjo          0          0          0         47         48         49
+ w1p2vrvm          0          0          0          0          0          0
+ w1p2vrvo          0          0          0          0          0          0
+ w1p2vrvj          0          0          0          0          0          0
+ w1p2vrmv          0          0          0          0          0          0
+ w1p2vrmo          0          0          0          0          0          0
+ w1p2vrmj          0          0          0          0          0          0
+ w1p2vrov          0          0          0          0          0          0
+ w1p2vrom          0          0          0          0          0          0
+ w1p2vroj          0          0          0          0          0          0
+ w1p2vrjv          0          0          0          0          0          0
+ w1p2vrjm          0          0          0          0          0          0
+ w1p2vrjo          0          0          0          0          0          0
+
+         THETA-EPS   
+
+            w1p2vrvm   w1p2vrvo   w1p2vrvj   w1p2vrmv   w1p2vrmo   w1p2vrmj
+            --------   --------   --------   --------   --------   --------
+ w1p2vrvm         50
+ w1p2vrvo         51         52
+ w1p2vrvj         53         54         55
+ w1p2vrmv          0          0          0         56
+ w1p2vrmo          0          0          0         57         58
+ w1p2vrmj          0          0          0         59         60         61
+ w1p2vrov          0          0          0          0          0          0
+ w1p2vrom          0          0          0          0          0          0
+ w1p2vroj          0          0          0          0          0          0
+ w1p2vrjv          0          0          0          0          0          0
+ w1p2vrjm          0          0          0          0          0          0
+ w1p2vrjo          0          0          0          0          0          0
+
+         THETA-EPS   
+
+            w1p2vrov   w1p2vrom   w1p2vroj   w1p2vrjv   w1p2vrjm   w1p2vrjo
+            --------   --------   --------   --------   --------   --------
+ w1p2vrov         62
+ w1p2vrom         63         64
+ w1p2vroj         65         66         67
+ w1p2vrjv          0          0          0         68
+ w1p2vrjm          0          0          0         69         70
+ w1p2vrjo          0          0          0         71         72         73
+ 
+
+
+ SRM big5 extraversion                                                          
+
+ Number of Iterations = 11
+
+ LISREL Estimates (Maximum Likelihood)               
+
+         LAMBDA-Y    
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm    1.00000     - -        - -        - -        - -       1.00000
+ 
+ w1pevrvo    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1pevrvj    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1pevrmv     - -       1.00000     - -        - -       1.00000     - -   
+ 
+ w1pevrmo     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1pevrmj     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1pevrov     - -        - -       1.00000     - -       1.00000     - -   
+ 
+ w1pevrom     - -        - -       1.00000     - -        - -       1.00000
+ 
+ w1pevroj     - -        - -       1.00000     - -        - -        - -   
+ 
+ w1pevrjv     - -        - -        - -       1.00000    1.00000     - -   
+ 
+ w1pevrjm     - -        - -        - -       1.00000     - -       1.00000
+ 
+ w1pevrjo     - -        - -        - -       1.00000     - -        - -   
+ 
+ w1p2vrvm    1.00000     - -        - -        - -        - -       1.00000
+ 
+ w1p2vrvo    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1p2vrvj    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1p2vrmv     - -       1.00000     - -        - -       1.00000     - -   
+ 
+ w1p2vrmo     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1p2vrmj     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1p2vrov     - -        - -       1.00000     - -       1.00000     - -   
+ 
+ w1p2vrom     - -        - -       1.00000     - -        - -       1.00000
+ 
+ w1p2vroj     - -        - -       1.00000     - -        - -        - -   
+ 
+ w1p2vrjv     - -        - -        - -       1.00000    1.00000     - -   
+ 
+ w1p2vrjm     - -        - -        - -       1.00000     - -       1.00000
+ 
+ w1p2vrjo     - -        - -        - -       1.00000     - -        - -   
+ 
+
+         LAMBDA-Y    
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm     - -        - -       1.00000     - -        - -        - -   
+ 
+ w1pevrvo    1.00000     - -        - -       1.00000     - -        - -   
+ 
+ w1pevrvj     - -       1.00000     - -        - -       1.00000     - -   
+ 
+ w1pevrmv     - -        - -        - -        - -        - -       1.00000
+ 
+ w1pevrmo    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1pevrmj     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1pevrov     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrom     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevroj     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1pevrjv     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrjm     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrjo    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1p2vrvm     - -        - -       1.00000     - -        - -        - -   
+ 
+ w1p2vrvo    1.00000     - -        - -       1.00000     - -        - -   
+ 
+ w1p2vrvj     - -       1.00000     - -        - -       1.00000     - -   
+ 
+ w1p2vrmv     - -        - -        - -        - -        - -       1.00000
+ 
+ w1p2vrmo    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1p2vrmj     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vroj     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjo    1.00000     - -        - -        - -        - -        - -   
+ 
+
+         LAMBDA-Y    
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrvo     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrvj     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrmv     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrmo    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1pevrmj     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1pevrov     - -        - -       1.00000     - -        - -        - -   
+ 
+ w1pevrom     - -        - -        - -       1.00000     - -        - -   
+ 
+ w1pevroj     - -        - -        - -        - -       1.00000     - -   
+ 
+ w1pevrjv     - -        - -        - -        - -        - -       1.00000
+ 
+ w1pevrjm     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrjo     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrvm     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrvo     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrvj     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrmv     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrmo    1.00000     - -        - -        - -        - -        - -   
+ 
+ w1p2vrmj     - -       1.00000     - -        - -        - -        - -   
+ 
+ w1p2vrov     - -        - -       1.00000     - -        - -        - -   
+ 
+ w1p2vrom     - -        - -        - -       1.00000     - -        - -   
+ 
+ w1p2vroj     - -        - -        - -        - -       1.00000     - -   
+ 
+ w1p2vrjv     - -        - -        - -        - -        - -       1.00000
+ 
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+ 
+
+         LAMBDA-Y    
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+ w1pevrvm     - -        - -       1.00000
+ 
+ w1pevrvo     - -        - -       1.00000
+ 
+ w1pevrvj     - -        - -       1.00000
+ 
+ w1pevrmv     - -        - -       1.00000
+ 
+ w1pevrmo     - -        - -       1.00000
+ 
+ w1pevrmj     - -        - -       1.00000
+ 
+ w1pevrov     - -        - -       1.00000
+ 
+ w1pevrom     - -        - -       1.00000
+ 
+ w1pevroj     - -        - -       1.00000
+ 
+ w1pevrjv     - -        - -       1.00000
+ 
+ w1pevrjm    1.00000     - -       1.00000
+ 
+ w1pevrjo     - -       1.00000    1.00000
+ 
+ w1p2vrvm     - -        - -       1.00000
+ 
+ w1p2vrvo     - -        - -       1.00000
+ 
+ w1p2vrvj     - -        - -       1.00000
+ 
+ w1p2vrmv     - -        - -       1.00000
+ 
+ w1p2vrmo     - -        - -       1.00000
+ 
+ w1p2vrmj     - -        - -       1.00000
+ 
+ w1p2vrov     - -        - -       1.00000
+ 
+ w1p2vrom     - -        - -       1.00000
+ 
+ w1p2vroj     - -        - -       1.00000
+ 
+ w1p2vrjv     - -        - -       1.00000
+ 
+ w1p2vrjm    1.00000     - -       1.00000
+ 
+ w1p2vrjo     - -       1.00000    1.00000
+ 
+
+         Covariance Matrix of ETA                
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+    1actv    0.15606
+    2actm     - -       0.15728
+    3acto     - -        - -       0.38721
+    4actj     - -        - -        - -       0.29172
+    5parv     - -        - -        - -        - -       0.06733
+    6parm     - -        - -        - -        - -        - -       0.01692
+    7paro     - -        - -       0.07944     - -        - -        - -   
+    8parj     - -        - -        - -       0.04991     - -        - -   
+   9relvm     - -        - -        - -        - -        - -        - -   
+  10relvo     - -        - -        - -        - -        - -        - -   
+  11relvj     - -        - -        - -        - -        - -        - -   
+  12relmv     - -        - -        - -        - -        - -        - -   
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Covariance Matrix of ETA                
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+    7paro    0.10387
+    8parj     - -       0.14029
+   9relvm     - -        - -       0.12879
+  10relvo     - -        - -        - -       0.13538
+  11relvj     - -        - -        - -        - -       0.11884
+  12relmv     - -        - -        - -        - -        - -       0.13280
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Covariance Matrix of ETA                
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+  13relmo    0.20221
+  14relmj   -0.04062    0.10705
+  15relov     - -        - -       0.19712
+  16relom     - -        - -        - -       0.06206
+  17reloj     - -        - -        - -        - -       0.34396
+  18reljv     - -        - -        - -        - -        - -       0.05847
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -       0.11821     - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Covariance Matrix of ETA                
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+  19reljm    0.08931
+  20reljo     - -       0.39879
+    21fam     - -        - -       0.05313
+
+         PSI         
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+    1actv    0.15606
+           (0.02289)
+             6.81626
+ 
+    2actm     - -       0.15728
+                      (0.02438)
+                        6.45254
+ 
+    3acto     - -        - -       0.38721
+                                 (0.04503)
+                                   8.59804
+ 
+    4actj     - -        - -        - -       0.29172
+                                            (0.03955)
+                                              7.37695
+ 
+    5parv     - -        - -        - -        - -       0.06733
+                                                       (0.01491)
+                                                         4.51640
+ 
+    6parm     - -        - -        - -        - -        - -       0.01692
+                                                                  (0.01052)
+                                                                    1.60740
+ 
+    7paro     - -        - -       0.07944     - -        - -        - -   
+                                 (0.02127)
+                                   3.73495
+ 
+    8parj     - -        - -        - -       0.04991     - -        - -   
+                                            (0.02015)
+                                              2.47696
+ 
+   9relvm     - -        - -        - -        - -        - -        - -   
+ 
+  10relvo     - -        - -        - -        - -        - -        - -   
+ 
+  11relvj     - -        - -        - -        - -        - -        - -   
+ 
+  12relmv     - -        - -        - -        - -        - -        - -   
+ 
+  13relmo     - -        - -        - -        - -        - -        - -   
+ 
+  14relmj     - -        - -        - -        - -        - -        - -   
+ 
+  15relov     - -        - -        - -        - -        - -        - -   
+ 
+  16relom     - -        - -        - -        - -        - -        - -   
+ 
+  17reloj     - -        - -        - -        - -        - -        - -   
+ 
+  18reljv     - -        - -        - -        - -        - -        - -   
+ 
+  19reljm     - -        - -        - -        - -        - -        - -   
+ 
+  20reljo     - -        - -        - -        - -        - -        - -   
+ 
+    21fam     - -        - -        - -        - -        - -        - -   
+ 
+
+         PSI         
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+    7paro    0.10387
+           (0.02060)
+             5.04314
+ 
+    8parj     - -       0.14029
+                      (0.02147)
+                        6.53467
+ 
+   9relvm     - -        - -       0.12879
+                                 (0.02361)
+                                   5.45536
+ 
+  10relvo     - -        - -        - -       0.13538
+                                            (0.02775)
+                                              4.87839
+ 
+  11relvj     - -        - -        - -        - -       0.11884
+                                                       (0.02542)
+                                                         4.67557
+ 
+  12relmv     - -        - -        - -        - -        - -       0.13280
+                                                                  (0.02636)
+                                                                    5.03735
+ 
+  13relmo     - -        - -        - -        - -        - -        - -   
+ 
+  14relmj     - -        - -        - -        - -        - -        - -   
+ 
+  15relov     - -        - -        - -        - -        - -        - -   
+ 
+  16relom     - -        - -        - -        - -        - -        - -   
+ 
+  17reloj     - -        - -        - -        - -        - -        - -   
+ 
+  18reljv     - -        - -        - -        - -        - -        - -   
+ 
+  19reljm     - -        - -        - -        - -        - -        - -   
+ 
+  20reljo     - -        - -        - -        - -        - -        - -   
+ 
+    21fam     - -        - -        - -        - -        - -        - -   
+ 
+
+         PSI         
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+  13relmo    0.20221
+           (0.03557)
+             5.68425
+ 
+  14relmj   -0.04062    0.10705
+           (0.02337)  (0.02872)
+            -1.73857    3.72776
+ 
+  15relov     - -        - -       0.19712
+                                 (0.03430)
+                                   5.74726
+ 
+  16relom     - -        - -        - -       0.06206
+                                            (0.02518)
+                                              2.46491
+ 
+  17reloj     - -        - -        - -        - -       0.34396
+                                                       (0.05156)
+                                                         6.67045
+ 
+  18reljv     - -        - -        - -        - -        - -       0.05847
+                                                                  (0.02836)
+                                                                    2.06156
+ 
+  19reljm     - -        - -        - -        - -        - -        - -   
+ 
+  20reljo     - -        - -        - -        - -       0.11821     - -   
+                                                       (0.03809)
+                                                         3.10312
+ 
+    21fam     - -        - -        - -        - -        - -        - -   
+ 
+
+         PSI         
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+  19reljm    0.08931
+           (0.02524)
+             3.53915
+ 
+  20reljo     - -       0.39879
+                      (0.05752)
+                        6.93316
+ 
+    21fam     - -        - -       0.05313
+                                 (0.01365)
+                                   3.89315
+ 
+
+         Squared Multiple Correlations for Structural Equations  
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+              - -        - -       0.00000     - -        - -        - -   
+
+         Squared Multiple Correlations for Structural Equations  
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+              - -        - -        - -        - -        - -        - -   
+
+         Squared Multiple Correlations for Structural Equations  
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+              - -        - -        - -        - -        - -        - -   
+
+         Squared Multiple Correlations for Structural Equations  
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+              - -        - -        - -   
+
+         Squared Multiple Correlations for Reduced Form          
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+              - -        - -       0.00000     - -        - -        - -   
+
+         Squared Multiple Correlations for Reduced Form          
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+              - -        - -        - -        - -        - -        - -   
+
+         Squared Multiple Correlations for Reduced Form          
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+              - -        - -        - -        - -        - -        - -   
+
+         Squared Multiple Correlations for Reduced Form          
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+              - -        - -        - -   
+
+         THETA-EPS   
+
+            w1pevrvm   w1pevrvo   w1pevrvj   w1pevrmv   w1pevrmo   w1pevrmj   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm    0.03486
+           (0.01386)
+             2.51519
+ 
+ w1pevrvo   -0.00694    0.09273
+           (0.01140)  (0.01771)
+            -0.60886    5.23667
+ 
+ w1pevrvj    0.00110   -0.01261    0.05429
+           (0.01029)  (0.01150)  (0.01405)
+             0.10679   -1.09663    3.86441
+ 
+ w1pevrmv     - -        - -        - -       0.07070
+                                            (0.01586)
+                                              4.45797
+ 
+ w1pevrmo     - -        - -        - -       0.03162    0.05738
+                                            (0.01273)  (0.01804)
+                                              2.48454    3.17971
+ 
+ w1pevrmj     - -        - -        - -       0.01297   -0.00467    0.06312
+                                            (0.01153)  (0.01191)  (0.01500)
+                                              1.12528   -0.39223    4.20759
+ 
+ w1pevrov     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrom     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevroj     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrjv     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrjm     - -        - -        - -        - -        - -        - -   
+ 
+ w1pevrjo     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrvm     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrvo     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrvj     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrmv     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrmo     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrmj     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vroj     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+ 
+
+         THETA-EPS   
+
+            w1pevrov   w1pevrom   w1pevroj   w1pevrjv   w1pevrjm   w1pevrjo   
+            --------   --------   --------   --------   --------   --------
+ w1pevrov    0.11781
+           (0.02940)
+             4.00657
+ 
+ w1pevrom   -0.01106    0.09349
+           (0.02085)  (0.02431)
+            -0.53038    3.84613
+ 
+ w1pevroj    0.00136   -0.03691    0.15530
+           (0.02597)  (0.02359)  (0.04103)
+             0.05219   -1.56431    3.78511
+ 
+ w1pevrjv     - -        - -        - -       0.22799
+                                            (0.03841)
+                                              5.93585
+ 
+ w1pevrjm     - -        - -        - -       0.03547    0.11527
+                                            (0.02709)  (0.03063)
+                                              1.30956    3.76293
+ 
+ w1pevrjo     - -        - -        - -       0.01609    0.00943    0.33065
+                                            (0.03357)  (0.03022)  (0.05391)
+                                              0.47921    0.31201    6.13299
+ 
+ w1p2vrvm     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrvo     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrvj     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrmv     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrmo     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrmj     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vroj     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+ 
+
+         THETA-EPS   
+
+            w1p2vrvm   w1p2vrvo   w1p2vrvj   w1p2vrmv   w1p2vrmo   w1p2vrmj   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrvm    0.12434
+           (0.01713)
+             7.25933
+ 
+ w1p2vrvo    0.02327    0.08619
+           (0.01262)  (0.01703)
+             1.84426    5.06122
+ 
+ w1p2vrvj    0.01178    0.02209    0.07686
+           (0.01165)  (0.01169)  (0.01463)
+             1.01064    1.89052    5.25397
+ 
+ w1p2vrmv     - -        - -        - -       0.09319
+                                            (0.01696)
+                                              5.49389
+ 
+ w1p2vrmo     - -        - -        - -       0.00720    0.11999
+                                            (0.01361)  (0.02023)
+                                              0.52896    5.93149
+ 
+ w1p2vrmj     - -        - -        - -      -0.00963    0.02451    0.08792
+                                            (0.01211)  (0.01313)  (0.01601)
+                                             -0.79563    1.86768    5.49062
+ 
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vroj     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ 
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+ 
+
+         THETA-EPS   
+
+            w1p2vrov   w1p2vrom   w1p2vroj   w1p2vrjv   w1p2vrjm   w1p2vrjo   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrov    0.19307
+           (0.03150)
+             6.12900
+ 
+ w1p2vrom    0.09905    0.20987
+           (0.02394)  (0.02807)
+             4.13735    7.47712
+ 
+ w1p2vroj    0.10703    0.12427    0.36684
+           (0.02989)  (0.02897)  (0.04871)
+             3.58062    4.28880    7.53080
+ 
+ w1p2vrjv     - -        - -        - -       0.34149
+                                            (0.04311)
+                                              7.92124
+ 
+ w1p2vrjm     - -        - -        - -       0.20143    0.35704
+                                            (0.03489)  (0.04194)
+                                              5.77346    8.51305
+ 
+ w1p2vrjo     - -        - -        - -       0.13024    0.20782    0.33483
+                                            (0.03617)  (0.03759)  (0.05369)
+                                              3.60033    5.52935    6.23657
+ 
+
+         Squared Multiple Correlations for Y - Variables         
+
+            w1pevrvm   w1pevrvo   w1pevrvj   w1pevrmv   w1pevrmo   w1pevrmj   
+            --------   --------   --------   --------   --------   --------
+             0.91055    0.82865    0.89612    0.85308    0.90002    0.87882
+
+         Squared Multiple Correlations for Y - Variables         
+
+            w1pevrov   w1pevrom   w1pevroj   w1pevrjv   w1pevrjm   w1pevrjo   
+            --------   --------   --------   --------   --------   --------
+             0.85678    0.84744    0.85619    0.67366    0.79647    0.71935
+
+         Squared Multiple Correlations for Y - Variables         
+
+            w1p2vrvm   w1p2vrvo   w1p2vrvj   w1p2vrmv   w1p2vrmo   w1p2vrmj   
+            --------   --------   --------   --------   --------   --------
+             0.74053    0.83878    0.85901    0.81500    0.81148    0.83888
+
+         Squared Multiple Correlations for Y - Variables         
+
+            w1p2vrov   w1p2vrom   w1p2vroj   w1p2vrjv   w1p2vrjm   w1p2vrjo   
+            --------   --------   --------   --------   --------   --------
+             0.78497    0.71218    0.71594    0.57952    0.55818    0.71681
+
+
+                           Goodness of Fit Statistics
+
+                             Degrees of Freedom = 227
+           Minimum Fit Function Chi-Square = 294.71447 (P = 0.0016504)
+   Normal Theory Weighted Least Squares Chi-Square = 298.84776 (P = 0.00096508)
+               Estimated Non-centrality Parameter (NCP) = 71.84776
+         90 Percent Confidence Interval for NCP = (31.07292 ; 120.72484)
+ 
+                       Minimum Fit Function Value = 1.09154
+               Population Discrepancy Function Value (F0) = 0.26610
+           90 Percent Confidence Interval for F0 = (0.11508 ; 0.44713)
+            Root Mean Square Error of Approximation (RMSEA) = 0.034238
+         90 Percent Confidence Interval for RMSEA = (0.022516 ; 0.044382)
+              P-Value for Test of Close Fit (RMSEA < 0.05) = 0.99598
+ 
+                 Expected Cross-Validation Index (ECVI) = 1.64758
+          90 Percent Confidence Interval for ECVI = (1.49657 ; 1.82861)
+                        ECVI for Saturated Model = 2.22222
+                      ECVI for Independence Model = 18.39957
+ 
+    Chi-Square for Independence Model with 276 Degrees of Freedom = 4919.88367
+                          Independence AIC = 4967.88367
+                              Model AIC = 444.84776
+                            Saturated AIC = 600.00000
+                          Independence CAIC = 5078.33452
+                              Model CAIC = 780.80243
+                           Saturated CAIC = 1980.63565
+ 
+                         Normed Fit Index (NFI) = 0.94010
+                      Non-Normed Fit Index (NNFI) = 0.98227
+                   Parsimony Normed Fit Index (PNFI) = 0.77320
+                      Comparative Fit Index (CFI) = 0.98542
+                      Incremental Fit Index (IFI) = 0.98557
+                        Relative Fit Index (RFI) = 0.92717
+ 
+                           Critical N (CN) = 257.05086
+ 
+ 
+                    Root Mean Square Residual (RMR) = 0.046374
+                           Standardized RMR = 0.063755
+                      Goodness of Fit Index (GFI) = 0.91555
+                 Adjusted Goodness of Fit Index (AGFI) = 0.88840
+                 Parsimony Goodness of Fit Index (PGFI) = 0.69277
+
+ SRM big5 extraversion                                                          
+
+         Fitted Covariance Matrix
+
+            w1pevrvm   w1pevrvo   w1pevrvj   w1pevrmv   w1pevrmo   w1pevrmj   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm    0.38975
+ w1pevrvo    0.20224    0.54117
+ w1pevrvj    0.21028    0.19657    0.52260
+ w1pevrmv    0.05313    0.05313    0.05313    0.48124
+ w1pevrmo    0.05313    0.15700    0.05313    0.24203    0.57387
+ w1pevrmj    0.05313    0.05313    0.19341    0.22338    0.16512    0.52087
+ w1pevrov    0.05313    0.13257    0.05313    0.12046    0.13257    0.05313
+ w1pevrom    0.07004    0.13257    0.05313    0.05313    0.13257    0.05313
+ w1pevroj    0.05313    0.13257    0.19341    0.05313    0.13257    0.19341
+ w1pevrjv    0.05313    0.05313    0.10303    0.12046    0.05313    0.10303
+ w1pevrjm    0.07004    0.05313    0.10303    0.05313    0.05313    0.10303
+ w1pevrjo    0.05313    0.15700    0.10303    0.05313    0.15700    0.10303
+ w1p2vrvm    0.35489    0.20918    0.20918    0.05313    0.05313    0.05313
+ w1p2vrvo    0.20918    0.44844    0.20918    0.05313    0.15700    0.05313
+ w1p2vrvj    0.20918    0.20918    0.46831    0.05313    0.05313    0.19341
+ w1p2vrmv    0.05313    0.05313    0.05313    0.41054    0.21041    0.21041
+ w1p2vrmo    0.05313    0.15700    0.05313    0.21041    0.51649    0.16979
+ w1p2vrmj    0.05313    0.05313    0.19341    0.21041    0.16979    0.45775
+ w1p2vrov    0.05313    0.13257    0.05313    0.12046    0.13257    0.05313
+ w1p2vrom    0.07004    0.13257    0.05313    0.05313    0.13257    0.05313
+ w1p2vroj    0.05313    0.13257    0.19341    0.05313    0.13257    0.19341
+ w1p2vrjv    0.05313    0.05313    0.10303    0.12046    0.05313    0.10303
+ w1p2vrjm    0.07004    0.05313    0.10303    0.05313    0.05313    0.10303
+ w1p2vrjo    0.05313    0.15700    0.10303    0.05313    0.15700    0.10303
+
+         Fitted Covariance Matrix
+
+            w1pevrov   w1pevrom   w1pevroj   w1pevrjv   w1pevrjm   w1pevrjo   
+            --------   --------   --------   --------   --------   --------
+ w1pevrov    0.82260
+ w1pevrom    0.42928    0.61280
+ w1pevroj    0.44169    0.40343    1.07988
+ w1pevrjv    0.12046    0.05313    0.10303    0.69865
+ w1pevrjm    0.05313    0.07004    0.10303    0.38033    0.56635
+ w1pevrjo    0.13257    0.13257    0.30068    0.36094    0.35428    1.17817
+ w1p2vrvm    0.05313    0.07004    0.05313    0.05313    0.07004    0.05313
+ w1p2vrvo    0.13257    0.13257    0.13257    0.05313    0.05313    0.15700
+ w1p2vrvj    0.05313    0.05313    0.19341    0.10303    0.10303    0.10303
+ w1p2vrmv    0.12046    0.05313    0.05313    0.12046    0.05313    0.05313
+ w1p2vrmo    0.13257    0.13257    0.13257    0.05313    0.05313    0.15700
+ w1p2vrmj    0.05313    0.05313    0.19341    0.10303    0.10303    0.10303
+ w1p2vrov    0.70478    0.44034    0.44034    0.12046    0.05313    0.13257
+ w1p2vrom    0.44034    0.51931    0.44034    0.05313    0.07004    0.13257
+ w1p2vroj    0.44034    0.44034    0.92458    0.10303    0.10303    0.30068
+ w1p2vrjv    0.12046    0.05313    0.10303    0.47066    0.34485    0.34485
+ w1p2vrjm    0.05313    0.07004    0.10303    0.34485    0.45108    0.34485
+ w1p2vrjo    0.13257    0.13257    0.30068    0.34485    0.34485    0.84752
+
+         Fitted Covariance Matrix
+
+            w1p2vrvm   w1p2vrvo   w1p2vrvj   w1p2vrmv   w1p2vrmo   w1p2vrmj   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrvm    0.47923
+ w1p2vrvo    0.23245    0.53463
+ w1p2vrvj    0.22096    0.23128    0.54517
+ w1p2vrmv    0.05313    0.05313    0.05313    0.50373
+ w1p2vrmo    0.05313    0.15700    0.05313    0.21761    0.63648
+ w1p2vrmj    0.05313    0.05313    0.19341    0.20078    0.19430    0.54567
+ w1p2vrov    0.05313    0.13257    0.05313    0.12046    0.13257    0.05313
+ w1p2vrom    0.07004    0.13257    0.05313    0.05313    0.13257    0.05313
+ w1p2vroj    0.05313    0.13257    0.19341    0.05313    0.13257    0.19341
+ w1p2vrjv    0.05313    0.05313    0.10303    0.12046    0.05313    0.10303
+ w1p2vrjm    0.07004    0.05313    0.10303    0.05313    0.05313    0.10303
+ w1p2vrjo    0.05313    0.15700    0.10303    0.05313    0.15700    0.10303
+
+         Fitted Covariance Matrix
+
+            w1p2vrov   w1p2vrom   w1p2vroj   w1p2vrjv   w1p2vrjm   w1p2vrjo   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrov    0.89785
+ w1p2vrom    0.53939    0.72919
+ w1p2vroj    0.54736    0.56460    1.29142
+ w1p2vrjv    0.12046    0.05313    0.10303    0.81214
+ w1p2vrjm    0.05313    0.07004    0.10303    0.54628    0.80813
+ w1p2vrjo    0.13257    0.13257    0.30068    0.47509    0.55268    1.18235
+
+         Fitted Residuals
+
+            w1pevrvm   w1pevrvo   w1pevrvj   w1pevrmv   w1pevrmo   w1pevrmj   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm   -0.00583
+ w1pevrvo   -0.00132    0.01252
+ w1pevrvj   -0.02394   -0.05278   -0.03113
+ w1pevrmv    0.00044    0.01695   -0.02785   -0.00473
+ w1pevrmo   -0.02036    0.00499   -0.07865    0.01433   -0.00608
+ w1pevrmj   -0.00489   -0.05933   -0.02472   -0.02356   -0.02862   -0.02596
+ w1pevrov   -0.04913   -0.01966    0.02307    0.04914   -0.01922    0.05292
+ w1pevrom   -0.03061   -0.00794    0.02379    0.00176   -0.00487    0.03089
+ w1pevroj   -0.04842   -0.06476   -0.00329    0.05168   -0.05328    0.02790
+ w1pevrjv   -0.00789   -0.00062    0.00445   -0.00406    0.00854   -0.00914
+ w1pevrjm   -0.01012   -0.00160   -0.01170    0.05980    0.05931   -0.00266
+ w1pevrjo   -0.00679    0.06263    0.00209    0.08222   -0.00644   -0.04342
+ w1p2vrvm   -0.01011    0.01824   -0.05637    0.01595    0.00401   -0.02040
+ w1p2vrvo   -0.01455    0.00799   -0.04446    0.04521    0.00811   -0.02295
+ w1p2vrvj   -0.01328   -0.05468   -0.03994   -0.04216   -0.06484   -0.05264
+ w1p2vrmv    0.00493    0.01082   -0.02790    0.01179    0.04116   -0.01333
+ w1p2vrmo    0.00478    0.01640   -0.07307   -0.00442   -0.00563   -0.02802
+ w1p2vrmj   -0.02185   -0.07851   -0.01514   -0.04145   -0.05684   -0.02796
+ w1p2vrov   -0.06446   -0.02970    0.01372    0.02240   -0.00079    0.03968
+ w1p2vrom   -0.05157   -0.04540    0.00853   -0.01490   -0.03174    0.02980
+ w1p2vroj   -0.06156   -0.08855   -0.05155   -0.00295   -0.06181   -0.02282
+ w1p2vrjv   -0.00298   -0.00790    0.03159   -0.00697    0.00316   -0.00117
+ w1p2vrjm   -0.01072   -0.03391   -0.00451    0.03890    0.01128    0.04445
+ w1p2vrjo   -0.04027   -0.03581    0.05058    0.01061   -0.07573    0.03307
+
+         Fitted Residuals
+
+            w1pevrov   w1pevrom   w1pevroj   w1pevrjv   w1pevrjm   w1pevrjo   
+            --------   --------   --------   --------   --------   --------
+ w1pevrov    0.01394
+ w1pevrom   -0.00177    0.01534
+ w1pevroj    0.07696    0.05533    0.07812
+ w1pevrjv    0.08124    0.06591    0.09380    0.02892
+ w1pevrjm    0.09058    0.06295    0.07051    0.01533   -0.01686
+ w1pevrjo    0.13078    0.10334    0.07053    0.09531    0.00481    0.06113
+ w1p2vrvm   -0.05496   -0.05282   -0.08007   -0.04173   -0.01635   -0.00411
+ w1p2vrvo    0.03152    0.00418   -0.04763    0.00013    0.01915    0.02305
+ w1p2vrvj    0.00327    0.00434   -0.04991   -0.01126   -0.03580   -0.05329
+ w1p2vrmv    0.05613   -0.02078    0.01772    0.00732    0.05522    0.05890
+ w1p2vrmo   -0.02172    0.01831   -0.05727   -0.00966    0.03347   -0.02316
+ w1p2vrmj    0.03904   -0.00764    0.00800   -0.00137   -0.00122   -0.04749
+ w1p2vrov    0.01547    0.02508    0.08105    0.04064    0.07305    0.08929
+ w1p2vrom   -0.06192   -0.01478    0.02880    0.08719    0.08926    0.07420
+ w1p2vroj    0.08951    0.06554    0.06532    0.03755    0.05139    0.01197
+ w1p2vrjv    0.09892    0.10142    0.12171    0.04224    0.03730    0.12489
+ w1p2vrjm    0.02908    0.08279    0.04846   -0.00694   -0.02103   -0.02971
+ w1p2vrjo    0.02394    0.10205    0.09093    0.07431    0.00302    0.02831
+
+         Fitted Residuals
+
+            w1p2vrvm   w1p2vrvo   w1p2vrvj   w1p2vrmv   w1p2vrmo   w1p2vrmj   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrvm   -0.01339
+ w1p2vrvo    0.00014    0.00203
+ w1p2vrvj   -0.04298   -0.04518   -0.04866
+ w1p2vrmv    0.03354    0.05211   -0.04036    0.02558
+ w1p2vrmo    0.03176    0.02159   -0.06143    0.02294   -0.00193
+ w1p2vrmj   -0.03966   -0.04355   -0.04086   -0.02929   -0.05525   -0.03013
+ w1p2vrov   -0.03788    0.01480   -0.00271    0.04769    0.00797    0.02155
+ w1p2vrom   -0.05389   -0.05110   -0.01019   -0.01898   -0.00058    0.02256
+ w1p2vroj   -0.05051   -0.06224   -0.06886   -0.02270   -0.05307   -0.03293
+ w1p2vrjv   -0.04300   -0.04063    0.01800   -0.02089   -0.00227    0.01537
+ w1p2vrjm   -0.04426   -0.06005   -0.03345    0.02794    0.00936    0.06695
+ w1p2vrjo   -0.04658   -0.06059    0.00485   -0.00960   -0.06995    0.05175
+
+         Fitted Residuals
+
+            w1p2vrov   w1p2vrom   w1p2vroj   w1p2vrjv   w1p2vrjm   w1p2vrjo   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrov    0.02190
+ w1p2vrom   -0.03182   -0.04905
+ w1p2vroj    0.09238    0.03807    0.05288
+ w1p2vrjv    0.07538    0.12294    0.12047    0.05642
+ w1p2vrjm    0.04055    0.11433    0.02301    0.01820   -0.01969
+ w1p2vrjo    0.06486    0.10352    0.04834    0.08665   -0.02404   -0.00285
+
+ Summary Statistics for Fitted Residuals
+
+ Smallest Fitted Residual =   -0.08855
+   Median Fitted Residual =   -0.00098
+  Largest Fitted Residual =    0.13078
+
+ Stemleaf Plot
+
+ - 8|90 
+ - 7|99630 
+ - 6|95542222110 
+ - 5|9776555433333322110 
+ - 4|999887755444333221110000 
+ - 3|8664332211000 
+ - 2|998888654443333221110000 
+ - 1|9976555533321100000 
+ - 0|988887776666555544433333322221111111000 
+   0|22233344445555578888999 
+   1|11122344455555667888889 
+   2|2222333334456888999 
+   3|0122233478899 
+   4|01112458889 
+   5|1122233556699 
+   6|013355667 
+   7|11344578 
+   8|11237799 
+   9|0112459 
+  10|1234 
+  11|4 
+  12|0235 
+  13|1
+
+         Standardized Residuals  
+
+            w1pevrvm   w1pevrvo   w1pevrvj   w1pevrmv   w1pevrmo   w1pevrmj   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm   -0.44240
+ w1pevrvo   -0.07887    0.53146
+ w1pevrvj   -1.39955   -2.30610   -1.34313
+ w1pevrmv    0.01929    0.60366   -1.01315   -0.37712
+ w1pevrmo   -0.79716    0.19363   -2.57213    0.66756   -0.24954
+ w1pevrmj   -0.20355   -2.01347   -1.06879   -1.25159   -1.75099   -1.19318
+ w1pevrov   -1.54466   -0.57790    0.61302    1.46123   -0.54211    1.40884
+ w1pevrom   -1.19948   -0.29247    0.74852    0.05825   -0.17095    0.97375
+ w1pevroj   -1.30200   -1.58342   -0.08190    1.23583   -1.25466    0.69521
+ w1pevrjv   -0.27344   -0.01771    0.14964   -0.13453    0.23590   -0.30825
+ w1pevrjm   -0.41864   -0.05171   -0.46747    2.07120    1.84995   -0.10673
+ w1pevrjo   -0.17384    1.44618    0.04902    1.87444   -0.14333   -1.02251
+ w1p2vrvm   -0.73249    0.78590   -2.50760    0.61239    0.13817   -0.74551
+ w1p2vrvo   -0.77844    0.37268   -1.79643    1.62186    0.31802   -0.78465
+ w1p2vrvj   -0.69554   -2.11179   -1.79473   -1.49440   -2.06813   -2.18846
+ w1p2vrmv    0.20993    0.37471   -0.98687    0.99195    1.70895   -0.60772
+ w1p2vrmo    0.17552    0.58357   -2.24849   -0.17423   -0.23301   -1.31549
+ w1p2vrmj   -0.88336   -2.59133   -0.62713   -1.88803   -2.89467   -1.35526
+ w1p2vrov   -1.92587   -0.82117    0.34717    0.62981   -0.02093    1.00571
+ w1p2vrom   -1.80172   -1.45794    0.24265   -0.44434   -0.97567    0.84941
+ w1p2vroj   -1.49815   -1.93385   -1.14519   -0.06388   -1.30226   -0.50803
+ w1p2vrjv   -0.09448   -0.20728    0.95132   -0.20893    0.08016   -0.03544
+ w1p2vrjm   -0.35088   -0.89249   -0.13629    1.09400    0.28733    1.34659
+ w1p2vrjo   -1.02921   -0.82501    1.18586    0.24130   -1.68208    0.77693
+
+         Standardized Residuals  
+
+            w1pevrov   w1pevrom   w1pevroj   w1pevrjv   w1pevrjm   w1pevrjo   
+            --------   --------   --------   --------   --------   --------
+ w1pevrov    0.38814
+ w1pevrom   -0.08543    0.76013
+ w1pevroj    1.88198    1.88799    1.39396
+ w1pevrjv    1.91842    1.75540    1.94536    1.10690
+ w1pevrjm    2.30103    1.94059    1.66388    0.94933   -0.99177
+ w1pevrjo    2.34976    2.21217    1.31817    2.64220    0.15883    1.14513
+ w1p2vrvm   -1.53372   -1.80692   -1.91912   -1.27925   -0.58847   -0.09390
+ w1p2vrvo    0.93478    0.15568   -1.17382    0.00361    0.62274    0.53635
+ w1p2vrvj    0.08473    0.13325   -1.20796   -0.36698   -1.37890   -1.21945
+ w1p2vrmv    1.62071   -0.66821    0.41332    0.23529    1.86067    1.30984
+ w1p2vrmo   -0.57083    0.59323   -1.26359   -0.25181    0.98304   -0.48380
+ w1p2vrmj    1.01239   -0.23423    0.19341   -0.04476   -0.04711   -1.08617
+ w1p2vrov    0.43857    0.97401    1.72166    0.91149    1.76787    1.52550
+ w1p2vrom   -2.12757   -0.82557    0.73354    2.10790    2.47909    1.43063
+ w1p2vroj    1.76919    1.66135    1.13598    0.70059    1.08589    0.19447
+ w1p2vrjv    2.13881    2.48373    2.30885    1.70751    1.62844    2.56812
+ w1p2vrjm    0.60810    2.06909    0.92191   -0.22983   -1.10340   -0.61324
+ w1p2vrjo    0.42929    2.17983    1.69452    1.71357    0.08368    0.53145
+
+         Standardized Residuals  
+
+            w1p2vrvm   w1p2vrvo   w1p2vrvj   w1p2vrmv   w1p2vrmo   w1p2vrmj   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrvm   -0.78039
+ w1p2vrvo    0.00735    0.08891
+ w1p2vrvj   -2.21579   -1.98438   -2.00757
+ w1p2vrmv    1.25151    1.81802   -1.39142    1.69686
+ w1p2vrmo    1.02818    0.77585   -1.84444    1.01711   -0.07447
+ w1p2vrmj   -1.40875   -1.44777   -1.62970   -1.53508   -3.03103   -1.31188
+ w1p2vrov   -1.00590    0.41275   -0.06699    1.30288    0.19778    0.53225
+ w1p2vrom   -1.65442   -1.65615   -0.28307   -0.55146   -0.01649    0.62630
+ w1p2vroj   -1.09797   -1.36948   -1.49052   -0.48037   -1.05035   -0.71244
+ w1p2vrjv   -1.20855   -1.07364    0.52605   -0.60826   -0.05441    0.44889
+ w1p2vrjm   -1.27712   -1.59098   -0.98121    0.76550    0.22512    1.96252
+ w1p2vrjo   -1.06229   -1.40677    0.11066   -0.21315   -1.45819    1.18095
+
+         Standardized Residuals  
+
+            w1p2vrov   w1p2vrom   w1p2vroj   w1p2vrjv   w1p2vrjm   w1p2vrjo   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrov    0.58193
+ w1p2vrom   -1.39725   -2.16741
+ w1p2vroj    2.05800    1.02539    0.79563
+ w1p2vrjv    1.54990    2.73710    2.06145    1.98973
+ w1p2vrjm    0.80904    2.58950    0.39480    0.87036   -0.81469
+ w1p2vrjo    1.10589    1.99175    0.78353    2.49399   -0.65694   -0.05129
+
+ Summary Statistics for Standardized Residuals
+
+ Smallest Standardized Residual =   -3.03103
+   Median Standardized Residual =   -0.02819
+  Largest Standardized Residual =    2.73710
+
+ Stemleaf Plot
+
+ - 3|0 
+ - 2|9665 
+ - 2|32222111000 
+ - 1|999988888877766655555555 
+ - 1|44444444433333333332222221111111100000000 
+ - 0|99888888887777776666666655555 
+ - 0|44444433333222222222221111111111111110000000000 
+   0|1111111112222222222222333444444444 
+   0|5555566666666667777788888888899999 
+   1|0000000000111111222333334444 
+   1|55566677777777888889999999 
+   2|00011111122333 
+   2|5556667
+ Largest Negative Standardized Residuals
+ Residual for w1p2vrmj and w1pevrvo  -2.59133
+ Residual for w1p2vrmj and w1pevrmo  -2.89467
+ Residual for w1p2vrmj and w1p2vrmo  -3.03103
+ Largest Positive Standardized Residuals
+ Residual for w1pevrjo and w1pevrjv   2.64220
+ Residual for w1p2vrjv and w1p2vrom   2.73710
+ Residual for w1p2vrjm and w1p2vrom   2.58950
+
+ SRM big5 extraversion                                                          
+
+                         Qplot of Standardized Residuals
+
+  3.5..........................................................................
+     .                                                                       ..
+     .                                                                      . .
+     .                                                                    .   .
+     .                                                                  .     .
+     .                                                                 .      .
+     .                                                               .x       .
+     .                                                             . x        .
+     .                                                            . *         .
+     .                                                          .  *          .
+     .                                                        .   xx          .
+     .                                                       .   *x           .
+     .                                                     .   **             .
+     .                                                   .    xx              .
+     .                                                  .    **               .
+ N   .                                                .    **                 .
+ o   .                                              .   xx**                  .
+ r   .                                             .x*x*x                     .
+ m   .                                           .x**                         .
+ a   .                                         .x**                           .
+ l   .                                        *x*                             .
+     .                                     xx*x                               .
+ Q   .                                   xx*                                  .
+ u   .                                  **                                    .
+ a   .                                xxx                                     .
+ n   .                             x***                                       .
+ t   .                          ***x.                                         .
+ i   .                        *x  .                                           .
+ l   .                      **x .                                             .
+ e   .                    *xx  .                                              .
+ s   .                  xx*  .                                                .
+     .                 xx  .                                                  .
+     .               **   .                                                   .
+     .             x*x  .                                                     .
+     .             x  .                                                       .
+     .            *  .                                                        .
+     .         x x .                                                          .
+     .        xx .                                                            .
+     .     x    .                                                             .
+     .    x   .                                                               .
+     .      .                                                                 .
+     .     .                                                                  .
+     .   .                                                                    .
+     . .                                                                      .
+ -3.5..........................................................................
+   -3.5                                                                      3.5
+                             Standardized Residuals
+
+ SRM big5 extraversion                                                          
+
+ Standardized Solution           
+
+         LAMBDA-Y    
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm    0.39504     - -        - -        - -        - -       0.13006
+ w1pevrvo    0.39504     - -        - -        - -        - -        - -   
+ w1pevrvj    0.39504     - -        - -        - -        - -        - -   
+ w1pevrmv     - -       0.39659     - -        - -       0.25948     - -   
+ w1pevrmo     - -       0.39659     - -        - -        - -        - -   
+ w1pevrmj     - -       0.39659     - -        - -        - -        - -   
+ w1pevrov     - -        - -       0.62226     - -       0.25948     - -   
+ w1pevrom     - -        - -       0.62226     - -        - -       0.13006
+ w1pevroj     - -        - -       0.62226     - -        - -        - -   
+ w1pevrjv     - -        - -        - -       0.54012    0.25948     - -   
+ w1pevrjm     - -        - -        - -       0.54012     - -       0.13006
+ w1pevrjo     - -        - -        - -       0.54012     - -        - -   
+ w1p2vrvm    0.39504     - -        - -        - -        - -       0.13006
+ w1p2vrvo    0.39504     - -        - -        - -        - -        - -   
+ w1p2vrvj    0.39504     - -        - -        - -        - -        - -   
+ w1p2vrmv     - -       0.39659     - -        - -       0.25948     - -   
+ w1p2vrmo     - -       0.39659     - -        - -        - -        - -   
+ w1p2vrmj     - -       0.39659     - -        - -        - -        - -   
+ w1p2vrov     - -        - -       0.62226     - -       0.25948     - -   
+ w1p2vrom     - -        - -       0.62226     - -        - -       0.13006
+ w1p2vroj     - -        - -       0.62226     - -        - -        - -   
+ w1p2vrjv     - -        - -        - -       0.54012    0.25948     - -   
+ w1p2vrjm     - -        - -        - -       0.54012     - -       0.13006
+ w1p2vrjo     - -        - -        - -       0.54012     - -        - -   
+
+         LAMBDA-Y    
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm     - -        - -       0.35887     - -        - -        - -   
+ w1pevrvo    0.32229     - -        - -       0.36794     - -        - -   
+ w1pevrvj     - -       0.37455     - -        - -       0.34473     - -   
+ w1pevrmv     - -        - -        - -        - -        - -       0.36442
+ w1pevrmo    0.32229     - -        - -        - -        - -        - -   
+ w1pevrmj     - -       0.37455     - -        - -        - -        - -   
+ w1pevrov     - -        - -        - -        - -        - -        - -   
+ w1pevrom     - -        - -        - -        - -        - -        - -   
+ w1pevroj     - -       0.37455     - -        - -        - -        - -   
+ w1pevrjv     - -        - -        - -        - -        - -        - -   
+ w1pevrjm     - -        - -        - -        - -        - -        - -   
+ w1pevrjo    0.32229     - -        - -        - -        - -        - -   
+ w1p2vrvm     - -        - -       0.35887     - -        - -        - -   
+ w1p2vrvo    0.32229     - -        - -       0.36794     - -        - -   
+ w1p2vrvj     - -       0.37455     - -        - -       0.34473     - -   
+ w1p2vrmv     - -        - -        - -        - -        - -       0.36442
+ w1p2vrmo    0.32229     - -        - -        - -        - -        - -   
+ w1p2vrmj     - -       0.37455     - -        - -        - -        - -   
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ w1p2vroj     - -       0.37455     - -        - -        - -        - -   
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ w1p2vrjo    0.32229     - -        - -        - -        - -        - -   
+
+         LAMBDA-Y    
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm     - -        - -        - -        - -        - -        - -   
+ w1pevrvo     - -        - -        - -        - -        - -        - -   
+ w1pevrvj     - -        - -        - -        - -        - -        - -   
+ w1pevrmv     - -        - -        - -        - -        - -        - -   
+ w1pevrmo    0.44968     - -        - -        - -        - -        - -   
+ w1pevrmj     - -       0.32719     - -        - -        - -        - -   
+ w1pevrov     - -        - -       0.44398     - -        - -        - -   
+ w1pevrom     - -        - -        - -       0.24912     - -        - -   
+ w1pevroj     - -        - -        - -        - -       0.58648     - -   
+ w1pevrjv     - -        - -        - -        - -        - -       0.24181
+ w1pevrjm     - -        - -        - -        - -        - -        - -   
+ w1pevrjo     - -        - -        - -        - -        - -        - -   
+ w1p2vrvm     - -        - -        - -        - -        - -        - -   
+ w1p2vrvo     - -        - -        - -        - -        - -        - -   
+ w1p2vrvj     - -        - -        - -        - -        - -        - -   
+ w1p2vrmv     - -        - -        - -        - -        - -        - -   
+ w1p2vrmo    0.44968     - -        - -        - -        - -        - -   
+ w1p2vrmj     - -       0.32719     - -        - -        - -        - -   
+ w1p2vrov     - -        - -       0.44398     - -        - -        - -   
+ w1p2vrom     - -        - -        - -       0.24912     - -        - -   
+ w1p2vroj     - -        - -        - -        - -       0.58648     - -   
+ w1p2vrjv     - -        - -        - -        - -        - -       0.24181
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+
+         LAMBDA-Y    
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+ w1pevrvm     - -        - -       0.23049
+ w1pevrvo     - -        - -       0.23049
+ w1pevrvj     - -        - -       0.23049
+ w1pevrmv     - -        - -       0.23049
+ w1pevrmo     - -        - -       0.23049
+ w1pevrmj     - -        - -       0.23049
+ w1pevrov     - -        - -       0.23049
+ w1pevrom     - -        - -       0.23049
+ w1pevroj     - -        - -       0.23049
+ w1pevrjv     - -        - -       0.23049
+ w1pevrjm    0.29886     - -       0.23049
+ w1pevrjo     - -       0.63150    0.23049
+ w1p2vrvm     - -        - -       0.23049
+ w1p2vrvo     - -        - -       0.23049
+ w1p2vrvj     - -        - -       0.23049
+ w1p2vrmv     - -        - -       0.23049
+ w1p2vrmo     - -        - -       0.23049
+ w1p2vrmj     - -        - -       0.23049
+ w1p2vrov     - -        - -       0.23049
+ w1p2vrom     - -        - -       0.23049
+ w1p2vroj     - -        - -       0.23049
+ w1p2vrjv     - -        - -       0.23049
+ w1p2vrjm    0.29886     - -       0.23049
+ w1p2vrjo     - -       0.63150    0.23049
+
+         Correlation Matrix of ETA               
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+    1actv    1.00000
+    2actm     - -       1.00000
+    3acto     - -        - -       1.00000
+    4actj     - -        - -        - -       1.00000
+    5parv     - -        - -        - -        - -       1.00000
+    6parm     - -        - -        - -        - -        - -       1.00000
+    7paro     - -        - -       0.39611     - -        - -        - -   
+    8parj     - -        - -        - -       0.24670     - -        - -   
+   9relvm     - -        - -        - -        - -        - -        - -   
+  10relvo     - -        - -        - -        - -        - -        - -   
+  11relvj     - -        - -        - -        - -        - -        - -   
+  12relmv     - -        - -        - -        - -        - -        - -   
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Correlation Matrix of ETA               
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+    7paro    1.00000
+    8parj     - -       1.00000
+   9relvm     - -        - -       1.00000
+  10relvo     - -        - -        - -       1.00000
+  11relvj     - -        - -        - -        - -       1.00000
+  12relmv     - -        - -        - -        - -        - -       1.00000
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Correlation Matrix of ETA               
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+  13relmo    1.00000
+  14relmj   -0.27610    1.00000
+  15relov     - -        - -       1.00000
+  16relom     - -        - -        - -       1.00000
+  17reloj     - -        - -        - -        - -       1.00000
+  18reljv     - -        - -        - -        - -        - -       1.00000
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -       0.31917     - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Correlation Matrix of ETA               
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+  19reljm    1.00000
+  20reljo     - -       1.00000
+    21fam     - -        - -       1.00000
+
+         PSI         
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+    1actv    1.00000
+    2actm     - -       1.00000
+    3acto     - -        - -       1.00000
+    4actj     - -        - -        - -       1.00000
+    5parv     - -        - -        - -        - -       1.00000
+    6parm     - -        - -        - -        - -        - -       1.00000
+    7paro     - -        - -       0.39611     - -        - -        - -   
+    8parj     - -        - -        - -       0.24670     - -        - -   
+   9relvm     - -        - -        - -        - -        - -        - -   
+  10relvo     - -        - -        - -        - -        - -        - -   
+  11relvj     - -        - -        - -        - -        - -        - -   
+  12relmv     - -        - -        - -        - -        - -        - -   
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         PSI         
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+    7paro    1.00000
+    8parj     - -       1.00000
+   9relvm     - -        - -       1.00000
+  10relvo     - -        - -        - -       1.00000
+  11relvj     - -        - -        - -        - -       1.00000
+  12relmv     - -        - -        - -        - -        - -       1.00000
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         PSI         
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+  13relmo    1.00000
+  14relmj   -0.27610    1.00000
+  15relov     - -        - -       1.00000
+  16relom     - -        - -        - -       1.00000
+  17reloj     - -        - -        - -        - -       1.00000
+  18reljv     - -        - -        - -        - -        - -       1.00000
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -       0.31917     - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         PSI         
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+  19reljm    1.00000
+  20reljo     - -       1.00000
+    21fam     - -        - -       1.00000
+
+ SRM big5 extraversion                                                          
+
+ Completely Standardized Solution
+
+         LAMBDA-Y    
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm    0.63278     - -        - -        - -        - -       0.20834
+ w1pevrvo    0.53700     - -        - -        - -        - -        - -   
+ w1pevrvj    0.54646     - -        - -        - -        - -        - -   
+ w1pevrmv     - -       0.57169     - -        - -       0.37405     - -   
+ w1pevrmo     - -       0.52352     - -        - -        - -        - -   
+ w1pevrmj     - -       0.54951     - -        - -        - -        - -   
+ w1pevrov     - -        - -       0.68609     - -       0.28610     - -   
+ w1pevrom     - -        - -       0.79490     - -        - -       0.16615
+ w1pevroj     - -        - -       0.59881     - -        - -        - -   
+ w1pevrjv     - -        - -        - -       0.64619    0.31044     - -   
+ w1pevrjm     - -        - -        - -       0.71770     - -       0.17283
+ w1pevrjo     - -        - -        - -       0.49760     - -        - -   
+ w1p2vrvm    0.57065     - -        - -        - -        - -       0.18788
+ w1p2vrvo    0.54028     - -        - -        - -        - -        - -   
+ w1p2vrvj    0.53503     - -        - -        - -        - -        - -   
+ w1p2vrmv     - -       0.55878     - -        - -       0.36560     - -   
+ w1p2vrmo     - -       0.49711     - -        - -        - -        - -   
+ w1p2vrmj     - -       0.53688     - -        - -        - -        - -   
+ w1p2vrov     - -        - -       0.65671     - -       0.27385     - -   
+ w1p2vrom     - -        - -       0.72871     - -        - -       0.15231
+ w1p2vroj     - -        - -       0.54757     - -        - -        - -   
+ w1p2vrjv     - -        - -        - -       0.59934    0.28793     - -   
+ w1p2vrjm     - -        - -        - -       0.60082     - -       0.14468
+ w1p2vrjo     - -        - -        - -       0.49672     - -        - -   
+
+         LAMBDA-Y    
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm     - -        - -       0.57483     - -        - -        - -   
+ w1pevrvo    0.43811     - -        - -       0.50016     - -        - -   
+ w1pevrvj     - -       0.51811     - -        - -       0.47687     - -   
+ w1pevrmv     - -        - -        - -        - -        - -       0.52531
+ w1pevrmo    0.42545     - -        - -        - -        - -        - -   
+ w1pevrmj     - -       0.51897     - -        - -        - -        - -   
+ w1pevrov     - -        - -        - -        - -        - -        - -   
+ w1pevrom     - -        - -        - -        - -        - -        - -   
+ w1pevroj     - -       0.36043     - -        - -        - -        - -   
+ w1pevrjv     - -        - -        - -        - -        - -        - -   
+ w1pevrjm     - -        - -        - -        - -        - -        - -   
+ w1pevrjo    0.29693     - -        - -        - -        - -        - -   
+ w1p2vrvm     - -        - -       0.51840     - -        - -        - -   
+ w1p2vrvo    0.44078     - -        - -       0.50321     - -        - -   
+ w1p2vrvj     - -       0.50727     - -        - -       0.46689     - -   
+ w1p2vrmv     - -        - -        - -        - -        - -       0.51345
+ w1p2vrmo    0.40398     - -        - -        - -        - -        - -   
+ w1p2vrmj     - -       0.50704     - -        - -        - -        - -   
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ w1p2vroj     - -       0.32959     - -        - -        - -        - -   
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ w1p2vrjo    0.29640     - -        - -        - -        - -        - -   
+
+         LAMBDA-Y    
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm     - -        - -        - -        - -        - -        - -   
+ w1pevrvo     - -        - -        - -        - -        - -        - -   
+ w1pevrvj     - -        - -        - -        - -        - -        - -   
+ w1pevrmv     - -        - -        - -        - -        - -        - -   
+ w1pevrmo    0.59360     - -        - -        - -        - -        - -   
+ w1pevrmj     - -       0.45335     - -        - -        - -        - -   
+ w1pevrov     - -        - -       0.48952     - -        - -        - -   
+ w1pevrom     - -        - -        - -       0.31823     - -        - -   
+ w1pevroj     - -        - -        - -        - -       0.56437     - -   
+ w1pevrjv     - -        - -        - -        - -        - -       0.28930
+ w1pevrjm     - -        - -        - -        - -        - -        - -   
+ w1pevrjo     - -        - -        - -        - -        - -        - -   
+ w1p2vrvm     - -        - -        - -        - -        - -        - -   
+ w1p2vrvo     - -        - -        - -        - -        - -        - -   
+ w1p2vrvj     - -        - -        - -        - -        - -        - -   
+ w1p2vrmv     - -        - -        - -        - -        - -        - -   
+ w1p2vrmo    0.56365     - -        - -        - -        - -        - -   
+ w1p2vrmj     - -       0.44293     - -        - -        - -        - -   
+ w1p2vrov     - -        - -       0.46855     - -        - -        - -   
+ w1p2vrom     - -        - -        - -       0.29173     - -        - -   
+ w1p2vroj     - -        - -        - -        - -       0.51608     - -   
+ w1p2vrjv     - -        - -        - -        - -        - -       0.26832
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+
+         LAMBDA-Y    
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+ w1pevrvm     - -        - -       0.36920
+ w1pevrvo     - -        - -       0.31332
+ w1pevrvj     - -        - -       0.31884
+ w1pevrmv     - -        - -       0.33226
+ w1pevrmo     - -        - -       0.30426
+ w1pevrmj     - -        - -       0.31937
+ w1pevrov     - -        - -       0.25413
+ w1pevrom     - -        - -       0.29444
+ w1pevroj     - -        - -       0.22180
+ w1pevrjv     - -        - -       0.27576
+ w1pevrjm    0.39712     - -       0.30628
+ w1pevrjo     - -       0.58180    0.21235
+ w1p2vrvm     - -        - -       0.33295
+ w1p2vrvo     - -        - -       0.31523
+ w1p2vrvj     - -        - -       0.31217
+ w1p2vrmv     - -        - -       0.32476
+ w1p2vrmo     - -        - -       0.28891
+ w1p2vrmj     - -        - -       0.31203
+ w1p2vrov     - -        - -       0.24325
+ w1p2vrom     - -        - -       0.26992
+ w1p2vroj     - -        - -       0.20283
+ w1p2vrjv     - -        - -       0.25576
+ w1p2vrjm    0.33245     - -       0.25640
+ w1p2vrjo     - -       0.58077    0.21197
+
+         Correlation Matrix of ETA               
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+    1actv    1.00000
+    2actm     - -       1.00000
+    3acto     - -        - -       1.00000
+    4actj     - -        - -        - -       1.00000
+    5parv     - -        - -        - -        - -       1.00000
+    6parm     - -        - -        - -        - -        - -       1.00000
+    7paro     - -        - -       0.39611     - -        - -        - -   
+    8parj     - -        - -        - -       0.24670     - -        - -   
+   9relvm     - -        - -        - -        - -        - -        - -   
+  10relvo     - -        - -        - -        - -        - -        - -   
+  11relvj     - -        - -        - -        - -        - -        - -   
+  12relmv     - -        - -        - -        - -        - -        - -   
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Correlation Matrix of ETA               
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+    7paro    1.00000
+    8parj     - -       1.00000
+   9relvm     - -        - -       1.00000
+  10relvo     - -        - -        - -       1.00000
+  11relvj     - -        - -        - -        - -       1.00000
+  12relmv     - -        - -        - -        - -        - -       1.00000
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Correlation Matrix of ETA               
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+  13relmo    1.00000
+  14relmj   -0.27610    1.00000
+  15relov     - -        - -       1.00000
+  16relom     - -        - -        - -       1.00000
+  17reloj     - -        - -        - -        - -       1.00000
+  18reljv     - -        - -        - -        - -        - -       1.00000
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -       0.31917     - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         Correlation Matrix of ETA               
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+  19reljm    1.00000
+  20reljo     - -       1.00000
+    21fam     - -        - -       1.00000
+
+         PSI         
+
+               1actv      2actm      3acto      4actj      5parv      6parm   
+            --------   --------   --------   --------   --------   --------
+    1actv    1.00000
+    2actm     - -       1.00000
+    3acto     - -        - -       1.00000
+    4actj     - -        - -        - -       1.00000
+    5parv     - -        - -        - -        - -       1.00000
+    6parm     - -        - -        - -        - -        - -       1.00000
+    7paro     - -        - -       0.39611     - -        - -        - -   
+    8parj     - -        - -        - -       0.24670     - -        - -   
+   9relvm     - -        - -        - -        - -        - -        - -   
+  10relvo     - -        - -        - -        - -        - -        - -   
+  11relvj     - -        - -        - -        - -        - -        - -   
+  12relmv     - -        - -        - -        - -        - -        - -   
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         PSI         
+
+               7paro      8parj     9relvm    10relvo    11relvj    12relmv   
+            --------   --------   --------   --------   --------   --------
+    7paro    1.00000
+    8parj     - -       1.00000
+   9relvm     - -        - -       1.00000
+  10relvo     - -        - -        - -       1.00000
+  11relvj     - -        - -        - -        - -       1.00000
+  12relmv     - -        - -        - -        - -        - -       1.00000
+  13relmo     - -        - -        - -        - -        - -        - -   
+  14relmj     - -        - -        - -        - -        - -        - -   
+  15relov     - -        - -        - -        - -        - -        - -   
+  16relom     - -        - -        - -        - -        - -        - -   
+  17reloj     - -        - -        - -        - -        - -        - -   
+  18reljv     - -        - -        - -        - -        - -        - -   
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -        - -        - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         PSI         
+
+             13relmo    14relmj    15relov    16relom    17reloj    18reljv   
+            --------   --------   --------   --------   --------   --------
+  13relmo    1.00000
+  14relmj   -0.27610    1.00000
+  15relov     - -        - -       1.00000
+  16relom     - -        - -        - -       1.00000
+  17reloj     - -        - -        - -        - -       1.00000
+  18reljv     - -        - -        - -        - -        - -       1.00000
+  19reljm     - -        - -        - -        - -        - -        - -   
+  20reljo     - -        - -        - -        - -       0.31917     - -   
+    21fam     - -        - -        - -        - -        - -        - -   
+
+         PSI         
+
+             19reljm    20reljo      21fam   
+            --------   --------   --------
+  19reljm    1.00000
+  20reljo     - -       1.00000
+    21fam     - -        - -       1.00000
+
+         THETA-EPS   
+
+            w1pevrvm   w1pevrvo   w1pevrvj   w1pevrmv   w1pevrmo   w1pevrmj   
+            --------   --------   --------   --------   --------   --------
+ w1pevrvm    0.08945
+ w1pevrvo   -0.01511    0.17135
+ w1pevrvj    0.00244   -0.02371    0.10388
+ w1pevrmv     - -        - -        - -       0.14692
+ w1pevrmo     - -        - -        - -       0.06016    0.09998
+ w1pevrmj     - -        - -        - -       0.02591   -0.00854    0.12118
+ w1pevrov     - -        - -        - -        - -        - -        - -   
+ w1pevrom     - -        - -        - -        - -        - -        - -   
+ w1pevroj     - -        - -        - -        - -        - -        - -   
+ w1pevrjv     - -        - -        - -        - -        - -        - -   
+ w1pevrjm     - -        - -        - -        - -        - -        - -   
+ w1pevrjo     - -        - -        - -        - -        - -        - -   
+ w1p2vrvm     - -        - -        - -        - -        - -        - -   
+ w1p2vrvo     - -        - -        - -        - -        - -        - -   
+ w1p2vrvj     - -        - -        - -        - -        - -        - -   
+ w1p2vrmv     - -        - -        - -        - -        - -        - -   
+ w1p2vrmo     - -        - -        - -        - -        - -        - -   
+ w1p2vrmj     - -        - -        - -        - -        - -        - -   
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ w1p2vroj     - -        - -        - -        - -        - -        - -   
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+
+         THETA-EPS   
+
+            w1pevrov   w1pevrom   w1pevroj   w1pevrjv   w1pevrjm   w1pevrjo   
+            --------   --------   --------   --------   --------   --------
+ w1pevrov    0.14322
+ w1pevrom   -0.01557    0.15256
+ w1pevroj    0.00144   -0.04537    0.14381
+ w1pevrjv     - -        - -        - -       0.32634
+ w1pevrjm     - -        - -        - -       0.05639    0.20353
+ w1pevrjo     - -        - -        - -       0.01773    0.01154    0.28065
+ w1p2vrvm     - -        - -        - -        - -        - -        - -   
+ w1p2vrvo     - -        - -        - -        - -        - -        - -   
+ w1p2vrvj     - -        - -        - -        - -        - -        - -   
+ w1p2vrmv     - -        - -        - -        - -        - -        - -   
+ w1p2vrmo     - -        - -        - -        - -        - -        - -   
+ w1p2vrmj     - -        - -        - -        - -        - -        - -   
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ w1p2vroj     - -        - -        - -        - -        - -        - -   
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+
+         THETA-EPS   
+
+            w1p2vrvm   w1p2vrvo   w1p2vrvj   w1p2vrmv   w1p2vrmo   w1p2vrmj   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrvm    0.25947
+ w1p2vrvo    0.04596    0.16122
+ w1p2vrvj    0.02304    0.04092    0.14099
+ w1p2vrmv     - -        - -        - -       0.18500
+ w1p2vrmo     - -        - -        - -       0.01271    0.18852
+ w1p2vrmj     - -        - -        - -      -0.01837    0.04160    0.16112
+ w1p2vrov     - -        - -        - -        - -        - -        - -   
+ w1p2vrom     - -        - -        - -        - -        - -        - -   
+ w1p2vroj     - -        - -        - -        - -        - -        - -   
+ w1p2vrjv     - -        - -        - -        - -        - -        - -   
+ w1p2vrjm     - -        - -        - -        - -        - -        - -   
+ w1p2vrjo     - -        - -        - -        - -        - -        - -   
+
+         THETA-EPS   
+
+            w1p2vrov   w1p2vrom   w1p2vroj   w1p2vrjv   w1p2vrjm   w1p2vrjo   
+            --------   --------   --------   --------   --------   --------
+ w1p2vrov    0.21503
+ w1p2vrom    0.12242    0.28782
+ w1p2vroj    0.09939    0.12806    0.28406
+ w1p2vrjv     - -        - -        - -       0.42048
+ w1p2vrjm     - -        - -        - -       0.24864    0.44182
+ w1p2vrjo     - -        - -        - -       0.13291    0.21261    0.28319
+
+
+          The Problem used   153512 Bytes (=  0.2% of Available Workspace)
+
+                           Time used:    0.828 Seconds

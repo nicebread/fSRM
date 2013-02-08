@@ -1,0 +1,1073 @@
+rownames(eff[grepl("IGSIM", eff$label), ])
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]
+igsim
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+eff <- parameterEstimates(x$model)#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+igsim <- eff[grepl("IGSIM", eff$label), c("est","se","z","pvalue","ci.lower","ci.upper")]#
+		rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]
+igsim
+eff
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+eff[grepl("IGSIM", eff$label), "f"]
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+igsim <- eff[grepl("IGSIM", eff$label), c("est","se","z","pvalue","ci.lower","ci.upper")]
+igsim
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]
+str(igsim)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+eff <- as.data.frame(parameterEstimates(x$model))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+igsim <- eff[grepl("IGSIM", eff$label), c("est","se","z","pvalue","ci.lower","ci.upper")]#
+		rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]
+igsim
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+print.RR.role.latent <-#
+function(x, ...) {#
+	## Das Modell muss bei 4 Personen: 31 freie parameter und 47 df haben!#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$model)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$model)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], 3), ", p = ", round(FIT["pvalue"], 3), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], 3), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], 3), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], 3), " [", round(FIT["rmsea.ci.lower"], 3), ";", round(FIT["rmsea.ci.upper"], 3), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], 3), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$model))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp.latent(x)#
+	print(round(T, 3))#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable.latent(x)$stand))#
+	cat("\n\nGeneralized reciprocity (actor-partner-effect covariances):\n----------------\n")#
+	GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- as.data.frame(eff[eff$f == paste("A", t, " ~~ ", "P", t, sep="") , c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(GR0) <- paste("A", t, " ~~ ", "P", t, sep="")#
+		SD1 <- T[paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		SD2 <- T[paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		if (SD1["pvalue"] <= .05 & SD2["pvalue"] <= .05) {#
+			GR0$COR <- GR0$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+		} else {#
+			GR0$COR <- NA#
+			GR0$est <- NA#
+		}#
+		GR <- rbind(GR, GR0)#
+	}#
+	GR$COR <- as.numeric(GR$COR)#
+	print(round(GR, 3), row.names=TRUE)#
+	cat("\n\nDyadic reciprocity (relationship-effect covariances):\n----------------\n")#
+	DR <- data.frame()#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if ((p < t) & (x$roles[p] != x$roles[t])) {#
+				DR0 <- as.data.frame(eff[eff$f == paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep="") , c("est","se","z","pvalue","ci.lower","ci.upper")])#
+				rownames(DR0) <- paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep="")#
+				SD1 <- T[paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), ]#
+				SD2 <- T[paste("R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep=""), ]#
+				if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+				if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+				if (SD1["pvalue"] <= .05 & SD2["pvalue"] <= .05) {#
+					DR0$COR <- DR0$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+				} else {#
+					DR0$COR <- NA#
+					DR0$est <- NA#
+				}#
+				DR <- rbind(DR, DR0)#
+			}#
+		}#
+	}#
+	DR$COR <- as.numeric(DR$COR)#
+	if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntergenerational similarity:\n----------------\n")#
+		igsim <- eff[grepl("IGSIM", eff$label), c("est","se","z","pvalue","ci.lower","ci.upper")]#
+		rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]#
+	}#
+	print(round(DR, 3), row.names=TRUE)#
+}
+s1
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+print.RR.role.latent <-#
+function(x, ...) {#
+	## Das Modell muss bei 4 Personen: 31 freie parameter und 47 df haben!#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$model)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$model)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], 3), ", p = ", round(FIT["pvalue"], 3), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], 3), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], 3), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], 3), " [", round(FIT["rmsea.ci.lower"], 3), ";", round(FIT["rmsea.ci.upper"], 3), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], 3), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$model))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp.latent(x)#
+	print(round(T, 3))#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable.latent(x)$stand))#
+	cat("\n\nGeneralized reciprocity (actor-partner-effect covariances):\n----------------\n")#
+	GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- as.data.frame(eff[eff$f == paste("A", t, " ~~ ", "P", t, sep="") , c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(GR0) <- paste("A", t, " ~~ ", "P", t, sep="")#
+		SD1 <- T[paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		SD2 <- T[paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		if (SD1["pvalue"] <= .05 & SD2["pvalue"] <= .05) {#
+			GR0$COR <- GR0$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+		} else {#
+			GR0$COR <- NA#
+			GR0$est <- NA#
+		}#
+		GR <- rbind(GR, GR0)#
+	}#
+	GR$COR <- as.numeric(GR$COR)#
+	print(round(GR, 3), row.names=TRUE)#
+	cat("\n\nDyadic reciprocity (relationship-effect covariances):\n----------------\n")#
+	DR <- data.frame()#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if ((p < t) & (x$roles[p] != x$roles[t])) {#
+				DR0 <- as.data.frame(eff[eff$f == paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep="") , c("est","se","z","pvalue","ci.lower","ci.upper")])#
+				rownames(DR0) <- paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep="")#
+				SD1 <- T[paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), ]#
+				SD2 <- T[paste("R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep=""), ]#
+				if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+				if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+				if (SD1["pvalue"] <= .05 & SD2["pvalue"] <= .05) {#
+					DR0$COR <- DR0$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+				} else {#
+					DR0$COR <- NA#
+					DR0$est <- NA#
+				}#
+				DR <- rbind(DR, DR0)#
+			}#
+		}#
+	}#
+	DR$COR <- as.numeric(DR$COR)#
+	print(round(DR, 3), row.names=TRUE)#
+	if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntergenerational similarity:\n----------------\n")#
+		igsim <- eff[grepl("IGSIM", eff$label), c("est","se","z","pvalue","ci.lower","ci.upper")]#
+		rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]#
+	}#
+}
+s1
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+print.RR.role.latent <-#
+function(x, ...) {#
+	## Das Modell muss bei 4 Personen: 31 freie parameter und 47 df haben!#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$model)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$model)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], 3), ", p = ", round(FIT["pvalue"], 3), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], 3), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], 3), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], 3), " [", round(FIT["rmsea.ci.lower"], 3), ";", round(FIT["rmsea.ci.upper"], 3), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], 3), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$model))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp.latent(x)#
+	print(round(T, 3))#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable.latent(x)$stand))#
+	cat("\n\nGeneralized reciprocity (actor-partner-effect covariances):\n----------------\n")#
+	GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- as.data.frame(eff[eff$f == paste("A", t, " ~~ ", "P", t, sep="") , c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(GR0) <- paste("A", t, " ~~ ", "P", t, sep="")#
+		SD1 <- T[paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		SD2 <- T[paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		if (SD1["pvalue"] <= .05 & SD2["pvalue"] <= .05) {#
+			GR0$COR <- GR0$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+		} else {#
+			GR0$COR <- NA#
+			GR0$est <- NA#
+		}#
+		GR <- rbind(GR, GR0)#
+	}#
+	GR$COR <- as.numeric(GR$COR)#
+	print(round(GR, 3), row.names=TRUE)#
+	cat("\n\nDyadic reciprocity (relationship-effect covariances):\n----------------\n")#
+	DR <- data.frame()#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if ((p < t) & (x$roles[p] != x$roles[t])) {#
+				DR0 <- as.data.frame(eff[eff$f == paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep="") , c("est","se","z","pvalue","ci.lower","ci.upper")])#
+				rownames(DR0) <- paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep="")#
+				SD1 <- T[paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), ]#
+				SD2 <- T[paste("R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep=""), ]#
+				if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+				if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+				if (SD1["pvalue"] <= .05 & SD2["pvalue"] <= .05) {#
+					DR0$COR <- DR0$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+				} else {#
+					DR0$COR <- NA#
+					DR0$est <- NA#
+				}#
+				DR <- rbind(DR, DR0)#
+			}#
+		}#
+	}#
+	DR$COR <- as.numeric(DR$COR)#
+	print(round(DR, 3), row.names=TRUE)#
+	if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntergenerational similarity:\n----------------\n")#
+		igsim <- eff[grepl("IGSIM", eff$label), c("est","se","z","pvalue","ci.lower","ci.upper")]#
+		rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]#
+		print(round(igsim, 3), row.names=TRUE)#
+	}#
+}
+s1
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+igsim <- eff[grepl("IGSIM", eff$label), ]#
+		rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]#
+		print(round(igsim[, c("est","se","z","pvalue","ci.lower","ci.upper")], 3), row.names=TRUE)
+T
+igsim$lhs
+paste(igsim$lhs, " ~~ ", igsim$lhs)
+paste(igsim$lhs, " ~~ ", igsim$lhs, sep="")
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+SD1 <- T[paste(igsim$lhs, " ~~ ", igsim$lhs, sep=""), ]
+SD1
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+SD2 <- T[paste(igsim$rhs, " ~~ ", igsim$rhs, sep=""), ]
+SD2
+igsim
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+COR <- igsim$est / (sqrt(SD1$est)*sqrt(SD2$est))
+COR
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+igsim <- eff[grepl("IGSIM", eff$label), ]#
+		SD1 <- T[paste(igsim$lhs, " ~~ ", igsim$lhs, sep=""), ]#
+		SD2 <- T[paste(igsim$rhs, " ~~ ", igsim$rhs, sep=""), ]#
+		SD1$pvalue[is.na(SD1$pvalue)] <- 1#
+		SD2$pvalue[is.na(SD2$pvalue)] <- 1#
+		igsim$COR <- igsim$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+		rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]#
+		print(round(igsim[, c("est","se","z","pvalue","ci.lower","ci.upper", "COR")], 3), row.names=TRUE)
+s1
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+print.RR.role.latent <-#
+function(x, ...) {#
+	## Das Modell muss bei 4 Personen: 31 freie parameter und 47 df haben!#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$model)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$model)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], 3), ", p = ", round(FIT["pvalue"], 3), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], 3), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], 3), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], 3), " [", round(FIT["rmsea.ci.lower"], 3), ";", round(FIT["rmsea.ci.upper"], 3), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], 3), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$model))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp.latent(x)#
+	print(round(T, 3))#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable.latent(x)$stand))#
+	cat("\n\nGeneralized reciprocity (actor-partner-effect covariances):\n----------------\n")#
+	GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- as.data.frame(eff[eff$f == paste("A", t, " ~~ ", "P", t, sep="") , c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(GR0) <- paste("A", t, " ~~ ", "P", t, sep="")#
+		SD1 <- T[paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		SD2 <- T[paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		if (SD1["pvalue"] <= .05 & SD2["pvalue"] <= .05) {#
+			GR0$COR <- GR0$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+		} else {#
+			GR0$COR <- NA#
+			GR0$est <- NA#
+		}#
+		GR <- rbind(GR, GR0)#
+	}#
+	GR$COR <- as.numeric(GR$COR)#
+	print(round(GR, 3), row.names=TRUE)#
+	cat("\n\nDyadic reciprocity (relationship-effect covariances):\n----------------\n")#
+	DR <- data.frame()#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if ((p < t) & (x$roles[p] != x$roles[t])) {#
+				DR0 <- as.data.frame(eff[eff$f == paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep="") , c("est","se","z","pvalue","ci.lower","ci.upper")])#
+				rownames(DR0) <- paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep="")#
+				SD1 <- T[paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), ]#
+				SD2 <- T[paste("R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep=""), ]#
+				if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+				if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+				if (SD1["pvalue"] <= .05 & SD2["pvalue"] <= .05) {#
+					DR0$COR <- DR0$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+				} else {#
+					DR0$COR <- NA#
+					DR0$est <- NA#
+				}#
+				DR <- rbind(DR, DR0)#
+			}#
+		}#
+	}#
+	DR$COR <- as.numeric(DR$COR)#
+	print(round(DR, 3), row.names=TRUE)#
+	if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntergenerational similarity:\n----------------\n")#
+		igsim <- eff[grepl("IGSIM", eff$label), ]#
+		SD1 <- T[paste(igsim$lhs, " ~~ ", igsim$lhs, sep=""), ]#
+		SD2 <- T[paste(igsim$rhs, " ~~ ", igsim$rhs, sep=""), ]#
+		SD1$pvalue[is.na(SD1$pvalue)] <- 1#
+		SD2$pvalue[is.na(SD2$pvalue)] <- 1#
+		igsim$COR <- igsim$est / (sqrt(SD1$est)*sqrt(SD2$est))#
+		rownames(igsim) <- eff[grepl("IGSIM", eff$label), "f"]#
+		print(round(igsim[, c("est","se","z","pvalue","ci.lower","ci.upper", "COR")], 3), row.names=TRUE)#
+	}#
+}
+s1
+cat(s1$syntax)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+s1 <- RR.roles.latent(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")), err=2)
+s1
+str(s1)
+?anova
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+#
+sourceDir("../R")
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+library(foreign)#
+library(reshape2)#
+dat0 <- read.spss("Cook2000.sav", to.data.frame=TRUE)#
+#
+# create an indicator variable for the family#
+dat0$fam <- 1:nrow(dat0)#
+#
+# convert to long format#
+dat <- melt(dat0, id.vars="fam")#
+#
+# create indicator variables for actor, partner, and measure ##
+dat$actor <- substr(dat$variable, 1, 1)#
+dat$partner <- substr(dat$variable, 2, 2)#
+dat$v <- substr(dat$variable, 3, 6)#
+#
+# bring both measures back into columns#
+dat2 <- dcast(dat, fam + actor + partner ~ v, value.var="value")#
+#
+## --> now we have the correct data format for the fSRM package:#
+## each row is one directed relationship with multiple measures in columns#
+head(dat2)#
+#
+# run SRM with roles#
+s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+s1
+str(s1)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)
+str(s1)
+rm(list=ls())
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+#
+sourceDir("../R")
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+library(foreign)#
+library(reshape2)#
+dat0 <- read.spss("Cook2000.sav", to.data.frame=TRUE)#
+#
+# create an indicator variable for the family#
+dat0$fam <- 1:nrow(dat0)#
+#
+# convert to long format#
+dat <- melt(dat0, id.vars="fam")#
+#
+# create indicator variables for actor, partner, and measure ##
+dat$actor <- substr(dat$variable, 1, 1)#
+dat$partner <- substr(dat$variable, 2, 2)#
+dat$v <- substr(dat$variable, 3, 6)#
+#
+# bring both measures back into columns#
+dat2 <- dcast(dat, fam + actor + partner ~ v, value.var="value")#
+#
+## --> now we have the correct data format for the fSRM package:#
+## each row is one directed relationship with multiple measures in columns#
+head(dat2)#
+#
+# run SRM with roles#
+s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)#
+#
+# show the results:#
+s1#
+#
+# take a lo
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+reestimate:#
+#	0 = no reestimation#
+#	1 = negative variances are set to zero --> new estimation#
+# 	2 = negative and nopn-significant variances (with p > min.p) are set to zero --> new estimation#
+#
+fSRM <-#
+function(formula, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.05, IGSIM=list(), ...) {#
+	library(lavaan)#
+	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
+	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
+	var.id <- lhs#
+	actor.id <- rhs[1]#
+	partner.id <- rhs[2]#
+	group.id <- NULL#
+	if (length(rhs)>=3) {#
+		group.id <- rhs[3]#
+	} else {#
+		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
+	}#
+	fam0 <- list()#
+	for (v in var.id) {#
+		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
+		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
+	}#
+	fam <- merge.rec(fam0, by=group.id)#
+	roles <- sort(unique(data[, actor.id]))#
+	model <- buildSRMSyntaxLatent(roles, var.id, fe=fe,err=err, ...)#
+	#model <- buildSRMSyntaxLatent(roles, var.id)#
+	model2 <- paste(model, model_add, sep="\n")#
+	#cat(model2)#
+	m <- sem(model=model2, data=fam, std.ov=FALSE, estimator="ML", orthogonal=TRUE, missing="listwise")#
+	if (reestimate > 0) {#
+		T <- table.latent(list(model=m, syntax =model, roles=roles, var.id=var.id, fe=fe))#
+		if (reestimate == 1 & any(T[, "est"] <= 0)) {#
+			print("Some variances are < 0 ... reestimating model with these variances set to zero.")#
+			add <- paste(gsub("~~ ", "~~ 0*", rownames(T)[which(T$est < 0)]), collapse="\n")#
+			res2 <- RR.roles.latent(formula, data, fe=fe, reestimate=0, model_add=add, err=err, min.p=min.p, ...)#
+			return(res2)#
+		}#
+		if (reestimate == 2 & (any(T[, "pvalue"] > min.p  | T$est <= 0))) {#
+			print("Some variances are < 0 or non-significant ... reestimating model with these variances set to zero.")#
+			add <- paste(gsub("~~ ", "~~ 0*", rownames(T)[which(T$pvalue > min.p | T$est <= 0)]), collapse="\n")#
+			res2 <- RR.roles.latent(formula, data, fe=fe, reestimate=0, model_add=add, err=err, min.p=min.p, ...)#
+			return(res2)#
+		}#
+	}#
+	res <- list(model=m, syntax=model2, roles=roles, var.id=var.id, fe=fe, IGSIM=IGSIM)#
+	attr(res, "class") <- "fSRM"#
+	return(res)#
+}
+library(foreign)#
+library(reshape2)#
+dat0 <- read.spss("Cook2000.sav", to.data.frame=TRUE)#
+#
+# create an indicator variable for the family#
+dat0$fam <- 1:nrow(dat0)#
+#
+# convert to long format#
+dat <- melt(dat0, id.vars="fam")#
+#
+# create indicator variables for actor, partner, and measure ##
+dat$actor <- substr(dat$variable, 1, 1)#
+dat$partner <- substr(dat$variable, 2, 2)#
+dat$v <- substr(dat$variable, 3, 6)#
+#
+# bring both measures back into columns#
+dat2 <- dcast(dat, fam + actor + partner ~ v, value.var="value")#
+#
+## --> now we have the correct data format for the fSRM package:#
+## each row is one directed relationship with multiple measures in columns#
+head(dat2)#
+#
+# run SRM with roles#
+s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)#
+#
+# show the results:#
+s1#
+#
+# take a lo
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")))
+s1
+str(s1)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+reestimate:#
+#	0 = no reestimation#
+#	1 = negative variances are set to zero --> new estimation#
+# 	2 = negative and nopn-significant variances (with p > min.p) are set to zero --> new estimation#
+#
+fSRM <-#
+function(formula, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.05, IGSIM=list(), ...) {#
+	library(lavaan)#
+	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
+	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
+	var.id <- lhs#
+	actor.id <- rhs[1]#
+	partner.id <- rhs[2]#
+	group.id <- NULL#
+	if (length(rhs)>=3) {#
+		group.id <- rhs[3]#
+	} else {#
+		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
+	}#
+	fam0 <- list()#
+	for (v in var.id) {#
+		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
+		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
+	}#
+	fam <- merge.rec(fam0, by=group.id)#
+	roles <- sort(unique(data[, actor.id]))#
+	model <- buildSRMSyntaxLatent(roles, var.id, fe=fe,err=err, IGSIM=IGSIM, ...)#
+	#model <- buildSRMSyntaxLatent(roles, var.id)#
+	model2 <- paste(model, model_add, sep="\n")#
+	#cat(model2)#
+	m <- sem(model=model2, data=fam, std.ov=FALSE, estimator="ML", orthogonal=TRUE, missing="listwise")#
+	if (reestimate > 0) {#
+		T <- table.latent(list(model=m, syntax =model, roles=roles, var.id=var.id, fe=fe))#
+		if (reestimate == 1 & any(T[, "est"] <= 0)) {#
+			print("Some variances are < 0 ... reestimating model with these variances set to zero.")#
+			add <- paste(gsub("~~ ", "~~ 0*", rownames(T)[which(T$est < 0)]), collapse="\n")#
+			res2 <- RR.roles.latent(formula, data, fe=fe, reestimate=0, model_add=add, err=err, min.p=min.p, IGSIM=IGSIM, ...)#
+			return(res2)#
+		}#
+		if (reestimate == 2 & (any(T[, "pvalue"] > min.p  | T$est <= 0))) {#
+			print("Some variances are < 0 or non-significant ... reestimating model with these variances set to zero.")#
+			add <- paste(gsub("~~ ", "~~ 0*", rownames(T)[which(T$pvalue > min.p | T$est <= 0)]), collapse="\n")#
+			res2 <- RR.roles.latent(formula, data, fe=fe, reestimate=0, model_add=add, err=err, min.p=min.p, IGSIM=IGSIM, ...)#
+			return(res2)#
+		}#
+	}#
+	res <- list(model=m, syntax=model2, roles=roles, var.id=var.id, fe=fe, IGSIM=IGSIM)#
+	attr(res, "class") <- "fSRM"#
+	return(res)#
+}
+s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")))
+s1
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+s2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")))#
+s2
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(s1$model, s2$model)
+s1$model
+s2$model
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)
+anova(s1$model, s2$model)
+str(s1$model)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+s2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")))
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(s1$model, s2$model)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+S1 <- s1$model#
+S2 <- s2$model#
+anova(S1, S2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(S1=s1$model, S2=s2$model)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(S1, S2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(x, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots))#
+        sapply(dots, is, "lavaan") else logical(0)#
+}
+anova(s1, s2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(x, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "lavaan") else logical(0)#
+	print(modp)#
+}
+anova(s1, s2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(x, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "lavaan") else logical(0)#
+	if(!any(modp)) stop("fSRM ERROR: need at least two models to compare")#
+}
+anova(s1, s2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(x, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "fSRM") else logical(0)#
+	if(!any(modp)) stop("fSRM ERROR: need at least two models to compare")#
+}
+anova(s1, s2)
+anova(s1)
+anova(s1, s2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(x, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "fSRM") else logical(0)#
+	if(!any(modp)) stop("Need at least two models to compare")#
+	mods <- c(list(object), dots[modp])#
+    names(mods) <- sapply(as.list(mcall)[c(FALSE, TRUE, modp)], as.character)#
+print(str(mods))#
+}
+anova(s1, s2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(object, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "fSRM") else logical(0)#
+	if(!any(modp)) stop("Need at least two models to compare")#
+	mods <- c(list(object), dots[modp])#
+    names(mods) <- sapply(as.list(mcall)[c(FALSE, TRUE, modp)], as.character)#
+print(str(mods))#
+}
+anova(s1, s2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(object, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "fSRM") else logical(0)#
+	if(!any(modp)) stop("Need at least two models to compare")#
+	mods <- c(list(object), dots[modp])#
+    names(mods) <- sapply(as.list(mcall)[c(FALSE, TRUE, modp)], as.character)#
+print(str(mods))#
+#
+	anova(mods)#
+}
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(object, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "fSRM") else logical(0)#
+	if(!any(modp)) stop("Need at least two models to compare")#
+	mods <- c(list(object), dots[modp])#
+    names(mods) <- sapply(as.list(mcall)[c(FALSE, TRUE, modp)], as.character)#
+print(str(mods))#
+#
+	return(anova(mods))#
+}
+anova.fSRM <- function(object, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "fSRM") else logical(0)#
+	if(!any(modp)) stop("Need at least two models to compare")#
+	mods <- c(list(object), dots[modp])#
+    names(mods) <- sapply(as.list(mcall)[c(FALSE, TRUE, modp)], as.character)#
+print(str(mods))#
+#
+	anova(mods)#
+}
+anova(s1, s2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova.fSRM <- function(object, ...) {#
+	mcall <- match.call(expand.dots = TRUE)#
+	print(mcall)#
+    dots <- list(...)#
+    modp <- if(length(dots)) sapply(dots, is, "fSRM") else logical(0)#
+	if(!any(modp)) stop("Need at least two models to compare")#
+	mods <- c(list(object), dots[modp])#
+    names(mods) <- sapply(as.list(mcall)[c(FALSE, TRUE, modp)], as.character)#
+#
+	return(anova(unlist(mods)))#
+}
+anova(s1, s2)
+object=s1
+dots=list(s2=s2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+modp <- if(length(dots)) sapply(dots, is, "fSRM") else logical(0)#
+	if(!any(modp)) stop("Need at least two models to compare")
+modp
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+mods <- c(list(object), dots[modp])
+str(mods)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+mods <- list(object$model)
+str(mods)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+mods <- list(object$model)#
+	for (d in dots[modp]) {mods <- c(mods, d$model)}
+str(mods)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+names(mods) <- sapply(as.list(mcall)[c(FALSE, TRUE, modp)], as.character)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(unlist(mods))
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(mods)
+?do.call
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+do.call(anova, mods)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+list(S1, S2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+do.call(anova, S0)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+S0 <- list(S1, S2)#
+	do.call(anova, S0)
+?setMethod
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+call(anova, S0)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+call("anova", S0)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+call("anova", "S0")
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+do.call("anova", S0)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(S1, S2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(S0)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(unlist(S0))
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+do.call(anova, S0)
+str(mods)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+unlist(S0)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+unlist(mods)
+?unlist
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+do.call(anova, S0, quote=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+S0 <- list(s1=S1, s2=S2)#
+	do.call(anova, S0, quote=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+do.call("anova", S0, quote=TRUE)
+anova(s1$model, s2$model)
+str(s1)
+str(s2)
+str(s2$model)
+s1$model
+str(s1$model)
+?setMethod
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(S1, S2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(mods[1], mods[2])
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+mods <- list(object$model)#
+	for (d in dots[modp]) {mods <- c(mods, d$model)}
+length(mods)
+str(mods)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(mods[[1]], mods[[2]])
+str(mods[[1]])
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(S1, S2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+s3 <- mods[[1]]#
+	s4 <- mods[[2]]
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(s3, s4)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(s3=mods[1], s4=mods[2])
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(s3, s4)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/R')
+anova(s3=mods[[1]], s4=mods[[2]])
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+s3 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")), err=2)#
+s3#
+#
+S3 <- s3$model#
+anova(S1, S2, S3)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(S2, S3)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(S1, S2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/APIMDemo')
+------------------------------------------------------------#
+# ----  The APIM package#
+# (c) 2012 by Felix Schönbrodt, www.nicebread.de#
+#------------------------------------------------------------#
+#------------------------------------------------------------#
+# ----  TODOS:#
+#
+# a.equal in moderation: set ALL actor effects to be equal (X->Y, M->Y, XxM -> Y)#
+#------------------------------------------------------------#
+# This function builds the syntax for lavaan (i.e., the APIM model is constructed)#
+# distLevel = vector with the variable levels that distinguish the members of the dyad#
+# w = vector of weights; w[1:2] = actor effects, w[3:4] = partner effects, w[5:12] = weights for mediating/ moderating effects#
+APIM.buildSyntax <- function(DV, IV, distLevel, w, mediator=NULL, moderator=NULL) {#
+	a1 <- paste(DV, "_", distLevel[1], "~", w[1], IV, "_", distLevel[1], sep="") # actor effect 1#
+	a2 <- paste(DV, "_", distLevel[2], "~", w[2], IV, "_", distLevel[2], sep="") # actor effect 2#
+	p1 <- paste(DV, "_", distLevel[1], "~", w[3], IV, "_", distLevel[2], sep="") 	# partner effect 1#
+	p2 <- paste(DV, "_", distLevel[2], "~", w[4], IV, "_", distLevel[1], sep="") 	# partner effect 2#
+#
+	IV.cor <- paste(IV, "_", distLevel[1], "~~", IV, "_", distLevel[2], sep="") # correlation of DV#
+#
+	err1 <- paste("e_", distLevel[1], "=~", DV, "_", distLevel[1], sep="")#
+	err2 <- paste("e_", distLevel[2], "=~", DV, "_", distLevel[2], sep="")#
+	err.cor <- paste("e_", distLevel[1], "~~", "e_", distLevel[2], sep="")#
+	# Full model for distinguishable members#
+	model.dist <- paste(a1, a2, p1, p2, IV.cor, err1, err2, err.cor, sep="\n")#
+	if (!is.null(mediator) & !is.null(moderator)) stop("You can only provide either a mediating or a moderating variable!")#
+#
+	 # Test for mediation (if requested)#
+	 	if (!is.null(mediator)) {#
+	 		med.effects <- paste(		#
+	 		paste(mediator, "_", distLevel[1], "~", w[5], IV, "_", distLevel[1], sep=""), # med. a-effect 1#
+	 		paste(mediator, "_", distLevel[2], "~", w[6], IV, "_", distLevel[2], sep=""), # med. a-effect 2#
+	 		paste(mediator, "_", distLevel[1], "~", w[7], IV, "_", distLevel[2], sep=""), # med. p-effect 1#
+	 		paste(mediator, "_", distLevel[2], "~", w[8], IV, "_", distLevel[1], sep=""), # med. p-effect 2#
+			paste(DV, "_", distLevel[1], "~", w[9], mediator, "_", distLevel[1], sep=""), # med. a-effect 1#
+	 		paste(DV, "_", distLevel[2], "~", w[10], mediator, "_", distLevel[2], sep=""), # med. a-effect 2#
+	 		paste(DV, "_", distLevel[1], "~", w[11], mediator, "_", distLevel[2], sep=""), # med. p-effect 1#
+	 		paste(DV, "_", distLevel[2], "~", w[12], mediator, "_", distLevel[1], sep=""), # med. p-effect 2#
+			sep="\n")#
+#
+	 		med.err <- paste(#
+			med.err1 <- paste("e.med_", distLevel[1], "=~", mediator, "_", distLevel[1], sep=""),#
+	 		med.err2 <- paste("e.med_", distLevel[2], "=~", mediator, "_", distLevel[2], sep=""),#
+	 		med.err.cor <- paste("e.med_", distLevel[1], "~~", "e.med_", distLevel[2], sep=""),#
+	 		paste("e.med_", distLevel[1], "~~ 0*e_", distLevel[1], sep=""),#
+	 		paste("e.med_", distLevel[1], "~~ 0*e_", distLevel[2], sep=""),#
+	 		paste("e.med_", distLevel[2], "~~ 0*e_", distLevel[1], sep=""),#
+	 		paste("e.med_", distLevel[2], "~~ 0*e_", distLevel[2], sep=""),#
+	 		sep="\n")#
+	 		model.dist <- paste(a1, a2, p1, p2, med.effects, IV.cor, err1, err2, err.cor, med.err, sep="\n")#
+	 	}#
+#
+		# Test for moderation#
+		if (!is.null(moderator)) {#
+			M <- moderator#
+			IA <- paste(IV,"_x_", M, sep="")#
+			mod.effects <- paste(		#
+	 		paste(DV, "_", distLevel[1], "~", w[5], moderator, "_", distLevel[1], sep=""), # direct M effect 1#
+	 		paste(DV, "_", distLevel[2], "~", w[6], moderator, "_", distLevel[2], sep=""), # direct M effect 2#
+	 		paste(DV, "_", distLevel[1], "~", w[7], moderator, "_", distLevel[2], sep=""), # indirect M effect 1#
+	 		paste(DV, "_", distLevel[2], "~", w[8], moderator, "_", distLevel[1], sep=""), # indirect M effect 2#
+			paste(DV, "_", distLevel[1], "~",  w[9], IA, "_", distLevel[1], sep=""), # IA a-effect 1#
+	 		paste(DV, "_", distLevel[2], "~", w[10], IA, "_", distLevel[2], sep=""), # IA a-effect 2#
+	 		paste(DV, "_", distLevel[1], "~", w[11], IA, "_", distLevel[2], sep=""), # IA p-effect 1#
+	 		paste(DV, "_", distLevel[2], "~", w[12], IA, "_", distLevel[1], sep=""), # IA p-effect 2#
+			sep="\n")#
+			mod.err <- paste(#
+	 		paste(M, "_", distLevel[1], "~~", IV, "_", distLevel[1], sep=""),#
+			paste(M, "_", distLevel[2], "~~", IV, "_", distLevel[2], sep=""),#
+			paste(IA, "_", distLevel[1], "~~", IV, "_", distLevel[1], sep=""),#
+			paste(IA, "_", distLevel[2], "~~", IV, "_", distLevel[2], sep=""),#
+			paste(M, "_", distLevel[1], "~~", IV, "_", distLevel[2], sep=""),#
+			paste(M, "_", distLevel[2], "~~", IV, "_", distLevel[1], sep=""),#
+			paste(IA, "_", distLevel[1], "~~", IV, "_", distLevel[2], sep=""),#
+			paste(IA, "_", distLevel[2], "~~", IV, "_", distLevel[1], sep=""),#
+	 		sep="\n")#
+#
+	 		model.dist <- paste(a1, a2, p1, p2, mod.effects, IV.cor, err1, err2, err.cor, mod.err, sep="\n")#
+	 	}#
+	return(model.dist)#
+}#
+# APIM.c = general APIM function for distinguishable members#
+APIM <- function(formula, data, w=NA, stand=FALSE, dist=TRUE, mediator=NULL, moderator=NULL, a.equal=FALSE, p.equal=FALSE, check.ap.equal=TRUE, check.full.mediation=TRUE, ...) {#
+	library(reshape)#
+#
+	if (!is.null(mediator) & !is.null(moderator)) stop("You can only provide either a mediating or a moderating variable!")#
+#
+	a1 <- all.vars(formula)#
+	DV <- a1[1]#
+	IV <- a1[2]#
+	dyad <- a1[3]#
+	distvar <- a1[4]#
+#
+	df <- data#
+#
+	# step one: convert long format to dyad level format#
+	df[, distvar] <- factor(df[, distvar])#
+	df <- df[, c(DV, IV, distvar, dyad, mediator, moderator)]#
+	me <- melt(df, id.vars=c(dyad, distvar))#
+	df.dyad <- cast(me, formula(paste(dyad, "~ variable + ", distvar)))#
+	distLevel <- unique(df[, distvar])#
+	if (!is.null(moderator)) {#
+		M <- moderator#
+		# center moderator and IV (within genders)#
+		df.dyad[, paste(IV, "_", distLevel[1], sep="")] <- scale(df.dyad[, paste(IV, "_", distLevel[1], sep="")], scale=FALSE)#
+		df.dyad[, paste(IV, "_", distLevel[2], sep="")] <- scale(df.dyad[, paste(IV, "_", distLevel[2], sep="")], scale=FALSE)#
+		df.dyad[, paste(M, "_", distLevel[1], sep="")] <- scale(df.dyad[, paste(M, "_", distLevel[1], sep="")], scale=FALSE)#
+		df.dyad[, paste(M, "_", distLevel[2], sep="")] <- scale(df.dyad[, paste(M, "_", distLevel[2], sep="")], scale=FALSE)#
+		df.dyad[, paste(IV,"_x_", M, "_", distLevel[1], sep="")] <- df.dyad[, paste(IV, "_", distLevel[1], sep="")]*df.dyad[, paste(M, "_", distLevel[1], sep="")]#
+		df.dyad[, paste(IV,"_x_", M, "_", distLevel[2], sep="")] <- df.dyad[, paste(IV, "_", distLevel[2], sep="")]*df.dyad[, paste(M, "_", distLevel[2], sep="")]#
+		if (stand==TRUE) {#
+			print("In moderated APIMs regression weights should not be standardized; setting stand to FALSE.")#
+			stand <- FALSE#
+		}#
+	}#
+#
+	# prepare weights/ path constraints#
+	# default values: all parameters are free#
+	if (length(w)==1 & is.na(w[1])) {#
+		if (is.null(mediator) & is.null(moderator)) {#
+			w <- rep("", 4)#
+		} else {#
+			w <- rep("", 12)#
+		}#
+	} else {#
+		# check if the length of weights is correct#
+		if (is.null(mediator) & is.null(moderator)) {#
+			if (length(w) < 4) w <- c(w, rep("", 4 - length(w)))#
+			if (length(w) != 4) stop("You have to provide exactly 4 weights for a11, a22, p12, and p21!")#
+		} else {#
+			if (length(w) < 12) w <- c(w, rep("", 12 - length(w)))#
+			if (length(w) != 12) stop("You have to provide exactly 12 weights for x1y1, x2y2, x2y1, x1y2, m1y1, m2y2, m2y1, m1y2, x1m1, x2m2, x2m1, x1m2!")#
+		}#
+	}#
+	# a.equal and p.equal: override any specific weights!#
+	if (a.equal==TRUE) {w[1] <- w[2] <- "aequal"}#
+	if (p.equal==TRUE) {w[3] <- w[4] <- "pequal"}#
+	w[w!=""] <- paste(w[w!=""], "* ")#
+#
+	library(lavaan)#
+#
+	model.dist <- APIM.buildSyntax(DV, IV, distLevel, w, mediator, moderator)#
+	# bootstrapping se's? Give a warning in mediation#
+	extra <- list(...)#
+	if (is.null(extra[["se"]]) & !is.null(mediator)) {#
+		extra[["se"]] <- "boot"#
+		print("For mediation analyses bootstrapped standard errors are recommended (Ledermann & Bodenmann, 2006). You should consider setting se='boot', bootstrap=1000 (or greater)!")#
+	}#
+	## Estimating the main model#
+	s1 <- sem(model.dist, data=df.dyad, meanstructure=TRUE, estimator="ML", fixed.x=FALSE, std.ov=stand, missing="fiml",...)#
+	final_model <- s1#
+	## If requested: test for equality of actor/ partner effects#
+	a.equal.m <- NULL#
+	p.equal.m <- NULL#
+	if (check.ap.equal) {#
+		w.a <- c("a*", "a*", rep("", length(w)-2))#
+		w.p <- c("", "", "p*", "p*", rep("", length(w)-4))#
+		a.equal.m <- sem(APIM.buildSyntax(DV, IV, distLevel, w=w.a, mediator=mediator, moderator=moderator), data=df.dyad, meanstructure=TRUE, estimator="ML", fixed.x=FALSE, std.ov=stand, missing="fiml",...)#
+		p.equal.m <- sem(APIM.buildSyntax(DV, IV, distLevel, w=w.p, mediator=mediator, moderator=moderator), data=df.dyad, meanstructure=TRUE, estimator="ML", fixed.x=FALSE, std.ov=stand, missing="fiml",...)#
+	}#
+	## In case of mediation: test for full mediation#
+	full.med <- NULL#
+	if (!is.null(mediator) & check.full.mediation==TRUE) {#
+		w.m <- c(rep("0*", 4), rep("", 8))#
+		full.med <- sem(APIM.buildSyntax(DV, IV, distLevel, w=w.m, mediator=mediator), data=df.dyad, meanstructure=TRUE, estimator="ML", fixed.x=FALSE, std.ov=stand, missing="fiml",...)#
+	}#
+	internal <- list(#
+		model_syntax = model.dist,#
+		df = df.dyad,#
+		a.equal = a.equal,#
+		p.equal = p.equal#
+	)#
+		res <- list(model = final_model, dist=dist, IV=IV, DV=DV, distVar=distLevel, stand=stand, fit=fitMeasures(s1), internal=internal, a.equal=a.equal.m, p.equal=p.equal.m, check.ap.equal=check.ap.equal, check.full.mediation=check.full.mediation, mediator=mediator, moderator=moderator, full.med=full.med, dist=dist)#
+#
+	attr(res, "class") <- "apim"#
+	return(res)#
+}#
+# Gives a summary of the apim objecta#
+print.apim <- function(x, ..., CI=.95) {#
+	cat("APIM analysis:\n===============================\n\n")#
+	cat("Descriptives:\n------------------------------------\n")#
+	cat(paste(nobs(x$model), ifelse(x$dist==TRUE, "distinguishable", "indistinguishable"), "dyads\n\n"))#
+	cat(paste(ifelse(x$stand==TRUE, "Standardized", "Unstandardized"), "Actor and Partner Effects", #
+		ifelse(x$internal$a.equal==TRUE, "(actor effects are set to be equal)", ""),#
+		ifelse(x$internal$p.equal==TRUE, "(partner effects are set to be equal)", ""), ":"))#
+	cat("\n------------------------------------\n")#
+	eff <- parameterEstimates(x$model, level=CI) #
+	if (is.null(x$mediator) & is.null(x$moderator)) {#
+		print(eff[1:4, ])#
+	} #
+	if (!is.null(x$mediator)) {#
+		cat(paste("Direct effects (X --> Y):\n"))#
+		print(eff[1:4,])#
+		cat(paste("\nIndirect effects (X --> M):\n"))#
+		print(eff[5:8,])#
+		cat(paste("\nIndirect effects (M --> Y):\n"))#
+		print(eff[9:12,])#
+	}#
+	if (!is.null(x$moderator)) {#
+		cat(paste("Direct effects of",x$IV," (X --> Y):\n"))#
+		print(eff[1:4,])#
+		cat(paste("\nDirect effects of", x$moderator," (M --> Y):\n"))#
+		print(eff[5:8,])#
+		cat(paste("\nInteraction effects (XxM --> Y):\n"))#
+		print(eff[9:12,])#
+	}#
+	cat("\nCovariances:\n------------------------------------\n")#
+	if (is.null(x$mediator) & is.null(x$moderator)) {#
+		print(eff[c(5, 8), ])#
+	}#
+	if (!is.null(x$mediator)) {#
+		print(eff[c(13, 19, 16), ])#
+	}#
+	if (!is.null(x$moderator)) {#
+		print(eff[c(13, 35, 16), ])#
+	}#
+	if (x$check.ap.equal == TRUE) {#
+		cat("\n\nEquality constraints for actor and/or partner effects:\n------------------------------------\n")#
+		# test of constraints#
+		fit.a <- fitMeasures(x$a.equal)#
+		cat(paste("Actor effects ", ifelse(fit.a[3] <= .05, "ARE", "ARE NOT"), " significantly different. The constraint of equality leads to a change in model fit of delta-chi2 (df=",fit.a[2],") = ", round(fit.a[1], 3), "; p = ", round(fit.a[3], 3), "\n\n", sep=""))#
+		fit.p <- fitMeasures(x$p.equal)#
+		cat(paste("Partner effects ", ifelse(fit.p[3] <= .05, "ARE", "ARE NOT"), " significantly different. The constraint of equality leads to a change in model fit of delta-chi2 (df=",fit.p[2],") = ", round(fit.p[1], 3), "; p = ", round(fit.p[3], 3), "\n\n", sep=""))#
+		#cat(paste("The constraint of both actor and both partner effects leads to a change in model fit of delta-chi2 (df=",x$is_both_equal[2, 6],") = ", round(x$is_both_equal[2, 5], 3), "; p = ", round(x$is_both_equal[2, 7], 3), sep=""))#
+	}#
+	## Mediation check: full mediation#
+	if (!is.null(x$full.med)) {#
+		fit.m <- fitMeasures(x$full.med)#
+		cat(paste("The model ", ifelse(fit.m[3] <= .05, "IS NOT", "IS"), " fully mediated. Setting all direct effects to 0 leads to a change in model fit of delta-chi2 (df=",fit.m[2],") = ", round(fit.m[1], 3), "; p = ", round(fit.m[3], 3), "\n\n", sep=""))#
+	}#
+	invisible(return(eff))#
+}#
+#
+coef.apim <- function(object, ...) {#
+	parameterEstimates(object$model)[1:4, 4]#
+}
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/APIMDemo')
+dyad1 <- read.table("dyad.tab")#
+roommates <- read.table("roommates.tab")#
+#
+source("APIM.R")#
+#
+## APIMs for distinguishable members#
+# formula interface: DV ~ IV | dyad/distinguishing_var#
+APIM(distress ~ neuroticism | dyad/gender, dyad1)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/APIMDemo')
+a1 <- APIM(distress ~ neuroticism | dyad/gender, dyad1)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/APIMDemo')
+a2 <- APIM(distress ~ neuroticism | dyad/gender, dyad1, a.equal=TRUE)
+anova(a1, a2)
+str(a1)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/APIMDemo')
+A1 <- a1$model#
+A2 <- a2$model#
+anova(A1, A2)
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(S1, S2)
+a1
+setwd('/Users/Felix/Documents/R/Funktionen/RForge/fSRM/trunk/files')
+anova(S2, S3)
+S2
+s2
+S3
+s3

@@ -1,0 +1,722 @@
+   EQS, A STRUCTURAL EQUATION PROGRAM          MULTIVARIATE SOFTWARE, INC.
+   COPYRIGHT BY P.M. BENTLER                   VERSION 6.1 (\cf1 C ) 1985 - 2005 (B83).
+ 
+ 
+     PROGRAM CONTROL INFORMATION
+ 
+      1  /TITLE                                                                          
+      2    SOCIAL RELATIONS MODEL - anxious attachment security                          
+      3  /SPECIFICATIONS                                                                 
+      4    CAS = 208;                                                                    
+      5    VAR = 12; MA = RAW; ME = ML;                                                  
+      6    DATA = '\cf1 C :\\dyad book\\checks\\data analysis\\4p_anx.ess';                        
+      7  /LABELS                                                                         
+      8    V1 = MF; V2 = MT; V3 = MS; V4 = FM; V5 = FT; V6 = FS; V7 = TM;                
+      9    V8 = TF; V9 = TS; V10 = SM; V11 = SF; V12 = ST;                               
+     10    F1=FAMILY; F2=M_ACT; F3=F_ACT; F4=T_ACT; F5=S_ACT; F6=F_PART;                 
+     11    F7=T_PART; F8=S_PART; F9=M_PART;                                              
+     12  /EQUATIONS                                                                      
+     13   V1 =  F1 + F2 + F6 + E1;                                                       
+     14   V2 =  F1 + F2 + F7 + E2;                                                       
+     15   V3 =  F1 + F2 + F8 + E3;                                                       
+     16   V4 =  F1 + F3 + F9 + E4;                                                       
+     17   V5 =  F1 + F3 + F7 + E5;                                                       
+     18   V6 =  F1 + F3 + F8 + E6;                                                       
+     19   V7 =  F1 + F4 + F9 + E7;                                                       
+     20   V8 =  F1 + F4 + F6 + E8;                                                       
+     21   V9 =  F1 + F4 + F8 + E9;                                                       
+     22   V10 = F1 + F5 + F9 + E10;                                                      
+     23   V11 = F1 + F5 + F6 + E11;                                                      
+     24   V12 = F1 + F5 + F7 + E12;                                                      
+     25  /VARIANCES                                                                      
+     26   E1 TO E12 = *;                                                                 
+     27   F1 to f9=*;                                                                    
+     28  /COVARIANCES                                                                    
+     29   F2,F9=*; F3,F6=*;  F4,F7=*;  F5,F8=*;                                          
+     30    !F2,F3=*; F6,F9=*; F4,F5=*; F7,F8=*;                                            
+     31   E1,E4=*; E2,E7=*; E3,E10=*; E5,E8=*;                                           
+     32  E6,E11=*; E9,E12=*;                                                             
+     33   !/lmtest;                                                                        
+     34    !set=pee, pff;                                                                  
+     35  /wtest                                                                          
+     36  /END                                                                            
+ 
+ 
+        36 RECORDS OF INPUT MODEL FILE WERE READ
+ 
+ 
+     DATA IS READ FROM \cf1 C :\\dyad book\\checks\\data analysis\\4p_anx.ess                                                                                    
+     THERE ARE  12 VARIABLES AND   208 CASES
+     IT IS A RAW DATA ESS FILE
+  
+  26-Feb-06      PAGE :  2  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+ 
+   SAMPLE STATISTICS BASED ON COMPLETE CASES
+ 
+ 
+                             UNIVARIATE STATISTICS
+                             ---------------------
+ 
+ 
+    VARIABLE           MF         MT         MS         FM         FT    
+ 
+    MEAN               1.8290     1.7456     1.8486     1.8882     1.8964
+ 
+    SKEWNESS (G1)      1.1102     1.0013      .9928     1.1502      .6519
+ 
+    KURTOSIS (G2)       .4244      .4991      .6392      .8475     -.1653
+ 
+    STANDARD DEV.       .8825      .7142      .7770      .9086      .6959
+ 
+ 
+    VARIABLE           FS         TM         TF         TS         SM    
+ 
+    MEAN               2.0007     1.4771     1.7393     1.8756     1.7295
+ 
+    SKEWNESS (G1)       .5300     1.6736     1.2240      .8434     1.1541
+ 
+    KURTOSIS (G2)      -.4682     2.5520     1.2544     -.1304      .9760
+ 
+    STANDARD DEV.       .7390      .6238      .7372      .7460      .7312
+ 
+ 
+    VARIABLE           SF         ST    
+ 
+    MEAN               1.9567     2.0710
+ 
+    SKEWNESS (G1)       .8997      .4695
+ 
+    KURTOSIS (G2)       .3042     -.3166
+ 
+    STANDARD DEV.       .8308      .7689
+ 
+ 
+                             MULTIVARIATE KURTOSIS
+                             ---------------------
+ 
+    MARDIA'S COEFFICIENT (G2,P) =     35.4407
+    NORMALIZED ESTIMATE =             13.9423
+ 
+ 
+                      ELLIPTICAL THEORY KURTOSIS ESTIMATES
+                      ------------------------------------
+ 
+    MARDIA-BASED KAPPA =       .2110 MEAN SCALED UNIVARIATE KURTOSIS =      .1782
+ 
+    MARDIA-BASED KAPPA IS USED IN COMPUTATION. KAPPA=            .2110
+ 
+ 
+    CASE NUMBERS WITH LARGEST CONTRIBUTION TO NORMALIZED MULTIVARIATE KURTOSIS:
+    ---------------------------------------------------------------------------
+ 
+    CASE NUMBER        43          126          145          150          177
+ 
+    ESTIMATE       375.1733     381.1883     554.9353     415.8431     436.4821
+  
+  26-Feb-06      PAGE :  3  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   COVARIANCE  MATRIX TO BE ANALYZED:  12 VARIABLES (SELECTED FROM  12 VARIABLES)
+   BASED ON   208 CASES.
+ 
+ 
+                          MF         MT         MS         FM         FT    
+                          V  1       V  2       V  3       V  4       V  5
+        MF     V  1        .779
+        MT     V  2        .225       .510
+        MS     V  3        .210       .192       .604
+        FM     V  4        .257       .051       .057       .825
+        FT     V  5        .046       .121       .036       .201       .484
+        FS     V  6        .032       .021       .142       .188       .260
+        TM     V  7        .141       .169       .037       .079       .076
+        TF     V  8        .198       .134       .063       .057       .137
+        TS     V  9        .125       .127       .078       .036       .079
+        SM     V 10        .131       .072       .138       .070       .001
+        SF     V 11        .105       .046       .132       .035       .014
+        ST     V 12        .035       .087       .042       .027       .006
+ 
+ 
+                          FS         TM         TF         TS         SM    
+                          V  6       V  7       V  8       V  9       V 10
+        FS     V  6        .546
+        TM     V  7        .013       .389
+        TF     V  8        .048       .256       .543
+        TS     V  9        .108       .250       .302       .557
+        SM     V 10        .081       .075       .035       .121       .535
+        SF     V 11        .162       .053       .100       .173       .319
+        ST     V 12        .033       .066       .084       .167       .223
+ 
+ 
+ 
+                          SF         ST    
+                          V 11       V 12
+        SF     V 11        .690
+        ST     V 12        .225       .591
+ 
+ 
+ 
+   BENTLER-WEEKS STRUCTURAL REPRESENTATION:
+ 
+         NUMBER OF DEPENDENT VARIABLES = 12
+             DEPENDENT V'S :     1    2    3    4    5    6    7    8    9   10
+             DEPENDENT V'S :    11   12
+ 
+         NUMBER OF INDEPENDENT VARIABLES = 21
+             INDEPENDENT F'S :     1    2    3    4    5    6    7    8    9
+             INDEPENDENT E'S :     1    2    3    4    5    6    7    8    9   10
+             INDEPENDENT E'S :    11   12
+ 
+         NUMBER OF FREE PARAMETERS =  31
+         NUMBER OF FIXED NONZERO PARAMETERS =  48
+ 
+  *** WARNING MESSAGES ABOVE, IF ANY, REFER TO INDEPENDENCE MODEL.
+      CALCULATIONS FOR USER'S MODEL NOW BEGIN.
+ 
+ 
+   3RD STAGE OF COMPUTATION REQUIRED     31020 WORDS OF MEMORY.
+   PROGRAM ALLOCATED   2000000 WORDS
+ 
+   DETERMINANT OF INPUT MATRIX IS    .61434D-04
+ 
+   PARAMETER ESTIMATES APPEAR IN ORDER,
+   NO SPECIAL PROBLEMS WERE ENCOUNTERED DURING OPTIMIZATION.
+ 
+ 
+ 
+   RESIDUAL COVARIANCE MATRIX  (S-SIGMA) :       
+ 
+ 
+                          MF         MT         MS         FM         FT    
+                          V  1       V  2       V  3       V  4       V  5
+        MF     V  1        .030
+        MT     V  2        .023       .021
+        MS     V  3        .007      -.011      -.015
+        FM     V  4       -.011      -.022      -.015      -.090
+        FT     V  5        .004       .018      -.003      -.055      -.006
+        FS     V  6       -.010      -.018       .024      -.068       .003
+        TM     V  7        .069       .011      -.036      -.004      -.023
+        TF     V  8        .103       .035       .024       .015      -.005
+        TS     V  9        .086       .029      -.040      -.003      -.019
+        SM     V 10        .058      -.001      -.007      -.014      -.038
+        SF     V 11        .011       .007       .020      -.007      -.028
+        ST     V 12       -.004      -.016      -.070      -.012      -.097
+ 
+ 
+                          FS         TM         TF         TS         SM    
+                          V  6       V  7       V  8       V  9       V 10
+        FS     V  6        .006
+        TM     V  7       -.026      -.016
+        TF     V  8        .006       .003       .030
+        TS     V  9       -.010      -.004       .048       .018
+        SM     V 10       -.031      -.008      -.004       .009       .015
+        SF     V 11       -.003       .014       .006       .061       .049
+        ST     V 12       -.079      -.032      -.014      -.019      -.048
+ 
+ 
+                          SF         ST    
+                          V 11       V 12
+        SF     V 11        .028
+        ST     V 12       -.045      -.099
+ 
+ 
+                      AVERAGE ABSOLUTE  COVARIANCE  RESIDUALS     =         .0266
+         AVERAGE OFF-DIAGONAL ABSOLUTE  COVARIANCE  RESIDUALS     =         .0258
+ 
+ 
+ 
+   STANDARDIZED RESIDUAL MATRIX:                 
+ 
+ 
+                          MF         MT         MS         FM         FT    
+                          V  1       V  2       V  3       V  4       V  5
+        MF     V  1        .038
+        MT     V  2        .036       .041
+        MS     V  3        .011      -.020      -.026
+        FM     V  4       -.013      -.033      -.022      -.110
+        FT     V  5        .007       .035      -.005      -.087      -.012
+        FS     V  6       -.016      -.034       .041      -.101       .007
+        TM     V  7        .125       .025      -.074      -.008      -.052
+        TF     V  8        .159       .067       .042       .022      -.010
+        TS     V  9        .130       .055      -.069      -.004      -.037
+        SM     V 10        .090      -.001      -.012      -.020      -.075
+        SF     V 11        .015       .012       .030      -.009      -.048
+        ST     V 12       -.006      -.030      -.118      -.017      -.181
+ 
+ 
+                          FS         TM         TF         TS         SM    
+                          V  6       V  7       V  8       V  9       V 10
+        FS     V  6        .010
+        TM     V  7       -.056      -.042
+        TF     V  8        .010       .006       .055
+        TS     V  9       -.018      -.008       .088       .033
+        SM     V 10       -.058      -.018      -.007       .017       .029
+        SF     V 11       -.006       .026       .009       .099       .080
+        ST     V 12       -.139      -.067      -.025      -.033      -.086
+ 
+ 
+                          SF         ST    
+                          V 11       V 12
+        SF     V 11        .041
+        ST     V 12       -.071      -.168
+ 
+ 
+                      AVERAGE ABSOLUTE STANDARDIZED RESIDUALS     =         .0454
+         AVERAGE OFF-DIAGONAL ABSOLUTE STANDARDIZED RESIDUALS     =         .0445
+  
+  26-Feb-06      PAGE :  4  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+   LARGEST STANDARDIZED RESIDUALS:
+ 
+       NO.    PARAMETER   ESTIMATE      NO.    PARAMETER   ESTIMATE
+       ---    ---------   --------      ---    ---------   --------
+        1     V12, V5        -.181      11     V10, V1         .090
+        2     V12, V12       -.168      12     V9,  V8         .088
+        3     V8,  V1         .159      13     V5,  V4        -.087
+        4     V12, V6        -.139      14     V12, V10       -.086
+        5     V9,  V1         .130      15     V11, V10        .080
+        6     V7,  V1         .125      16     V10, V5        -.075
+        7     V12, V3        -.118      17     V7,  V3        -.074
+        8     V4,  V4        -.110      18     V12, V11       -.071
+        9     V6,  V4        -.101      19     V9,  V3        -.069
+       10     V11, V9         .099      20     V8,  V2         .067
+ 
+ 
+ 
+   DISTRIBUTION OF STANDARDIZED RESIDUALS
+ 
+ 
+ 
+      ----------------------------------------                       
+       !                                      !                        
+    40-                 *                    -                       
+       !                 *                    !                        
+       !                 *                    !                        
+       !                 *                    !                        
+       !                 *                    !            RANGE      FREQ PERCENT 
+    30-                 *  *                 -                       
+       !                 *  *                 !    1   -0.5  -  --       0    .00% 
+       !                 *  *                 !    2   -0.4  -  -0.5     0    .00% 
+       !                 *  *                 !    3   -0.3  -  -0.4     0    .00% 
+       !                 *  *                 !    4   -0.2  -  -0.3     0    .00% 
+    20-                 *  *                 -    5   -0.1  -  -0.2     6   7.69%
+       !                 *  *                 !    6    0.0  -  -0.1    39  50.00% 
+       !                 *  *                 !    7    0.1  -   0.0    30  38.46% 
+       !                 *  *                 !    8    0.2  -   0.1     3   3.85% 
+       !                 *  *                 !    9    0.3  -   0.2     0    .00% 
+    10-                 *  *                 -    A    0.4  -   0.3     0    .00%
+       !                 *  *                 !    B    0.5  -   0.4     0    .00% 
+       !              *  *  *                 !    C     ++  -   0.5     0    .00% 
+       !              *  *  *  *              !    ------------------------------- 
+       !              *  *  *  *              !            TOTAL        78 100.00% 
+      ----------------------------------------                       
+         1  2  3  4  5  6  7  8  9  A  B  \cf1 C       EACH "*" REPRESENTS  2 RESIDUALS
+  
+  26-Feb-06      PAGE :  5  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+ 
+ 
+   GOODNESS OF FIT SUMMARY FOR METHOD = ML    
+ 
+   INDEPENDENCE MODEL CHI-SQUARE        =     638.777 ON    66 DEGREES OF FREEDOM
+ 
+   INDEPENDENCE AIC =   506.77677   INDEPENDENCE CAIC =   220.49926
+          MODEL AIC =   -48.90551          MODEL CAIC =  -252.76980
+ 
+   CHI-SQUARE =       45.094 BASED ON      47 DEGREES OF FREEDOM
+   PROBABILITY VALUE FOR THE CHI-SQUARE STATISTIC IS       .55179
+ 
+   THE NORMAL THEORY RLS CHI-SQUARE FOR THIS ML SOLUTION IS         44.429.
+ 
+   FIT INDICES
+   -----------
+   BENTLER-BONETT     NORMED FIT INDEX =      .929
+   BENTLER-BONETT NON-NORMED FIT INDEX =     1.005
+   COMPARATIVE FIT INDEX (CFI)         =     1.000
+ 
+   RELIABILITY COEFFICIENTS
+   ------------------------
+   CRONBACH'S ALPHA                    =      .739
+   COEFFICIENT ALPHA FOR AN OPTIMAL SHORT SCALE                =      .781
+   BASED ON THE FOLLOWING  3 VARIABLES
+     TM        TF        TS    
+   RELIABILITY COEFFICIENT RHO         =      .817
+   GREATEST LOWER BOUND RELIABILITY                            =      .881
+   GLB RELIABILITY FOR AN OPTIMAL SHORT SCALE                  =      .881
+   BASED ON ALL VARIABLES
+   BENTLER'S DIMENSION-FREE LOWER BOUND RELIABILITY            =      .881
+   SHAPIRO'S LOWER BOUND RELIABILITY FOR A WEIGHTED COMPOSITE  =      .901
+   WEIGHTS THAT ACHIEVE SHAPIRO'S LOWER BOUND:
+     MF        MT        MS        FM        FT        FS    
+       .285      .326      .221      .208      .318      .263
+     TM        TF        TS        SM        SF        ST    
+       .342      .401      .341      .248      .244      .186
+ 
+ 
+ 
+ 
+                          ITERATIVE SUMMARY
+ 
+                      PARAMETER
+   ITERATION          ABS CHANGE         ALPHA                FUNCTION
+       1                .267053         1.00000                .24924
+       2                .011109         1.00000                .21860
+       3                .001809         1.00000                .21787
+       4                .000342         1.00000                .21785
+  
+  26-Feb-06      PAGE :  6  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+   MEASUREMENT EQUATIONS WITH STANDARD ERRORS AND TEST STATISTICS
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+ 
+ 
+    MF    =V1  =  1.000 F1    +1.000 F2    +1.000 F6    +1.000 E1  
+                                                               
+                                                               
+ 
+    MT    =V2  =  1.000 F1    +1.000 F2    +1.000 F7    +1.000 E2  
+                                                               
+                                                               
+ 
+    MS    =V3  =  1.000 F1    +1.000 F2    +1.000 F8    +1.000 E3  
+                                                               
+                                                               
+ 
+    FM    =V4  =  1.000 F1    +1.000 F3    +1.000 F9    +1.000 E4  
+                                                               
+                                                               
+ 
+    FT    =V5  =  1.000 F1    +1.000 F3    +1.000 F7    +1.000 E5  
+                                                               
+                                                               
+ 
+    FS    =V6  =  1.000 F1    +1.000 F3    +1.000 F8    +1.000 E6  
+                                                               
+                                                               
+ 
+    TM    =V7  =  1.000 F1    +1.000 F4    +1.000 F9    +1.000 E7  
+                                                               
+                                                               
+ 
+    TF    =V8  =  1.000 F1    +1.000 F4    +1.000 F6    +1.000 E8  
+                                                               
+                                                               
+ 
+    TS    =V9  =  1.000 F1    +1.000 F4    +1.000 F8    +1.000 E9  
+                                                               
+                                                               
+ 
+    SM    =V10 =  1.000 F1    +1.000 F5    +1.000 F9    +1.000 E10 
+                                                               
+                                                               
+ 
+    SF    =V11 =  1.000 F1    +1.000 F5    +1.000 F6    +1.000 E11 
+                                                               
+                                                               
+ 
+    ST    =V12 =  1.000 F1    +1.000 F5    +1.000 F7    +1.000 E12 
+                                                               
+                                                               
+ 
+  
+  26-Feb-06      PAGE :  7  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   VARIANCES OF INDEPENDENT VARIABLES
+   ----------------------------------
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+                   V                                F
+                  ---                              ---
+                                 I F1  -FAMILY               .039*I              
+                                 I                           .018 I              
+                                 I                          2.203@I              
+                                 I                                I              
+                                 I F2  -M_ACT                .163*I              
+                                 I                           .032 I              
+                                 I                          5.099@I              
+                                 I                                I              
+                                 I F3  -F_ACT                .217*I              
+                                 I                           .034 I              
+                                 I                          6.332@I              
+                                 I                                I              
+                                 I F4  -T_ACT                .215*I              
+                                 I                           .031 I              
+                                 I                          6.836@I              
+                                 I                                I              
+                                 I F5  -S_ACT                .232*I              
+                                 I                           .037 I              
+                                 I                          6.246@I              
+                                 I                                I              
+                                 I F6  -F_PART               .056*I              
+                                 I                           .021 I              
+                                 I                          2.636@I              
+                                 I                                I              
+                                 I F7  -T_PART               .064*I              
+                                 I                           .020 I              
+                                 I                          3.177@I              
+                                 I                                I              
+                                 I F8  -S_PART               .079*I              
+                                 I                           .021 I              
+                                 I                          3.788@I              
+                                 I                                I              
+                                 I F9  -M_PART               .044*I              
+                                 I                           .017 I              
+                                 I                          2.539@I              
+                                 I                                I              
+  
+  26-Feb-06      PAGE :  8  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   VARIANCES OF INDEPENDENT VARIABLES
+   ----------------------------------
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+                   E                                D
+                  ---                              ---
+  E1  -  MF                 .491*I                                I              
+                            .062 I                                I              
+                           7.867@I                                I              
+                                 I                                I              
+  E2  -  MT                 .223*I                                I              
+                            .038 I                                I              
+                           5.801@I                                I              
+                                 I                                I              
+  E3  -  MS                 .338*I                                I              
+                            .048 I                                I              
+                           7.030@I                                I              
+                                 I                                I              
+  E4  -  FM                 .616*I                                I              
+                            .072 I                                I              
+                           8.568@I                                I              
+                                 I                                I              
+  E5  -  FT                 .170*I                                I              
+                            .033 I                                I              
+                           5.070@I                                I              
+                                 I                                I              
+  E6  -  FS                 .205*I                                I              
+                            .036 I                                I              
+                           5.706@I                                I              
+                                 I                                I              
+  E7  -  TM                 .107*I                                I              
+                            .026 I                                I              
+                           4.132@I                                I              
+                                 I                                I              
+  E8  -  TF                 .204*I                                I              
+                            .034 I                                I              
+                           5.944@I                                I              
+                                 I                                I              
+  E9  -  TS                 .205*I                                I              
+                            .034 I                                I              
+                           6.028@I                                I              
+                                 I                                I              
+  E10 -  SM                 .204*I                                I              
+                            .037 I                                I              
+                           5.568@I                                I              
+                                 I                                I              
+  E11 -  SF                 .336*I                                I              
+                            .048 I                                I              
+                           6.961@I                                I              
+                                 I                                I              
+  E12 -  ST                 .356*I                                I              
+                            .050 I                                I              
+                           7.093@I                                I              
+                                 I                                I              
+  
+  26-Feb-06      PAGE :  9  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   COVARIANCES AMONG INDEPENDENT VARIABLES
+   ---------------------------------------
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+                   V                                F
+                  ---                              ---
+                                 I F9  -M_PART               .034*I              
+                                 I F2  -M_ACT                .017 I              
+                                 I                          1.957 I              
+                                 I                                I              
+                                 I F6  -F_PART               .003*I              
+                                 I F3  -F_ACT                .019 I              
+                                 I                           .155 I              
+                                 I                                I              
+                                 I F7  -T_PART               .059*I              
+                                 I F4  -T_ACT                .019 I              
+                                 I                          3.133@I              
+                                 I                                I              
+                                 I F8  -S_PART               .073*I              
+                                 I F5  -S_ACT                .021 I              
+                                 I                          3.520@I              
+                                 I                                I              
+  
+  26-Feb-06      PAGE : 10  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   COVARIANCES AMONG INDEPENDENT VARIABLES
+   ---------------------------------------
+   STATISTICS SIGNIFICANT AT THE 5% LEVEL ARE MARKED WITH @.
+ 
+                   E                                D
+                  ---                              ---
+  E4  -  FM                 .192*I                                I              
+  E1  -  MF                 .050 I                                I              
+                           3.857@I                                I              
+                                 I                                I              
+  E7  -  TM                 .025*I                                I              
+  E2  -  MT                 .023 I                                I              
+                           1.118 I                                I              
+                                 I                                I              
+  E10 -  SM                -.001*I                                I              
+  E3  -  MS                 .030 I                                I              
+                           -.041 I                                I              
+                                 I                                I              
+  E8  -  TF                 .041*I                                I              
+  E5  -  FT                 .024 I                                I              
+                           1.706 I                                I              
+                                 I                                I              
+  E11 -  SF                 .051*I                                I              
+  E6  -  FS                 .030 I                                I              
+                           1.700 I                                I              
+                                 I                                I              
+  E12 -  ST                 .014*I                                I              
+  E9  -  TS                 .029 I                                I              
+                            .490 I                                I              
+                                 I                                I              
+  
+  26-Feb-06      PAGE : 11  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+   STANDARDIZED SOLUTION:                                              R-SQUARED
+ 
+ 
+ 
+    MF    =V1  =   .228 F1    + .467 F2    + .272 F6    + .810 E1           .344 
+    MT    =V2  =   .282 F1    + .578 F2    + .362 F7    + .675 E2           .545 
+    MS    =V3  =   .251 F1    + .514 F2    + .357 F8    + .739 E3           .454 
+    FM    =V4  =   .206 F1    + .487 F3    + .220 F9    + .820 E4           .328 
+    FT    =V5  =   .282 F1    + .666 F3    + .362 F7    + .588 E5           .654 
+    FS    =V6  =   .268 F1    + .634 F3    + .382 F8    + .616 E6           .620 
+    TM    =V7  =   .310 F1    + .728 F4    + .330 F9    + .515 E7           .735 
+    TF    =V8  =   .275 F1    + .647 F4    + .329 F6    + .630 E8           .603 
+    TS    =V9  =   .269 F1    + .632 F4    + .383 F8    + .618 E9           .618 
+    SM    =V10 =   .274 F1    + .668 F5    + .292 F9    + .627 E10          .606 
+    SF    =V11 =   .242 F1    + .592 F5    + .290 F6    + .712 E11          .493 
+    ST    =V12 =   .237 F1    + .579 F5    + .305 F7    + .718 E12          .485 
+  
+  26-Feb-06      PAGE : 12  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   CORRELATIONS AMONG INDEPENDENT VARIABLES
+   ---------------------------------------
+ 
+                   V                                F
+                  ---                              ---
+                                 I F9  -M_PART               .400*I              
+                                 I F2  -M_ACT                     I              
+                                 I                                I              
+                                 I F6  -F_PART               .027*I              
+                                 I F3  -F_ACT                     I              
+                                 I                                I              
+                                 I F7  -T_PART               .507*I              
+                                 I F4  -T_ACT                     I              
+                                 I                                I              
+                                 I F8  -S_PART               .541*I              
+                                 I F5  -S_ACT                     I              
+                                 I                                I              
+  
+  26-Feb-06      PAGE : 13  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+   CORRELATIONS AMONG INDEPENDENT VARIABLES
+   ---------------------------------------
+ 
+                   E                                D
+                  ---                              ---
+  E4  -  FM                 .349*I                                I              
+  E1  -  MF                      I                                I              
+                                 I                                I              
+  E7  -  TM                 .163*I                                I              
+  E2  -  MT                      I                                I              
+                                 I                                I              
+  E10 -  SM                -.005*I                                I              
+  E3  -  MS                      I                                I              
+                                 I                                I              
+  E8  -  TF                 .220*I                                I              
+  E5  -  FT                      I                                I              
+                                 I                                I              
+  E11 -  SF                 .193*I                                I              
+  E6  -  FS                      I                                I              
+                                 I                                I              
+  E12 -  ST                 .053*I                                I              
+  E9  -  TS                      I                                I              
+                                 I                                I              
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  -------------------------------------------------------------------------------
+                            E N D    O F    M E T H O D
+  -------------------------------------------------------------------------------
+  
+  26-Feb-06      PAGE : 14  EQS     Licensee:                               
+   TITLE:     SOCIAL RELATIONS MODEL - anxious attachment security      
+ 
+   MAXIMUM LIKELIHOOD SOLUTION (NORMAL DISTRIBUTION THEORY)
+ 
+ 
+   WALD TEST (FOR DROPPING PARAMETERS)
+   MULTIVARIATE WALD TEST BY SIMULTANEOUS PROCESS
+ 
+ 
+ 
+          CUMULATIVE MULTIVARIATE STATISTICS              UNIVARIATE INCREMENT
+          ----------------------------------              --------------------
+ 
+   STEP  PARAMETER   CHI-SQUARE  D.F.  PROBABILITY       CHI-SQUARE  PROBABILITY 
+   ---- -----------  ----------  ----  -----------       ----------  -----------
+ 
+     1    E10,E3         .002      1       .967              .002        .967
+     2     F6,F3         .026      2       .987              .024        .877
+     3    E12,E9         .275      3       .965              .250        .617
+     4     E7,E2        1.518      4       .823             1.242        .265
+     5    E11,E6        4.683      5       .456             3.165        .075
+ 1
+   Execution begins at 09:32:01   
+   Execution ends   at 09:32:02   
+   Elapsed time =       1.00 seconds 
+ 
+ }
+ 
