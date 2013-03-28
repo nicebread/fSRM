@@ -1,0 +1,33 @@
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/files')
+library(devtools)
+?load
+?load_all
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/files')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+load_code("./")
+ls()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+#
+sourceDir("../R")#
+#
+# alternatively: load from GitHub#
+#library(devtools)#
+#install_github("fSRM", "felice303")#
+#library(fSRM)
+ls()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+load("FIRMdemo.RData")#
+head(RRdat4)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+pow2 <- fSRM(RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4, reestimate=1, err=1, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+str(pow2)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+pow2 <- fSRM(RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4)
+pow2

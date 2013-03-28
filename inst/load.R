@@ -9,6 +9,6 @@ sourceDir <- function(path, trace = TRUE, ...) {
 sourceDir("../R")
 
 # alternatively: load from GitHub
-library(devtools)
-install_github("fSRM", "felice303")
-library(fSRM)
+#library(devtools)
+#install_github("fSRM", "felice303")
+#library(fSRM)

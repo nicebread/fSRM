@@ -1,0 +1,831 @@
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+#
+sourceDir("../R")#
+#
+# alternatively: load from GitHub#
+#library(devtools)#
+#install_github("fSRM", "felice303")#
+#library(fSRM)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+load("FIRM00.RData")#
+#
+# prepare data for fSRM analysis#
+RRdat2 <- merge(dat00[, c("pid", "sex", "age", "role")], RRdat, by="pid")#
+TID <- dat00[, c("pid", "role")]#
+colnames(TID)[1] <- "tid"#
+RRdat4 <- merge(RRdat2, TID, by="tid", suffixes=c(".p", ".t"))#
+RRdat4[RRdat4$pid == RRdat4$tid, grepl("RR", colnames(RRdat4))] <- NA#
+RRdat4 <- RRdat4[order(RRdat4$pid), ]
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+RRdat4$RR_POW  <- rowMeans(RRdat4[, c("RR_UMS1_2", "RR_UMS2_1", "RR_UMS2_3")])#
+RRdat4$RR_ACH  <- rowMeans(RRdat4[, c("RR_UMS2_0", "RR_UMS2_5", "RR_UMS2_7")])#
+RRdat4$RR_AFF  <- rowMeans(RRdat4[, c("RR_UMS1_1", "RR_UMS1_5", "RR_UMS2_4")])#
+RRdat4$RR_INT  <- rowMeans(RRdat4[, c("RR_UMS1_3", "RR_UMS2_2", "RR_UMS2_6")])#
+RRdat4$RR_FEAR <- rowMeans(RRdat4[, c("RR_UMS1_0", "RR_UMS1_4", "RR_UMS1_6")])
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+head(RRdat4)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+pow2 <- fSRM(RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4, reestimate=1, err=1, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+' @title Run a Social Relations Model with roles ("Family SRM")#
+#'#
+#' @description#
+#' Run a Social Relations Model with roles ("Family SRM")#
+#'#
+#' @details#
+#' None.#
+#'#
+#' @export#
+#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
+#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
+#' @param fe Should the family effect be included? Requires at least 4 members per group.#
+#' @param model_add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
+#' @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
+#' @param reestimate 0 = no reestimation; 1 = negative variances are set to zero --> new estimation; 2 = negative and non-significant variances (with p > min.p) are set to zero --> new estimation#
+#' @param min.p Minimum p value for reestimation: variances with a p value > min.p are set to zero (see also parameter \code{reestimate})#
+#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
+#' @param self Should self-ratings be included in the analysis (if present in the data set)?#
+#' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
+#' @param model In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
+#' @param REESTIMATE Internal parameter, do not use.#
+#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
+#
+#' @references#
+#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196–213. doi:10.1177/1088868309353414#
+#
+fSRM <-#
+function(formula=NULL, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.05, IGSIM=list(), self=FALSE, add.variable=c(), selfmode="cor", model="", REESTIMATE=NULL, ...) {#
+	library(lavaan)#
+	library(reshape2)#
+	dots <- list(...)#
+	# save the function call for use in refitting; but only if no refititng is done!#
+	#if (is.null(dots[["REESTIMATE"]])) {#
+	call <- match.call(expand.dots = TRUE)#
+	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
+	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
+	var.id <- lhs#
+	actor.id <- rhs[1]#
+	partner.id <- rhs[2]#
+	group.id <- NULL#
+	if (length(rhs)>=3) {#
+		group.id <- rhs[3]#
+	} else {#
+		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
+	}#
+	fam0 <- list()#
+	for (v in c(var.id, add.variable)) {#
+		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
+		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
+	}#
+	fam <- merge.rec(fam0, by=group.id)#
+	# remove all-NA columns#
+	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
+	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
+	fam <- na.omit(fam)#
+	included <- fam[, group.id]#
+	roles <- sort(unique(data[, actor.id]))#
+	# if no model is directly provided:#
+	if (model == "") {#
+		model <- buildSRMSyntaxLatent(roles, var.id, fe=fe,err=err, IGSIM=IGSIM, self=self, add.variable=add.variable, selfmode=selfmode)#
+		model2 <- paste(model, model_add, sep="\n")#
+	} else {#
+		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
+		model2 <- model#
+	}#
+	# reestimation: exchange or add new paths#
+	if (!is.null(REESTIMATE)) {#
+		model2 <- paste(model2, "\n## Reestimation adjustments:\n")#
+		for (r in 1:length(REESTIMATE[[1]])) {#
+			if (grepl(REESTIMATE[[1]][r], model2)) {#
+				model2 <- gsub(REESTIMATE[[1]][r], REESTIMATE[[2]][r], model2)#
+			} else {#
+				model2 <- paste(model2, REESTIMATE[[2]][r], "\n")#
+			}#
+		}#
+	}#
+	#m <- sem(model=model2, data=fam, std.ov=FALSE, orthogonal=TRUE, fixed.x=FALSE, ...)#
+	m <- lavaan(model=model2, data=fam, std.ov=FALSE, orthogonal=TRUE, fixed.x=FALSE, int.ov.free = TRUE, int.lv.free = FALSE, auto.fix.first = FALSE, auto.fix.single = TRUE, auto.var = TRUE, auto.cov.lv.x = TRUE, auto.cov.y = TRUE, ...)#
+	# compute factor scores. FS = wide format, FS3 = long format#
+	FS <- data.frame(predict(m))#
+	FS[, group.id] <- included#
+	FS2 <- list()#
+	for (r in roles) {#
+		FS2[[r]] <- FS[, grepl(r, colnames(FS))]#
+		colnames(FS2[[r]]) <- substr(colnames(FS2[[r]]), 1, 1)#
+		FS2[[r]][, group.id] <- FS[, group.id]#
+	}#
+	FS3 <- ldply(FS2, rbind)#
+	colnames(FS3)[1] <- "role"#
+	res <- list(res=m, model=model2, roles=roles, var.id=var.id, fe=fe, IGSIM=IGSIM, self=self, selfmode=selfmode, scores.wide=FS, scores.long=FS3, call=call, min.p=min.p, data=fam)#
+	attr(res, "class") <- "fSRM"#
+	# --> now the basic model is estimated#
+	## Do a reestimation of negative or non-significant variance components (VCs)#
+	if (reestimate > 0) {#
+		VC <- varComp(res)[, 1:7]#
+		REP <- rbind(getGR(res)[, 1:7], getDR(res)[, 1:7])#
+		ALL <- rbind(VC, REP)#
+		if (reestimate == 1 & any(VC[, "est"] <= 0)) {#
+			VC.sel <- VC[which(T$est <= 0), ]#
+			print(paste("Following variances are < 0 ... reestimating model with these variances set to zero:", paste(VC.sel$f, collapse=", ")))#
+			RE <- list(VC.sel$f, gsub(" ~~ ", " ~~ 0*", VC.sel$f))#
+			res2 <- add.fSRM(res, RE)#
+			return(res2)#
+		}#
+		if (reestimate == 2 & (any(ALL$pvalue > min.p)  | any(VC$est <= 0))) {#
+			VC.sel <- VC[which(VC$est <= 0 | VC$pvalue > min.p), ]#
+			REP.sel <- REP[which(REP$pvalue > min.p), ]#
+			ALL.sel <- c(VC.sel$f, REP.sel$f)#
+			print(paste("Following variances are < 0 or non-significant, or non-significant covariances... reestimating model with these (co)variances set to zero:", paste(VC.sel$f, collapse=", "), paste(REP.sel$f, collapse=", ")))#
+			RE <- list(ALL.sel, gsub(" ~~ ", " ~~ 0*", ALL.sel))#
+			res2 <- add.fSRM(res, RE)#
+			return(res2)#
+		}#
+	}#
+	# no reestimation: directly return the result#
+	return(res)	#
+}#
+# rerun a fSRM model with a prespecified model syntax#
+update.fSRM <- function(x, model, ..., evaluate=TRUE) {#
+	call <- x$call#
+    if(is.null(call)) stop("need an fRSM object with call slot")#
+#
+    extras <- match.call(expand.dots = FALSE)$...#
+#
+    if(!missing(model)) {#
+        call$model <- model#
+		call$REESTIMATE <- NULL#
+	}#
+#
+    if(length(extras) > 0) {#
+        existing <- !is.na(match(names(extras), names(call)))#
+        for(a in names(extras)[existing]) call[[a]] <- extras[[a]]#
+        if(any(!existing)) {#
+            call <- c(as.list(call), extras[!existing])#
+            call <- as.call(call)#
+        }#
+    }#
+    if (evaluate) {#
+        eval(call, parent.frame())#
+    }#
+    else call#
+}#
+#
+# rerun a fSRM model with additional syntax#
+add.fSRM <- function(x, RE, ..., evaluate=TRUE) {#
+	call <- x$call#
+    if(is.null(call)) stop("need an fRSM object with call slot")#
+#
+    extras <- match.call(expand.dots = FALSE)$...#
+#
+    if(!missing(RE)) {#
+        call$REESTIMATE <- RE#
+		call$reestimate <- 0	# stop reestimation loop#
+	}#
+#
+    if(length(extras) > 0) {#
+        existing <- !is.na(match(names(extras), names(call)))#
+        for(a in names(extras)[existing]) call[[a]] <- extras[[a]]#
+        if(any(!existing)) {#
+            call <- c(as.list(call), extras[!existing])#
+            call <- as.call(call)#
+        }#
+    }#
+    if (evaluate) {#
+        eval(call, parent.frame())#
+    }#
+    else call#
+}
+pow2 <- fSRM(RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4, reestimate=1, err=1, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+' @title Build lavaan syntax for a Social Relations Model with roles ("Family SRM")#
+#'#
+#' @description#
+#' Build lavaan syntax for a Social Relations Model with roles ("Family SRM"). This function is called by the fSRM function, but can be also #
+#'#
+#' @details#
+#' None.#
+#'#
+#' @export#
+#' @param roles A vector with all role labels.#
+#' @param var.id A vector with the variable names of the DV indicators#
+#' @param fe Should the family effect be included? Requires at least 4 members per group.#
+#' @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
+#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
+#' @param self Should self-ratings be included in the analysis (if present in the data set)?#
+#' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
+#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
+#
+#' @references#
+#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196–213. doi:10.1177/1088868309353414#
+buildSRMSyntaxLatent <-#
+function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err=2, add.variable=c(), selfmode="cor", ...) {#
+#
+	dots <- list(...)#
+#
+	# helper function: paste two vectors together, but only if elements are not identical#
+	pasteNS <- function(x, y, v="", sep="_", self=FALSE) {#
+		if (v[1] == "") {#
+			res <- c()#
+			for (i in x) {#
+				for (j in y) {if (i != j | self==TRUE) {res <- c(res, paste(i,j, sep=sep))}}#
+			}#
+			return(res)#
+		} else {#
+			res <- c()#
+			for (k in v) {#
+				for (i in x) {#
+					for (j in y) {if (i != j | self==TRUE) {res <- c(res, paste(i,j,k, sep=sep))}}#
+				}#
+			}#
+			return(res)#
+		}#
+	}#
+#
+	# Family effect#
+	FE <- paste("# Family effect:\nFE =~ ", paste("1*", pasteNS(roles, roles, var.id), sep="", collapse=" + "), sep="")#
+	if (self == TRUE) {#
+		# self factors (not indicators!) should load on family effect, but with free loadings (D. Kenny, Email from June 15, 2012)#
+		for (p in roles) {FE <- paste(FE, " + ", paste("S", p, sep="", collapse=" + "), sep="")}#
+	}#
+	# for (a in add.variable) {#
+	# 		for (r in roles) {FE <- paste(FE, " + ", r, "_", r, "_", a, sep="")}#
+	# 	}#
+	# Actor effects#
+	AE <- "\n# Actor effects:\n"#
+	for (p in roles) {AE <- paste(AE, "A", p, " =~ ", paste("1*", pasteNS(p, roles, var.id), sep="", collapse=" + "), "\n", sep="")}#
+#
+	# Partner effects#
+	PE <- "# Partner effects:\n"#
+	for (t in roles) {PE <- paste(PE, "P", t, " =~ ", paste("1*", pasteNS(roles, t, var.id), sep="", collapse=" + "), "\n", sep="")}#
+#
+	# Relationship effects#
+	RE <- "# Relationship effects:\n"#
+	for (p in roles) {#
+		for (t in roles) {#
+			if (p != t) {RE <- paste(RE, "R", substr(p, 1, 1), substr(t, 1, 1), " =~ ", paste("1*", pasteNS(p, t, var.id), collapse=" + "), "\n", sep="")}#
+		}#
+	}#
+#
+	# generalized reciprocity#
+	GR <- "# Generalized reciprocity:\n"#
+	for (p in roles) {GR <- paste(GR, "A", p, " ~~ P", p, "\n", sep="")}#
+#
+	# dyadic reciprocity#
+	DR <- "# Dyadic reciprocity:\n"#
+	for (p in 1:length(roles)) {#
+		for (t in 1:length(roles)) {#
+			if ((p < t) & (roles[p] != roles[t])) {#
+				DR <- paste(DR, "R", substr(roles[p], 1, 1), substr(roles[t], 1, 1), " ~~ ", "R", substr(roles[t], 1, 1), substr(roles[p], 1, 1), "\n", sep="")#
+			}#
+		}#
+	}#
+	# method correlations: The same items are allowed to correlate#
+	# ERR1: Correlate same items BETWEEN ALL RATERS (e.g., DDA)#
+	ERR1 <- "# Method covariance: Correlations among error terms:\n"#
+	count <- 1#
+	for (v in var.id) {#
+		M <- pasteNS(roles, roles, v, self=self)#
+		for (m1 in 1:length(M)) {#
+			for (m2 in 1:length(M)) {#
+				if ((m1 < m2) & (M[m1] != M[m2])) {#
+					ERR1 <- paste(ERR1, M[m1], " ~~ MF", count, "*", M[m2], "\n", sep="")#
+					count <- count + 1#
+				}#
+			}#
+		}#
+	}#
+	# ERR2: Correlate for same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
+	# define correlations between error terms#
+	ERR2 <- "# Method covariance: Correlations among error terms:\n"#
+	count <- 1#
+	for (v in 1:length(var.id)) {#
+		for (p in 1:length(roles)) {#
+			for (t1 in 1:length(roles)) {#
+				for (t2 in 1:length(roles)) {#
+					if (self == FALSE) {#
+						if (p != t1 & p != t2 & t1 < t2) {#
+							ERR2 <- paste(ERR2, pasteNS(roles[p], roles[t1], var.id[v]), " ~~ ERR", count, "*", pasteNS(roles[p], roles[t2], var.id[v]), "\n", sep="")#
+							count <- count + 1#
+						}#
+					} else {#
+						if (t1 < t2) {#
+							ERR2 <- paste(ERR2, paste(roles[p], roles[t1], var.id[v], sep="_"), " ~~ ERR", count, "*", paste(roles[p], roles[t2], var.id[v], sep="_"), "\n", sep="")#
+							count <- count + 1#
+						}#
+					}#
+				}#
+			}#
+		}#
+	}#
+	# equality constraints#
+	count <- 1#
+	EQ <- "# Equality constraints\n"#
+	if (!is.null(dots[["c.a"]])) {#
+		for (p in roles) {#
+			EQ <- paste(EQ, "A", p, " ~~ ", dots[["c.a"]][count], "*A", p, "\n", sep="")#
+			count <- count + 1#
+		}#
+	}#
+	if (!is.null(dots[["c.p"]])) {#
+		count <- 1#
+		for (t in roles) {#
+			EQ <- paste(EQ, "P", t, " ~~ ", dots[["c.p"]][count], "*P", t, "\n", sep="")#
+			count <- count + 1#
+		}#
+	}#
+	# intergenerational similarity#
+	if (length(IGSIM) > 0) {#
+		igsim <- "# intergenerational similarity:\n"#
+		for (i in 1:length(IGSIM)) {#
+			igsim <- paste(igsim, "A", IGSIM[[i]][1], " ~~ IGSIMA", i,"*A", IGSIM[[i]][2], "\n", sep="")#
+			igsim <- paste(igsim, "P", IGSIM[[i]][1], " ~~ IGSIMP", i,"*P", IGSIM[[i]][2], "\n", sep="")#
+		}#
+	}#
+	# self-ratings: assumed similarity and self-other agreement#
+	if (self == TRUE) {#
+		SELF <- "# Build self-rating factors:\n"#
+		for (p in roles) {#
+				# TODO: hier mit 1* oder ohne? paste("1*", paste(p, p, var.id, sep="_")#
+				SELF <- paste(SELF, "S", p, " =~ ", paste("", paste(p, p, var.id, sep="_"), sep="", collapse=" + "), "\n", sep="")#
+		}#
+		if (selfmode=="cor") {#
+			SELF <- paste(SELF, "\n\n# Assumed similarity:\n")#
+			for (p in roles) {SELF <- paste(SELF, "S", p, " ~~ A", p, "\n", sep="")}#
+			SELF <- paste(SELF, "\n\n# Self-other-agreement:\n")#
+			for (p in roles) {SELF <- paste(SELF, "S", p, " ~~ P", p, "\n", sep="")}#
+		}#
+		if (selfmode=="kq") {#
+			SELF <- paste(SELF, "\n\n# Assumed similarity:\n")#
+			for (p in roles) {SELF <- paste(SELF, "S", p, " ~ A", p, "\n", sep="")}#
+			SELF <- paste(SELF, "\n\n# Self-other-agreement:\n")#
+			for (p in roles) {SELF <- paste(SELF, "S", p, " ~ P", p, "\n", sep="")}#
+		}#
+	}#
+	# any other variables?#
+	addv <- ""#
+	# for (a in add.variable) {#
+	# 	addv <- "\n\n# Add extra variables to model:\n"#
+	# 	for (r in roles) {addv <- paste(addv, a, r, " =~ ", r, "_", r, "_", a, "\n", sep="")}#
+	# 	addv <- paste(addv, "# Actor effect ~~", a, ":\n")#
+	# 	for (r in roles) {addv <- paste(addv, a, r, " ~~ A", r, "\n", sep="")}#
+	# 	addv <- paste(addv, "# Partner effect ~~", a, ":\n")#
+	# 	for (r in roles) {addv <- paste(addv, a, r, " ~~ P", r, "\n", sep="")}#
+	# 	#
+	# 	if (self == TRUE) {#
+	# 		addv <- paste(addv, "# Self rating ~~", a, ":\n")#
+	# 		for (r in roles) {addv <- paste(addv, a, r, " ~~ S", r, "\n", sep="")}#
+	# 	}#
+	# 	# for (p in roles) {#
+	# 	# 	for (t in roles) {#
+	# 	# 		if (p != t) {addv <- paste(addv, a, p, " ~~ R", substr(t, 1, 1), substr(p, 1, 1), "\n", sep="")}#
+	# 	# 	}#
+	# 	# }#
+	# 	#
+	# }#
+	## Add internal information about variable names etc.#
+	SRM <- "### lavaan syntax for family SRM\n"#
+	SRM <- paste(SRM, "### ROLES:'", paste(roles, collapse="','"), "'\n", sep="")#
+	SRM <- paste(SRM, "### VARID:'", paste(var.id, collapse="','"), "'\n", sep="")#
+	if (fe==TRUE) SRM <- paste(SRM, FE)#
+	SRM <- paste(SRM, AE, PE, RE, ifelse(err==1, ERR1, ERR2), GR, DR, EQ, sep="\n")#
+	if (length(IGSIM) > 0) {SRM <- paste(SRM, igsim, sep="\n")}#
+	if (self == TRUE) {SRM <- paste(SRM, SELF, sep="\n")}#
+	if (addv!="") SRM <- paste(SRM, addv)#
+	return(SRM)#
+}#
+#cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("A1", "A2")))
+pow2 <- fSRM(RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4, reestimate=1, err=1, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+' @title Run a Social Relations Model with roles ("Family SRM")#
+#'#
+#' @description#
+#' Run a Social Relations Model with roles ("Family SRM")#
+#'#
+#' @details#
+#' None.#
+#'#
+#' @export#
+#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
+#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
+#' @param fe Should the family effect be included? Requires at least 4 members per group.#
+#' @param model_add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
+#' @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
+#' @param reestimate 0 = no reestimation; 1 = negative variances are set to zero --> new estimation; 2 = negative and non-significant variances (with p > min.p) are set to zero --> new estimation#
+#' @param min.p Minimum p value for reestimation: variances with a p value > min.p are set to zero (see also parameter \code{reestimate})#
+#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
+#' @param self Should self-ratings be included in the analysis (if present in the data set)?#
+#' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
+#' @param model In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
+#' @param REESTIMATE Internal parameter, do not use.#
+#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
+#
+#' @references#
+#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196–213. doi:10.1177/1088868309353414#
+#
+fSRM <-#
+function(formula=NULL, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.05, IGSIM=list(), self=FALSE, add.variable=c(), selfmode="cor", model="", REESTIMATE=NULL, ...) {#
+	library(lavaan)#
+	library(reshape2)#
+	library(plyr)#
+	dots <- list(...)#
+	# save the function call for use in refitting; but only if no refititng is done!#
+	#if (is.null(dots[["REESTIMATE"]])) {#
+	call <- match.call(expand.dots = TRUE)#
+	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
+	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
+	var.id <- lhs#
+	actor.id <- rhs[1]#
+	partner.id <- rhs[2]#
+	group.id <- NULL#
+	if (length(rhs)>=3) {#
+		group.id <- rhs[3]#
+	} else {#
+		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
+	}#
+	fam0 <- list()#
+	for (v in c(var.id, add.variable)) {#
+		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
+		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
+	}#
+	fam <- merge.rec(fam0, by=group.id)#
+	# remove all-NA columns#
+	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
+	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
+	fam <- na.omit(fam)#
+	included <- fam[, group.id]#
+	roles <- sort(unique(data[, actor.id]))#
+	# if no model is directly provided:#
+	if (model == "") {#
+		model <- buildSRMSyntaxLatent(roles, var.id, fe=fe,err=err, IGSIM=IGSIM, self=self, add.variable=add.variable, selfmode=selfmode)#
+		model2 <- paste(model, model_add, sep="\n")#
+	} else {#
+		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
+		model2 <- model#
+	}#
+	# reestimation: exchange or add new paths#
+	if (!is.null(REESTIMATE)) {#
+		model2 <- paste(model2, "\n## Reestimation adjustments:\n")#
+		for (r in 1:length(REESTIMATE[[1]])) {#
+			if (grepl(REESTIMATE[[1]][r], model2)) {#
+				model2 <- gsub(REESTIMATE[[1]][r], REESTIMATE[[2]][r], model2)#
+			} else {#
+				model2 <- paste(model2, REESTIMATE[[2]][r], "\n")#
+			}#
+		}#
+	}#
+	#m <- sem(model=model2, data=fam, std.ov=FALSE, orthogonal=TRUE, fixed.x=FALSE, ...)#
+	m <- lavaan(model=model2, data=fam, std.ov=FALSE, orthogonal=TRUE, fixed.x=FALSE, int.ov.free = TRUE, int.lv.free = FALSE, auto.fix.first = FALSE, auto.fix.single = TRUE, auto.var = TRUE, auto.cov.lv.x = TRUE, auto.cov.y = TRUE, ...)#
+	# compute factor scores. FS = wide format, FS3 = long format#
+	FS <- data.frame(predict(m))#
+	FS[, group.id] <- included#
+	FS2 <- list()#
+	for (r in roles) {#
+		FS2[[r]] <- FS[, grepl(r, colnames(FS))]#
+		colnames(FS2[[r]]) <- substr(colnames(FS2[[r]]), 1, 1)#
+		FS2[[r]][, group.id] <- FS[, group.id]#
+	}#
+	FS3 <- ldply(FS2, rbind)#
+	colnames(FS3)[1] <- "role"#
+	res <- list(res=m, model=model2, roles=roles, var.id=var.id, fe=fe, IGSIM=IGSIM, self=self, selfmode=selfmode, scores.wide=FS, scores.long=FS3, call=call, min.p=min.p, data=fam)#
+	attr(res, "class") <- "fSRM"#
+	# --> now the basic model is estimated#
+	## Do a reestimation of negative or non-significant variance components (VCs)#
+	if (reestimate > 0) {#
+		VC <- varComp(res)[, 1:7]#
+		REP <- rbind(getGR(res)[, 1:7], getDR(res)[, 1:7])#
+		ALL <- rbind(VC, REP)#
+		if (reestimate == 1 & any(VC[, "est"] <= 0)) {#
+			VC.sel <- VC[which(T$est <= 0), ]#
+			print(paste("Following variances are < 0 ... reestimating model with these variances set to zero:", paste(VC.sel$f, collapse=", ")))#
+			RE <- list(VC.sel$f, gsub(" ~~ ", " ~~ 0*", VC.sel$f))#
+			res2 <- add.fSRM(res, RE)#
+			return(res2)#
+		}#
+		if (reestimate == 2 & (any(ALL$pvalue > min.p)  | any(VC$est <= 0))) {#
+			VC.sel <- VC[which(VC$est <= 0 | VC$pvalue > min.p), ]#
+			REP.sel <- REP[which(REP$pvalue > min.p), ]#
+			ALL.sel <- c(VC.sel$f, REP.sel$f)#
+			print(paste("Following variances are < 0 or non-significant, or non-significant covariances... reestimating model with these (co)variances set to zero:", paste(VC.sel$f, collapse=", "), paste(REP.sel$f, collapse=", ")))#
+			RE <- list(ALL.sel, gsub(" ~~ ", " ~~ 0*", ALL.sel))#
+			res2 <- add.fSRM(res, RE)#
+			return(res2)#
+		}#
+	}#
+	# no reestimation: directly return the result#
+	return(res)	#
+}#
+# rerun a fSRM model with a prespecified model syntax#
+update.fSRM <- function(x, model, ..., evaluate=TRUE) {#
+	call <- x$call#
+    if(is.null(call)) stop("need an fRSM object with call slot")#
+#
+    extras <- match.call(expand.dots = FALSE)$...#
+#
+    if(!missing(model)) {#
+        call$model <- model#
+		call$REESTIMATE <- NULL#
+	}#
+#
+    if(length(extras) > 0) {#
+        existing <- !is.na(match(names(extras), names(call)))#
+        for(a in names(extras)[existing]) call[[a]] <- extras[[a]]#
+        if(any(!existing)) {#
+            call <- c(as.list(call), extras[!existing])#
+            call <- as.call(call)#
+        }#
+    }#
+    if (evaluate) {#
+        eval(call, parent.frame())#
+    }#
+    else call#
+}#
+#
+# rerun a fSRM model with additional syntax#
+add.fSRM <- function(x, RE, ..., evaluate=TRUE) {#
+	call <- x$call#
+    if(is.null(call)) stop("need an fRSM object with call slot")#
+#
+    extras <- match.call(expand.dots = FALSE)$...#
+#
+    if(!missing(RE)) {#
+        call$REESTIMATE <- RE#
+		call$reestimate <- 0	# stop reestimation loop#
+	}#
+#
+    if(length(extras) > 0) {#
+        existing <- !is.na(match(names(extras), names(call)))#
+        for(a in names(extras)[existing]) call[[a]] <- extras[[a]]#
+        if(any(!existing)) {#
+            call <- c(as.list(call), extras[!existing])#
+            call <- as.call(call)#
+        }#
+    }#
+    if (evaluate) {#
+        eval(call, parent.frame())#
+    }#
+    else call#
+}
+pow2 <- fSRM(RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4, reestimate=1, err=1, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+pow2
+pow2$res
+x <- pow2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+show(x$res)
+pow2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+print.fSRM <-#
+function(x, digits=3, ...) {#
+	library(plyr)#
+	## Das Modell muss bei 4 Personen: 31 freie parameter und 47 df haben!#
+	cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$res)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$res)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$res))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x)#
+	T[, -1] <- round(T[, -1], digits)#
+	print(T)#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable.latent(x)$stand))#
+	#cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")#
+	GR <- getGR(x)#
+	cat(paste("\n\nGeneralized reciprocity (actor-partner covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n"))#
+	print(GR, row.names=TRUE)#
+	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	DR <- getDR(x)#
+	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	print(DR, row.names=TRUE)#
+	if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntragenerational similarity:\n----------------\n")#
+		igsim <- SS[grepl("IGSIM", SS$label), ]#
+		print(igsim)#
+	}#
+	if (x$self == TRUE) {#
+		AS <- data.frame()#
+		for (t in x$roles) {#
+			if (x$selfmode == "cor") {F <- paste("A", t, " ~~ ", "S", t, sep="")}#
+			if (x$selfmode == "kq") {F <- paste("S", t, " ~ ", "A", t, sep="")}#
+			AS0 <- SS[SS$f == F, ]#
+			AS0$comment <- ""#
+#
+			# get Variance of components --> if that is < min.p, correlation is not reliable!#
+			SD1 <- SS[SS$f == paste("P", t, " ~~ ", "P", t, sep=""), ]#
+			SD2 <- SS[SS$f == paste("S", t, " ~~ ", "S", t, sep=""), ]#
+			if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+			if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+#
+			if (SD1["pvalue"] > x$min.p | SD2["pvalue"] > x$min.p) {#
+				AS0$COR <- NA_real_#
+				AS0$comment <- paste("One of the variance components has p <", x$min.p)#
+			}#
+			if (AS0$pvalue > x$min.p) {#
+				AS0$COR <- NA_real_#
+				AS0$comment <- paste("Covariance estimate has p <", x$min.p)#
+			}#
+#
+			AS <- rbind(AS, AS0)#
+		}#
+		cat("\n\nAssumed similarity: Mean r =", round(meanNA(AS$COR), digits),"(out of bound estimates set to zero)\n----------------\n")#
+		print(AS,row.names=TRUE)#
+		SO <- data.frame()#
+		for (t in x$roles) {#
+			if (x$selfmode == "cor") {F <- paste("P", t, " ~~ ", "S", t, sep="")}#
+			if (x$selfmode == "kq") {F <- paste("S", t, " ~ ", "P", t, sep="")}#
+			SO0 <- SS[SS$f == F, ]#
+			SO0$comment <- ""#
+#
+			# get Variance of components --> if that is < min.p, correlation is not reliable!#
+			SD1 <- SS[SS$f == paste("P", t, " ~~ ", "P", t, sep=""), ]#
+			SD2 <- SS[SS$f == paste("S", t, " ~~ ", "S", t, sep=""), ]#
+			if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+			if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+#
+			if (SD1["pvalue"] > x$min.p | SD2["pvalue"] > x$min.p) {#
+				SO0$COR <- NA_real_#
+				SO0$comment <- paste("One of the variance components has p <", x$min.p)#
+			}#
+			if (SO0$pvalue > x$min.p) {#
+				SO0$COR <- NA_real_#
+				SO0$comment <- paste("Covariance estimate has p <", x$min.p)#
+			}#
+#
+			SO <- rbind(SO, SO0)#
+		}#
+		SO$COR <- as.numeric(SO$COR)#
+		cat("\n\nSelf-Other agreement: Mean r =", round(meanNA(SO$COR), digits),"(out of bound estimates set to NA)\n----------------\n")#
+		print(SO, row.names=TRUE)#
+	}#
+}
+pow2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+library(plyr)#
+	## Das Modell muss bei 4 Personen: 31 freie parameter und 47 df haben!#
+	cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$res)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$res)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$res))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x)#
+	T[, -1] <- round(T[, -1], digits)#
+	print(T)
+digits=3
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+library(plyr)#
+	## Das Modell muss bei 4 Personen: 31 freie parameter und 47 df haben!#
+	cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$res)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$res)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$res))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+T[, -1] <- round(T[, -1], digits)#
+	print(T)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("\n\nRelative variance decomposition:\n----------------\n")
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+print(round(percTable.latent(x)$stand))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+percTable.latent(x)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+library(plyr)#
+	eff <- parameterEstimates(x$res)#
+	SS <- standardizedSolution(x$res)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	res <- matrix(NA, ncol=6, nrow=length(x$roles)*(length(x$roles)-1))#
+	colnames(res) <- c("Family", "Perceiver Effect", "Target Effect", "Relationship Effect", "Error", "SUM")#
+	rownames(res) <- rep("", nrow(res))#
+	count <- 1#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if (x$roles[p] != x$roles[t]) {#
+				#print(paste(p, t))#
+				res[count, 1:4] <- c(#
+					ifelse(x$fe == TRUE, eff[eff$f == "FE ~~ FE", "est"], 0), #
+					eff[eff$f == paste("A", x$roles[p], " ~~ ", "A", x$roles[p], sep=""), "est"],#
+					eff[eff$f == paste("P", x$roles[t], " ~~ ", "P", x$roles[t], sep=""), "est"],#
+					eff[eff$f == paste(paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), "~~", paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep="")), "est"])#
+					# error in all indicators#
+					err <- c()#
+					for (v in x$var.id) {#
+						err <- c(err, eff[eff$f == paste(paste(x$roles[p], x$roles[t], v, sep="_"), "~~", paste(x$roles[p], x$roles[t], v, sep="_")), "est"])#
+					}#
+					res[count, 5] <- mean(err)#
+#
+				res[count, 6] <- sum(res[count, 1:5])#
+				rownames(res)[count] <- paste(x$roles[p], x$roles[t], sep="_")#
+				count <- count + 1#
+			}#
+		}#
+	}
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+res2 <- round((res[, 1:5] / res[, 6])*100)
+res2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+res2 <- data.frame(addmargins(res2, margin=1, FUN=mean))
+res2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+res2$explained <- 100-res2$Error
+res2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+percTable.latent <-#
+function(x) {#
+	library(plyr)#
+	eff <- parameterEstimates(x$res)#
+	SS <- standardizedSolution(x$res)#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	res <- matrix(NA, ncol=6, nrow=length(x$roles)*(length(x$roles)-1))#
+	colnames(res) <- c("Family", "Perceiver Effect", "Target Effect", "Relationship Effect", "Error", "SUM")#
+	rownames(res) <- rep("", nrow(res))#
+	count <- 1#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if (x$roles[p] != x$roles[t]) {#
+				#print(paste(p, t))#
+				res[count, 1:4] <- c(#
+					ifelse(x$fe == TRUE, eff[eff$f == "FE ~~ FE", "est"], 0), #
+					eff[eff$f == paste("A", x$roles[p], " ~~ ", "A", x$roles[p], sep=""), "est"],#
+					eff[eff$f == paste("P", x$roles[t], " ~~ ", "P", x$roles[t], sep=""), "est"],#
+					eff[eff$f == paste(paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), "~~", paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep="")), "est"])#
+					# error in all indicators#
+					err <- c()#
+					for (v in x$var.id) {#
+						err <- c(err, eff[eff$f == paste(paste(x$roles[p], x$roles[t], v, sep="_"), "~~", paste(x$roles[p], x$roles[t], v, sep="_")), "est"])#
+					}#
+					res[count, 5] <- mean(err)#
+#
+				res[count, 6] <- sum(res[count, 1:5])#
+				rownames(res)[count] <- paste(x$roles[p], x$roles[t], sep="_")#
+				count <- count + 1#
+			}#
+		}#
+	}#
+	res2 <- round((res[, 1:5] / res[, 6])*100)#
+	res2 <- data.frame(addmargins(res2, margin=1, FUN=mean))#
+	res2$explained <- 100-res2$Error#
+	return(list(raw=res, stand=res2))#
+}
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+percTable.latent(x)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+print(round(percTable.latent(x)$stand))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+#
+sourceDir("../R")
+pow2
+?check
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/files')
+library(devtools)
+?check
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/files')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+load_all("./")
+ls()

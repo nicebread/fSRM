@@ -2,10 +2,24 @@ Encoding: UTF-8
 Package: fSRM
 Type: Package
 Title: Social Relations Analyses with roles ("Family SRM")
-Version: 0.1
-Date: 2013-02-08
+Version: 0.1.1
+Date: 2013-03-28
 Author: Felix Schönbrodt
 Maintainer: Felix Schönbrodt <felix@nicebread.de>
-Description: The package computes Social Relations Analyses with roles ("Family SRM"), using a structural equation modeling approach.
-Depends: lavaan, plyr, reshape2
+Description: The package computes Social Relations Analyses with roles ("Family
+    SRM"), using a structural equation modeling approach.
+Depends:
+    lavaan,
+    plyr,
+    reshape2
 License: GPL (>=2)
+Collate:
+    'anova.fSRM.R'
+    'buildSRMSyntaxLatent.R'
+    'fSRM.R'
+    'helpers.R'
+    'merge.rec.R'
+    'mod.r'
+    'percTable.latent.R'
+    'print.fSRM.R'
+    'varComp.latent.R'

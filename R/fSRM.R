@@ -1,31 +1,38 @@
-te2 <- function(x, ...) {
-	#print("te2")
-	#print(x)
-	args <- list(...)
-	#print(args[["y"]])
-	#print(args[["z"]])
-}
-te2(1)
-
-te <- function(x, y=2, ...) {
-	M <- match.call()
-	#print(str(M))
-	#do.call(te2, as.list(M))
-	M[[1]] <- as.name("te2")
-	eval(M)
-}
-te(1, 3, z=4)
-
-#' @param fe Should the family effect be included?
-#' @param model_add Additional lavaan syntax pasted at the end of the generated model
+#' @title Run a Social Relations Model with roles ("Family SRM")
+#' @aliases add
+#'
+#' @description
+#' Run a Social Relations Model with roles ("Family SRM")
+#'
+#' @details
+#' A model can be rerun with additional syntax using the \code{add} function:
+#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}
+#' \code{s2 <- add(s1, "Ac ~~ Pm")}
+#'
+#' @export
+#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.
+#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.
+#' @param fe Should the family effect be included? Requires at least 4 members per group.
+#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.
 #' @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
 #' @param reestimate 0 = no reestimation; 1 = negative variances are set to zero --> new estimation; 2 = negative and non-significant variances (with p > min.p) are set to zero --> new estimation
 #' @param min.p Minimum p value for reestimation: variances with a p value > min.p are set to zero (see also parameter \code{reestimate})
+#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.
 #' @param self Should self-ratings be included in the analysis (if present in the data set)?
+#' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)
+#' @param model In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula
+#' @param REESTIMATE Internal parameter, do not use.
+#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
+#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}
+
+#' @references
+#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196–213. doi:10.1177/1088868309353414
 
 fSRM <-
-function(formula=NULL, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.05, IGSIM=list(), self=FALSE, add.variable=c(), selfmode="cor", model="", REESTIMATE=NULL, ...) {
+function(formula=NULL, data, fe=TRUE, add="", err=1, reestimate=0, min.p=.05, IGSIM=list(), self=FALSE, add.variable=c(), selfmode="cor", model="", REESTIMATE=NULL, ...) {
 	library(lavaan)
+	library(reshape2)
+	library(plyr)
 	
 	dots <- list(...)
 	
@@ -66,7 +73,7 @@ function(formula=NULL, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.
 	if (model == "") {
 		model <- buildSRMSyntaxLatent(roles, var.id, fe=fe,err=err, IGSIM=IGSIM, self=self, add.variable=add.variable, selfmode=selfmode)
 	
-		model2 <- paste(model, model_add, sep="\n")
+		model2 <- paste(model, add, sep="\n")
 	} else {
 		print("Model syntax is directly specified; skipping buildfSRMSyntax")
 		model2 <- model
@@ -110,8 +117,8 @@ function(formula=NULL, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.
 
 	## Do a reestimation of negative or non-significant variance components (VCs)
 	if (reestimate > 0) {
-		VC <- varComp(x)[, 1:7]
-		REP <- rbind(getGR(x)[, 1:7], getDR(x)[, 1:7])
+		VC <- varComp(res)[, 1:7]
+		REP <- rbind(getGR(res)[, 1:7], getDR(res)[, 1:7])
 		ALL <- rbind(VC, REP)
 		if (reestimate == 1 & any(VC[, "est"] <= 0)) {
 			
@@ -120,7 +127,7 @@ function(formula=NULL, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.
 			print(paste("Following variances are < 0 ... reestimating model with these variances set to zero:", paste(VC.sel$f, collapse=", ")))
 			
 			RE <- list(VC.sel$f, gsub(" ~~ ", " ~~ 0*", VC.sel$f))
-			res2 <- add.fSRM(res, RE)
+			res2 <- RE.fSRM(res, RE)
 			return(res2)
 		}
 		if (reestimate == 2 & (any(ALL$pvalue > min.p)  | any(VC$est <= 0))) {
@@ -131,7 +138,7 @@ function(formula=NULL, data, fe=TRUE, model_add="", err=1, reestimate=0, min.p=.
 			
 			print(paste("Following variances are < 0 or non-significant, or non-significant covariances... reestimating model with these (co)variances set to zero:", paste(VC.sel$f, collapse=", "), paste(REP.sel$f, collapse=", ")))
 			RE <- list(ALL.sel, gsub(" ~~ ", " ~~ 0*", ALL.sel))
-			res2 <- add.fSRM(res, RE)
+			res2 <- RE.fSRM(res, RE)
 			return(res2)
 		}
 	}
@@ -167,8 +174,39 @@ update.fSRM <- function(x, model, ..., evaluate=TRUE) {
     else call
 }
 
+
+
+# rerun a fSRM model with an additional model syntax
+add <- function(x, add, ..., evaluate=TRUE) {
+	call <- x$call
+    if(is.null(call)) stop("need an fRSM object with call slot")
+
+    extras <- match.call(expand.dots = FALSE)$...
+
+    if(!missing(add)) {
+        call$add <- add
+		call$REESTIMATE <- NULL
+	}
+
+    if(length(extras) > 0) {
+		print("Extra arguments detected")
+        existing <- !is.na(match(names(extras), names(call)))
+        for(a in names(extras)[existing]) call[[a]] <- extras[[a]]
+        if(any(!existing)) {
+            call <- c(as.list(call), extras[!existing])
+            call <- as.call(call)
+        }
+    }
+    if (evaluate) {
+        eval(call, parent.frame())
+    }
+    else call
+}
+
+
 # rerun a fSRM model with additional syntax
-add.fSRM <- function(x, RE, ..., evaluate=TRUE) {
+# only used internal
+RE.fSRM <- function(x, RE, ..., evaluate=TRUE) {
 	call <- x$call
     if(is.null(call)) stop("need an fRSM object with call slot")
 

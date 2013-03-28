@@ -1,3 +1,4 @@
+# get correlations between latent factors
 getCor <- function(x, ops="~~", g="") {
 	eff <- parameterEstimates(x$res)
 	SS <- standardizedSolution(x$res, type="std.all")
@@ -14,9 +15,29 @@ getCor <- function(x, ops="~~", g="") {
 	return(SS3)
 }
 
+
+# retrieve model syntax from fSRM object and copy it directly to the clipboard
+# TODO: pbcopy for Windows?
 model <- function(x){
 	cat(x$model)
 	clipboard <- pipe("pbcopy", open="w")
 	write(x$model, clipboard)
 	close(clipboard)
+}
+
+
+
+# Transform correlation to Fisher's Z
+r2Z <- function(r) {return(0.5 * log((1 + r)/(1 - r)))}
+
+# Recode  Fisher's Z to correlation
+Z2r <- function(Z) {return((exp(2*Z)-1)/(exp(2*Z)+1))}
+
+# calculate average correlation for all elemts of x which are within [-1;1].
+# I.e., out-of-bound estimates are excluded.
+meanNA <- function(x) {
+	x[is.na(x)] <- NA
+	x[x>1] <- NA
+	x[x<(-1)] <- NA
+	return(Z2r(mean(r2Z(x), na.rm=TRUE)))
 }

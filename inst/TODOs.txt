@@ -1,0 +1,3 @@
+- variable naming within fSRM object:
+	- syntax = lavaan syntax?
+	- model = lavaan object?

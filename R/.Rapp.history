@@ -1,0 +1,61 @@
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+#
+sourceDir("../R")#
+#
+# alternatively: load from GitHub#
+#library(devtools)#
+#install_github("fSRM", "felice303")#
+#library(fSRM)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+pow2 <- fSRM(RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
+load("FIRMdemo.RData")#
+head(RRdat4)#
+#
+#------------------------------------------------------------#
+# ----  Base models for target effects (without self-ratings)#
+#------------------------------------------------------------#
+#
+# POWER: 2 indicators#
+#
+pow2 <- fSRM(RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4)
+pow2
+pow2$call
+x <- pow2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+digits=3
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$res)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$res)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$res))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x)#
+	T[, -1] <- round(T[, -1], digits)#
+	print(T)#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable.latent(x)$stand))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+GR <- getGR(x)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat(paste("\n\nGeneralized reciprocity (actor-partner covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n"))#
+	print(GR, row.names=TRUE)
+pow2

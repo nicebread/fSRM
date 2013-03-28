@@ -1,19 +1,4 @@
-# Helper: Transform correlation to Fisher's Z
-r2Z <- function(r) {
-	return(0.5 * log((1 + r)/(1 - r)))
-}
 
-# Helper: REcode  Fisher's to correlation
-Z2r <- function(Z) {
-	return((exp(2*Z)-1)/(exp(2*Z)+1))
-}
-
-meanNA <- function(x) {
-	x[is.na(x)] <- NA
-	x[x>1] <- NA
-	x[x<(-1)] <- NA
-	return(Z2r(mean(r2Z(x), na.rm=TRUE)))
-}
 
 print.fSRM <-
 function(x, digits=3, ...) {
@@ -48,9 +33,6 @@ function(x, digits=3, ...) {
 
 	#cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")
 	GR <- getGR(x)
-	cat(paste("\n\nGeneralized reciprocity (actor-partner covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n"))
-	print(GR, row.names=TRUE)
-	
 	
 	
 	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")
