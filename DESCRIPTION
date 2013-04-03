@@ -2,7 +2,7 @@ Encoding: UTF-8
 Package: fSRM
 Type: Package
 Title: Social Relations Analyses with roles ("Family SRM")
-Version: 0.1.1
+Version: 0.1.2
 Date: 2013-03-28
 Author: Felix Schönbrodt
 Maintainer: Felix Schönbrodt <felix@nicebread.de>
