@@ -34,6 +34,8 @@ s1b <- fSRM(dep1 ~ actor*partner | fam, dat2, model=ind1)
 # run SRM with roles
 s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)
 
+s2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, means=TRUE, err="no")
+
 # show the results:
 s1
 

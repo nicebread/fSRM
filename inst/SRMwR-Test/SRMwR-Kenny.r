@@ -14,6 +14,8 @@ dat2$tid <- substr(dat2$variable, 2, 2)
 dat2$v <- substr(dat2$variable, 3, 6)
 
 s1 <- fSRM(value ~ pid*tid | id2, dat2)
+s2 <- fSRM(value ~ pid*tid | id2, dat2, means=TRUE)
+
 s1 <- fSRM(value ~ pid*tid | id2, dat2, IGSIM=list(c("m", "f"), c("c", "y")))
 
 # --> identical to DDA
@@ -33,5 +35,10 @@ dat2$tid <- substr(dat2$variable, 2, 2)
 dat2$v <- substr(dat2$variable, 3, 6)
 dat3 <- dcast(dat2, id2 + pid + tid ~ v, value.var="value")
 
+s1 <- fSRM(anx1 ~ pid*tid | id2, dat3, fe=FALSE, means=TRUE)
+
 s1 <- fSRM(anx1/anx2 ~ pid*tid | id2, dat3, fe=FALSE)
+s2 <- fSRM(anx1/anx2 ~ pid*tid | id2, dat3, fe=FALSE, means=TRUE)
 # --> identical to DDA
+
+s2 <- fSRM(anx1 ~ pid*tid | id2, dat3, fe=FALSE, means=TRUE)

@@ -24,12 +24,13 @@
 #' @param REESTIMATE Internal parameter, do not use.
 #' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
 #' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}
+#' @param means Should the structured means of the SRM factors be calculated?
 
 #' @references
 #' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196–213. doi:10.1177/1088868309353414
 
 fSRM <-
-function(formula=NULL, data, fe=TRUE, add="", err=1, reestimate=0, min.p=.05, IGSIM=list(), self=FALSE, add.variable=c(), selfmode="cor", model="", REESTIMATE=NULL, ...) {
+function(formula=NULL, data, fe=TRUE, add="", err="default", means=FALSE, reestimate=0, min.p=.05, IGSIM=list(), self=FALSE, add.variable=c(), selfmode="cor", model="", REESTIMATE=NULL, ...) {
 	library(lavaan)
 	library(reshape2)
 	library(plyr)
@@ -73,7 +74,7 @@ function(formula=NULL, data, fe=TRUE, add="", err=1, reestimate=0, min.p=.05, IG
 	
 	# if no model is directly provided:
 	if (model == "") {
-		model <- buildSRMSyntaxLatent(roles, var.id, fe=fe, err=err, IGSIM=IGSIM, self=self, add.variable=add.variable, selfmode=selfmode)
+		model <- buildSRMSyntaxLatent(roles, var.id, fe=fe, err=err, IGSIM=IGSIM, means=means, self=self, add.variable=add.variable, selfmode=selfmode)
 	
 		model2 <- paste(model, add, sep="\n")
 	} else {
