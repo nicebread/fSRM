@@ -1,0 +1,191 @@
+library(foreign)
+# data from book Kenny et al. p.240
+setwd("C:\\SRM\\")
+anx<-read.spss("4person.sav",to.data.frame = TRUE)
+# rename variables
+names(anx) <- c("id2", "YMOFA", "YMOC1", "YMOC2", "YFAMO", "YFAC1", "YFAC2", 
+                "YC1MO", "YC1FA", "YC1C2", "YC2MO", "YC2FA", "YC2C1")
+
+
+
+library(lavaan)
+
+#############################################################
+### FIRST OPTION: DERIVE FACTOR MEANS FROM OBSERVED MEANS ### 
+#############################################################
+
+SRM <- '
+ffam  =~ 1*YMOFA+1*YFAMO+1*YMOC1+1*YC1MO+1*YMOC2+1*YC2MO+
+         1*YFAC1+1*YC1FA+1*YFAC2+1*YC2FA+1*YC1C2+1*YC2C1
+factmo=~ 1*YMOFA+1*YMOC1+1*YMOC2; factfa=~ 1*YFAMO+1*YFAC1+1*YFAC2
+factc1=~ 1*YC1FA+1*YC1MO+1*YC1C2; factc2=~ 1*YC2MO+1*YC2C1+1*YC2FA
+fparmo=~ 1*YFAMO+1*YC1MO+1*YC2MO; fparfa=~ 1*YMOFA+1*YC1FA+1*YC2FA
+fparc1=~ 1*YFAC1+1*YMOC1+1*YC2C1; fparc2=~ 1*YMOC2+1*YC1C2+1*YFAC2
+
+ffam~~ffam
+factmo~~factmo; factfa~~factfa; factc1~~factc1; factc2~~factc2;
+fparmo~~fparmo; fparfa~~fparfa; fparc1~~fparc1; fparc2~~fparc2;
+factmo~~fparmo; factfa~~fparfa; factc1~~fparc1; factc2~~fparc2
+
+YFAMO~~YMOFA; YFAC1~~YC1FA; YFAC2~~YC2FA; YMOC1~~YC1MO; YMOC2~~YC2MO;
+YC1C2~~YC2C1
+
+# mean/intercepts observed
+YMOFA ~ MOFA*1
+YFAMO ~ FAMO*1
+YMOC1 ~ MOC1*1
+YC1MO ~ C1MO*1
+YMOC2 ~ MOC2*1
+YC2MO ~ C2MO*1
+YFAC1 ~ FAC1*1
+YC1FA ~ C1FA*1
+YFAC2 ~ FAC2*1
+YC2FA ~ C2FA*1
+YC1C2 ~ C1C2*1
+YC2C1 ~ C2C1*1
+
+# defined parameters (function of existing *labeled* parameters)
+
+fam := (MOFA+FAMO+MOC1+C1MO+MOC2+C2MO+FAC1+C1FA+FAC2+C2FA+C1C2+C2C1)/12
+
+actM   := 3 * 3/(4*2)*(MOFA+MOC1+MOC2)/3 + 
+              3/(4*2)*(FAMO+C1MO+C2MO)/3 - 3/2*fam
+
+actF   := 3 * 3/(4*2)*(FAMO+FAC1+FAC2)/3 + 
+              3/(4*2)*(MOFA+C1FA+C2FA)/3 - 3/2*fam
+
+actC1  := 3 * 3/(4*2)*(C1FA+C1MO+C1C2)/3 +
+              3/(4*2)*(FAC1+MOC1+C2C1)/3 - 3/2*fam
+
+actC2  := 3 * 3/(4*2)*(C2FA+C2MO+C2C1)/3 +
+              3/(4*2)*(FAC2+MOC2+C1C2)/3 - 3/2*fam
+
+parM   := 3 * 3/(4*2)*(FAMO+C1MO+C2MO)/3 +
+              3/(4*2)*(MOFA+MOC1+MOC2)/3 - 3/2*fam
+
+parF   := 3 * 3/(4*2)*(MOFA+C1FA+C2FA)/3 +
+              3/(4*2)*(FAMO+FAC1+FAC2)/3 - 3/2*fam
+
+parC1  := 3 * 3/(4*2)*(FAC1+MOC1+C2C1)/3 + 
+              3/(4*2)*(C1FA+C1MO+C1C2)/3 - 3/2*fam
+
+parC2  := 3 * 3/(4*2)*(FAC2+MOC2+C1C2)/3 + 
+              3/(4*2)*(C2FA+C2MO+C2C1)/3 - 3/2*fam
+
+relMF   := MOFA - actM  - parF  - fam
+relMC1  := MOC1 - actM  - parC1 - fam
+relMC2  := MOC2 - actM  - parC2 - fam
+relFM   := FAMO - actF  - parM  - fam
+relFC1  := FAC1 - actF  - parC1 - fam
+relFC2  := FAC2 - actF  - parC2 - fam
+relC1F  := C1FA - actC1 - parF  - fam
+relC1M  := C1MO - actC1 - parM  - fam
+relC1C2 := C1C2 - actC1 - parC2 - fam
+relC2F  := C2FA - actC2 - parF  - fam
+relC2M  := C2MO - actC2 - parM  - fam
+relC2C1 := C2C1 - actC2 - parC1 - fam
+
+'
+
+
+fit <- lavaan(SRM, data=anx,auto.var=T)
+summary(fit)
+
+
+#######################################################################
+### SECOND OPTION: DIRECTLY MODEL FACTOR MEANS BUT PUT CONSTRAINTS  ### 
+#######################################################################
+## NEED TO PUT THE MEAN OF THE OBSERVED EQUAL TO 0 ##
+## IN CASE OF 1 OBSERVATION/RELATIONSHIP ONE NEED TO PUT THE VARIANCE OF THE OBSERVED ALSO EQUAL TO 0 ##
+
+SRM2 <- '
+ffam  =~ 1*YMOFA+1*YFAMO+1*YMOC1+1*YC1MO+1*YMOC2+1*YC2MO+
+         1*YFAC1+1*YC1FA+1*YFAC2+1*YC2FA+1*YC1C2+1*YC2C1
+factmo=~ 1*YMOFA+1*YMOC1+1*YMOC2; factfa=~ 1*YFAMO+1*YFAC1+1*YFAC2
+factc1=~ 1*YC1FA+1*YC1MO+1*YC1C2; factc2=~ 1*YC2MO+1*YC2C1+1*YC2FA
+fparmo=~ 1*YFAMO+1*YC1MO+1*YC2MO; fparfa=~ 1*YMOFA+1*YC1FA+1*YC2FA
+fparc1=~ 1*YFAC1+1*YMOC1+1*YC2C1; fparc2=~ 1*YMOC2+1*YC1C2+1*YFAC2
+fmofa=~ 1*YMOFA;ffamo=~1*YFAMO;
+fmoc1=~ 1*YMOC1;fc1mo=~1*YC1MO;
+fmoc2=~ 1*YMOC2;fc2mo=~1*YC2MO;
+ffac1=~ 1*YFAC1;fc1fa=~1*YC1FA;
+ffac2=~ 1*YFAC2;fc2fa=~1*YC2FA;
+fc1c2=~ 1*YC1C2;fc2c1=~1*YC2C1;
+
+
+ffam~~ffam
+factmo~~factmo; factfa~~factfa; factc1~~factc1; factc2~~factc2;
+fparmo~~fparmo; fparfa~~fparfa; fparc1~~fparc1; fparc2~~fparc2;
+fmofa~~fmofa;ffamo~~ffamo;fmoc1~~fmoc1;fc1mo~~fc1mo;fmoc2~~fmoc2;fc2mo~~fc2mo;
+ffac1~~ffac1;fc1fa~~fc1fa;ffac2~~ffac2;fc2fa~~fc2fa;fc2c1~~fc2c1;fc1c2~~fc1c2;
+factmo~~fparmo; factfa~~fparfa; factc1~~fparc1; factc2~~fparc2;
+ffamo~~fmofa;fc1mo~~fmoc1;fc2mo~~fmoc2;fc1fa~~ffac1;fc2fa~~ffac2;fc1c2~~fc2c1;
+
+
+ffam   ~ fam*1
+factmo ~ actmo*1
+factfa ~ actfa*1
+factc1 ~ actc1*1
+factc2 ~ actc2*1
+fparmo ~ parmo*1
+fparfa ~ parfa*1
+fparc1 ~ parc1*1
+fparc2 ~ parc2*1
+fmofa ~ mofa*1
+ffamo ~ famo*1
+fmoc1 ~ moc1*1
+fc1mo ~ c1mo*1
+fmoc2 ~ moc2*1
+fc2mo ~ c2mo*1
+ffac1 ~ fac1*1
+fc1fa ~ c1fa*1
+ffac2 ~ fac2*1
+fc2fa ~ c2fa*1
+fc1c2 ~ c1c2*1
+fc2c1 ~ c2c1*1
+
+# mean/intercepts observed
+YMOFA ~ 0
+YFAMO ~ 0
+YMOC1 ~ 0
+YC1MO ~ 0
+YMOC2 ~ 0
+YC2MO ~ 0
+YFAC1 ~ 0
+YC1FA ~ 0
+YFAC2 ~ 0
+YC2FA ~ 0
+YC1C2 ~ 0
+YC2C1 ~ 0
+
+# variances observed
+YMOFA~~0*YMOFA
+YFAMO~~0*YFAMO
+YMOC1~~0*YMOC1
+YC1MO~~0*YC1MO
+YMOC2~~0*YMOC2
+YC2MO~~0*YC2MO
+YFAC1~~0*YFAC1
+YC1FA~~0*YC1FA
+YFAC2~~0*YFAC2
+YC2FA~~0*YC2FA
+YC1C2~~0*YC1C2
+YC2C1~~0*YC2C1
+
+# Constraints
+actmo+actfa+actc1+actc2==0
+parmo+parfa+parc1+parc2==0
+mofa+moc1+moc2==0
+famo+c1mo+c2mo==0
+famo+fac1+fac2==0
+mofa+c1fa+c2fa==0
+c1mo+c1fa+c1c2==0
+moc1+fac1+c2c1==0
+c2mo+c2fa+c2c1==0
+moc2+fac2+c1c2==0
+'
+
+
+fit2 <- lavaan(SRM2, data=anx,auto.var=TRUE)
+summary(fit2)
+
