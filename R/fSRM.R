@@ -43,6 +43,7 @@ function(formula=NULL, data, fe=TRUE, add="", err=1, reestimate=0, min.p=.05, IG
 	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]
 	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]
 	
+	# Retrieve the variable names from the formula
 	var.id <- lhs
 	actor.id <- rhs[1]
 	partner.id <- rhs[2]
@@ -53,6 +54,7 @@ function(formula=NULL, data, fe=TRUE, add="", err=1, reestimate=0, min.p=.05, IG
 		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")
 	}
 	
+	# Restructure data format from long to wide
 	fam0 <- list()
 	for (v in c(var.id, add.variable)) {
 		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)
@@ -71,7 +73,7 @@ function(formula=NULL, data, fe=TRUE, add="", err=1, reestimate=0, min.p=.05, IG
 	
 	# if no model is directly provided:
 	if (model == "") {
-		model <- buildSRMSyntaxLatent(roles, var.id, fe=fe,err=err, IGSIM=IGSIM, self=self, add.variable=add.variable, selfmode=selfmode)
+		model <- buildSRMSyntaxLatent(roles, var.id, fe=fe, err=err, IGSIM=IGSIM, self=self, add.variable=add.variable, selfmode=selfmode)
 	
 		model2 <- paste(model, add, sep="\n")
 	} else {
@@ -99,6 +101,7 @@ function(formula=NULL, data, fe=TRUE, add="", err=1, reestimate=0, min.p=.05, IG
 	FS <- data.frame(predict(m))
 	FS[, group.id] <- included
 	
+	# TODO: seems buggy
 	FS2 <- list()
 	for (r in roles) {
 		FS2[[r]] <- FS[, grepl(r, colnames(FS))]
@@ -122,7 +125,7 @@ function(formula=NULL, data, fe=TRUE, add="", err=1, reestimate=0, min.p=.05, IG
 		ALL <- rbind(VC, REP)
 		if (reestimate == 1 & any(VC[, "est"] <= 0)) {
 			
-			VC.sel <- VC[which(T$est <= 0), ]
+			VC.sel <- VC[which(VC$est <= 0), ]
 			
 			print(paste("Following variances are < 0 ... reestimating model with these variances set to zero:", paste(VC.sel$f, collapse=", ")))
 			

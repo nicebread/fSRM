@@ -7,7 +7,7 @@ function(x) {
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	res <- matrix(NA, ncol=6, nrow=length(x$roles)*(length(x$roles)-1))
 	
-	colnames(res) <- c("Family", "Perceiver Effect", "Target Effect", "Relationship Effect", "Error", "SUM")
+	colnames(res) <- c("Family", "Actor Effect", "Partner Effect", "Relationship Effect", "Error", "SUM")
 	rownames(res) <- rep("", nrow(res))
 	count <- 1
 	for (p in 1:length(x$roles)) {

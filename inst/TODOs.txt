@@ -1,3 +1,42 @@
 - variable naming within fSRM object:
 	- syntax = lavaan syntax?
 	- model = lavaan object?
+	
+- formula: + for "only main effects", * for "including relationship effects"
+- long or wide format?
+	- How to add additional non-round-robin variables to the analyses? E.g. age
+	- Converter fucntion from standard wide format to long format?
+	
+- Changes to model syntax: The user has to know how to name the variables (because in the long format they have other names than in the original wide format)
+
+- Remove the "add"-parameter from fSRM: simply provide the complete syntax in "model"
+
+- include mean effects (cf. Rasbash)
+
+- group comparisons (multi-group SEM)
+
+- case studies (additional function after fSRM has been fit)
+
+- instead of "fe=FALSE": drop = c("group", "actor", "partner") in case of three members
+
+- getCor function: show all (co)variances, even the negative ones
+
+- styling option: use "actor" instead of "A" in the syntax, etc.
+
+- resestimation: no recursion, make another function: reestimate(x)
+	- if a variance is set to zero, also remove the covariances with it
+	- ask Yves: covariance with a variance component that is set to zero? Difference: remove it or leave it in the syntax?
+	
+- single indicator: set all error variances to zero and remove all error correlations
+	- Print a note in the output: now it's relationship + ERROR variance!
+	- in relative variance table: remove "error" and "explained" column
+	
+	
+	
+HOWTO improve model fit:
+1. Set negative variances to zero.
+2. Do everything that is theoretically justified, e.g. adding IGSIM
+
+Based on MIs > 10:
+3. Set a factor loading free (i.e., don't constrain it to 1) (if a MI warrants that)
+4. Let two factors correlate without a theoretical foundation (beyond the reciprocities)

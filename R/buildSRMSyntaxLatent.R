@@ -10,7 +10,7 @@
 #' @param roles A vector with all role labels.
 #' @param var.id A vector with the variable names of the DV indicators
 #' @param fe Should the family effect be included? Requires at least 4 members per group.
-#' @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
+#' @param err Defines the type of correlations between error terms. err = "no": no error term correlations - this is the required mode for single indicators. err = "within": If multiple indicators are present, correlate same items WITHIN raters (e.g., Branje et al., 2003, Eichelsheim). err = "all": If multiple indicators are present, correlate same items BETWEEN raters (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000). 
 #' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.
 #' @param self Should self-ratings be included in the analysis (if present in the data set)?
 #' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)
@@ -22,7 +22,9 @@
 
 
 buildSRMSyntaxLatent <-
-function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err=2, add.variable=c(), selfmode="cor", ...) {
+function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err="no", add.variable=c(), selfmode="cor", ...) {
+	
+	err <- match.args(err, c("no", "all", "within"))
 
 	dots <- list(...)
 
@@ -88,49 +90,58 @@ function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err=2, add.variable
 	}
 	
 
+	# single indicator: set error variance to zero
+	if (length(var.id) == 1) {
+			M <- pasteNS(roles, roles, var.id, self=self)
+			noerror <- paste(paste0(M, " ~~ 0*", M), collapse="\n")
+	} else {
+		noerror <- ""
+	}
 	
-	# method correlations: The same items are allowed to correlate
-	# ERR1: Correlate same items BETWEEN ALL RATERS (e.g., DDA)
-	ERR1 <- "# Method covariance: Correlations among error terms:\n"
-	count <- 1
-	for (v in var.id) {
-		M <- pasteNS(roles, roles, v, self=self)
-		for (m1 in 1:length(M)) {
-			for (m2 in 1:length(M)) {
-				if ((m1 < m2) & (M[m1] != M[m2])) {
-					ERR1 <- paste(ERR1, M[m1], " ~~ MF", count, "*", M[m2], "\n", sep="")
-					count <- count + 1
+	ERR1 <- ERR2 <- ""
+	if (length(var.id) > 1) {
+			# method correlations: The same items are allowed to correlate
+		# ERR1: Correlate same items BETWEEN ALL RATERS (e.g., DDA)
+		ERR1 <- "# Method covariance: Correlations among error terms:\n"
+		count <- 1
+		for (v in var.id) {
+			M <- pasteNS(roles, roles, v, self=self)
+			for (m1 in 1:length(M)) {
+				for (m2 in 1:length(M)) {
+					if ((m1 < m2) & (M[m1] != M[m2])) {
+						ERR1 <- paste(ERR1, M[m1], " ~~ MF", count, "*", M[m2], "\n", sep="")
+						count <- count + 1
+					}
 				}
 			}
 		}
-	}
 	
-	# ERR2: Correlate for same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
-	# define correlations between error terms
-	ERR2 <- "# Method covariance: Correlations among error terms:\n"
-	count <- 1
+		# ERR2: Correlate for same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
+		# define correlations between error terms
+		ERR2 <- "# Method covariance: Correlations among error terms:\n"
+		count <- 1
 	
 	
-	for (v in 1:length(var.id)) {
-		for (p in 1:length(roles)) {
-			for (t1 in 1:length(roles)) {
-				for (t2 in 1:length(roles)) {
-					if (self == FALSE) {
-						if (p != t1 & p != t2 & t1 < t2) {
-							ERR2 <- paste(ERR2, pasteNS(roles[p], roles[t1], var.id[v]), " ~~ ERR", count, "*", pasteNS(roles[p], roles[t2], var.id[v]), "\n", sep="")
-							count <- count + 1
-						}
-					} else {
-						if (t1 < t2) {
-							ERR2 <- paste(ERR2, paste(roles[p], roles[t1], var.id[v], sep="_"), " ~~ ERR", count, "*", paste(roles[p], roles[t2], var.id[v], sep="_"), "\n", sep="")
-							count <- count + 1
+		for (v in 1:length(var.id)) {
+			for (p in 1:length(roles)) {
+				for (t1 in 1:length(roles)) {
+					for (t2 in 1:length(roles)) {
+						if (self == FALSE) {
+							if (p != t1 & p != t2 & t1 < t2) {
+								ERR2 <- paste(ERR2, pasteNS(roles[p], roles[t1], var.id[v]), " ~~ ERR", count, "*", pasteNS(roles[p], roles[t2], var.id[v]), "\n", sep="")
+								count <- count + 1
+							}
+						} else {
+							if (t1 < t2) {
+								ERR2 <- paste(ERR2, paste(roles[p], roles[t1], var.id[v], sep="_"), " ~~ ERR", count, "*", paste(roles[p], roles[t2], var.id[v], sep="_"), "\n", sep="")
+								count <- count + 1
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-	
 
 	# equality constraints
 	count <- 1
@@ -150,9 +161,9 @@ function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err=2, add.variable
 	}
 
 
-	# intergenerational similarity
+	# intragenerational similarity
 	if (length(IGSIM) > 0) {
-		igsim <- "# intergenerational similarity:\n"
+		igsim <- "# intragenerational similarity:\n"
 		for (i in 1:length(IGSIM)) {
 			igsim <- paste(igsim, "A", IGSIM[[i]][1], " ~~ IGSIMA", i,"*A", IGSIM[[i]][2], "\n", sep="")
 			igsim <- paste(igsim, "P", IGSIM[[i]][1], " ~~ IGSIMP", i,"*P", IGSIM[[i]][2], "\n", sep="")
@@ -214,7 +225,7 @@ function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err=2, add.variable
 	SRM <- paste(SRM, "### VARID:'", paste(var.id, collapse="','"), "'\n", sep="")
 	
 	if (fe==TRUE) SRM <- paste(SRM, FE)
-	SRM <- paste(SRM, AE, PE, RE, ifelse(err==1, ERR1, ERR2), GR, DR, EQ, sep="\n")
+	SRM <- paste(SRM, AE, PE, RE, noerror, ifelse(err==1, ERR1, ERR2), GR, DR, EQ, sep="\n")
 	if (length(IGSIM) > 0) {SRM <- paste(SRM, igsim, sep="\n")}
 	if (self == TRUE) {SRM <- paste(SRM, SELF, sep="\n")}
 	if (addv!="") SRM <- paste(SRM, addv)
@@ -222,4 +233,4 @@ function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err=2, add.variable
 }
 
 
-#cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("A1", "A2")))
+cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), "dep1"))

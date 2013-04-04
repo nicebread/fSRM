@@ -20,6 +20,17 @@ dat2 <- dcast(dat, fam + actor + partner ~ v, value.var="value")
 ## each row is one directed relationship with multiple measures in columns
 head(dat2)
 
+
+## ======================================================================
+## single indicator
+## ======================================================================
+
+# run SRM with roles
+s1 <- fSRM(dep1 ~ actor*partner | fam, dat2)
+
+s1b <- fSRM(dep1 ~ actor*partner | fam, dat2, model=ind1)
+
+
 # run SRM with roles
 s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)
 

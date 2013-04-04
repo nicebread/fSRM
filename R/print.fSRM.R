@@ -3,7 +3,7 @@
 print.fSRM <-
 function(x, digits=3, ...) {
 	library(plyr)
-	## Das Modell muss bei 4 Personen: 31 freie parameter und 47 df haben!
+	## The model for 4 members must have 31 free parameters and 47 df!
 	cat("----------------\n")
 	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")
 	cat("\nModel summary:\n----------------\n")
@@ -31,9 +31,9 @@ function(x, digits=3, ...) {
 	print(round(percTable.latent(x)$stand))
 	
 
-	#cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")
+	cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")
 	GR <- getGR(x)
-	
+	print(GR, row.names=TRUE)
 	
 	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")
 	DR <- getDR(x)
