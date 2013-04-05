@@ -1,8 +1,8 @@
 percTable.latent <-
 function(x) {
 	library(plyr)
-	eff <- parameterEstimates(x$res)
-	SS <- standardizedSolution(x$res)
+	eff <- parameterEstimates(x$fit)
+	SS <- standardizedSolution(x$fit)
 	
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	res <- matrix(NA, ncol=6, nrow=length(x$roles)*(length(x$roles)-1))

@@ -15,8 +15,9 @@ dat2$v <- substr(dat2$variable, 3, 6)
 
 s1 <- fSRM(value ~ pid*tid | id2, dat2)
 s2 <- fSRM(value ~ pid*tid | id2, dat2, means=TRUE)
+summary(s2$fit)
 
-s1 <- fSRM(value ~ pid*tid | id2, dat2, IGSIM=list(c("m", "f"), c("c", "y")))
+s1 <- fSRM(value ~ pid*tid | id2, dat2[-1,], IGSIM=list(c("m", "f"), c("c", "y")))
 
 # --> identical to DDA
 
@@ -25,6 +26,7 @@ s1 <- fSRM(value ~ pid*tid | id2, dat2, IGSIM=list(c("m", "f"), c("c", "y")))
 #------------------------------------------------------------
 
 library(foreign)
+library(reshape2)
 dat <- read.spss("3person.sav", to.data.frame=TRUE)
 
 # convert to long format
@@ -35,10 +37,15 @@ dat2$tid <- substr(dat2$variable, 2, 2)
 dat2$v <- substr(dat2$variable, 3, 6)
 dat3 <- dcast(dat2, id2 + pid + tid ~ v, value.var="value")
 
-s1 <- fSRM(anx1 ~ pid*tid | id2, dat3, fe=FALSE, means=TRUE)
+s1 <- fSRM(anx1 ~ pid*tid | id2, dat3, fe=FALSE)
+s2 <- fSRM(anx1 ~ pid*tid | id2, dat3, fe=FALSE, means=TRUE)
 
-s1 <- fSRM(anx1/anx2 ~ pid*tid | id2, dat3, fe=FALSE)
-s2 <- fSRM(anx1/anx2 ~ pid*tid | id2, dat3, fe=FALSE, means=TRUE)
+s3 <- fSRM(anx1/anx2 ~ pid*tid | id2, dat3, fe=FALSE)
+s4  <- fSRM(anx1/anx2 ~ pid*tid | id2, dat3, fe=TRUE, means=TRUE)
+s4b <- fSRM(anx1/anx2 ~ pid*tid | id2, dat3, model=noc)
+s4c <- fSRM(anx1/anx2 ~ pid*tid | id2, dat3, model=noc2)
+
+
 # --> identical to DDA
 
 s2 <- fSRM(anx1 ~ pid*tid | id2, dat3, fe=FALSE, means=TRUE)

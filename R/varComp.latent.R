@@ -2,7 +2,7 @@
 
 varComp <-
 function(x) {
-	eff <- as.data.frame(parameterEstimates(x$res))
+	eff <- as.data.frame(parameterEstimates(x$fit))
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	res <- matrix(NA, ncol=6, nrow=ifelse(x$fe==TRUE, 1, 0) + ifelse(x$self==TRUE, length(x$roles), 0) + length(x$roles)*2 + length(x$roles)*(length(x$roles)-1))
 	

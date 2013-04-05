@@ -7,16 +7,16 @@ function(x, digits=3, ...) {
 	cat("----------------\n")
 	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")
 	cat("\nModel summary:\n----------------\n")
-	show(x$res)
+	show(x$fit)
 	cat("\nModel Fit:\n----------------\n")
-	FIT <- fitmeasures(x$res)
+	FIT <- fitmeasures(x$fit)
 	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))
 	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))
 	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))
 	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))
 	
 	
-	eff <- as.data.frame(parameterEstimates(x$res))
+	eff <- as.data.frame(parameterEstimates(x$fit))
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	
 	# SS = standardized solution: get correlation for that

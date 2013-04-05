@@ -1,3 +1,8 @@
+## ======================================================================
+## Load Cook 2000 data set; construct three and four member data sets
+## ======================================================================
+
+
 library(foreign)
 library(reshape2)
 dat0 <- read.spss("Cook2000.sav", to.data.frame=TRUE)
@@ -14,57 +19,71 @@ dat$partner <- substr(dat$variable, 2, 2)
 dat$v <- substr(dat$variable, 3, 6)
 
 # bring both measures back into columns
-dat2 <- dcast(dat, fam + actor + partner ~ v, value.var="value")
+dat.wide <- dcast(dat, fam + actor + partner ~ v, value.var="value")
 
 ## --> now we have the correct data format for the fSRM package:
 ## each row is one directed relationship with multiple measures in columns
-head(dat2)
+
+# construct a three-person data set
+dat3 <- dat.wide[dat.wide$actor %in% c("c", "f", "m") & dat.wide$partner %in% c("c", "f", "m"), ]
+
+# four-person data set
+dat4 <- dat.wide
+
+## ======================================================================
+## Testing sequence: All types of models:
+## - single vs. multiple indicators
+## - 3 vs. 4 members
+## - calculate mean structure or not
+## ======================================================================
+
+## No mean structure, standard models
+# 3 persons, 1 indicator
+f3.1 <- fSRM(dep1 ~ actor*partner | fam, dat3, fe=FALSE)
+
+# 3 persons, 2 indicators
+f3.2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, fe=FALSE)
+
+# 4 persons, 1 indicator
+f4.1 <- fSRM(dep1 ~ actor*partner | fam, dat4)
+
+# 4 persons, 2 indicators
+f4.2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4)
+
+
+## Mean structure
+# 3 persons, 1 indicator, mean structure
+f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, fe=FALSE, means=TRUE)
+
+# Alternative approach: update the existing model with new parameters:
+f3.1.m2 <- update(f3.1, means=TRUE)
+
+# 3 persons, 2 indicators, mean structure
+f3.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, fe=FALSE, means=TRUE)
+
+# 4 persons, 1 indicator, mean structure
+f4.1.m <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
+
+# 4 persons, 2 indicators, mean structure
+f4.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4, means=TRUE)
+
 
 
 ## ======================================================================
-## single indicator
+## other parameter tests
 ## ======================================================================
-
-# run SRM with roles
-s1 <- fSRM(dep1 ~ actor*partner | fam, dat2)
-
-s1b <- fSRM(dep1 ~ actor*partner | fam, dat2, model=ind1)
-
-
-# run SRM with roles
-s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)
-
-s2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, means=TRUE, err="no")
-
-# show the results:
-s1
-
-# take a look at the lavaan output
-summary(s1$res)
-
-# show the model syntax:
-cat(s1$model)
 
 # ... add intragenerational similarity (now results are identical to Cook, 2000)
-s2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")))
-s2
+f4.ig <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4, IGSIM=list(c("m", "f"), c("c", "y")))
 
 # reestimate the model: force non-significant (co)variances to be zero
-s2b <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")), reestimate=2)
-s2b
-
 
 # compare modelfits with and without IGSIM
-anovaList(list(s1=s1, s2=s2))
 
 # compare modelfits with and without reestimation
-anovaList(list(s2=s2, s2b=s2b))
 
 
 # change the method correlations to the style of Eichelsheim et al. 2009 (only correlate error terms of one measure *within one rater*)
-s3 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2, IGSIM=list(c("m", "f"), c("c", "y")), err=2)
-s3
 
-anovaList(list(s1=s1, s2=s2, s3=s3))
 
 # --> you get better CFI, TLI, Chi2, AIC and BIC. The less restricted model s3 is NOT significantly worse than s2, so s3 would be preferable.

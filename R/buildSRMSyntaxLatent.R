@@ -219,8 +219,8 @@ function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err="default", mean
 ## ======================================================================
 ## add structured means
 # TODO: Check: should self ratings be included somehow?
-# TODO: Works for 4 members and a single indicator (values are identical with Table p. 259 in DDA). Does NOT work for multiple indicators ("initial model-implied matrix (Sigma) is not positive definite").
-# Maybe problem with 3 members and 2 indicators: very negative Rel-var.
+# TODO: Works for 4 members (values are identical with Table p. 259 in DDA).
+# Maybe problem with 3 members and > 1 indicators: very negative Rel-var.
 ## ======================================================================
 
 SM <- ""
@@ -245,24 +245,40 @@ if (means==TRUE) {
 	SM <- paste(SM, "\n\n# set means of observed variables to zero\n")
 	SM <- paste(SM, paste(pasteNS(roles, roles, var.id), "~ 0", collapse="\n"))
 	
-	if (length(var.id) > 1 & err != "no") {
-		SM <- paste(SM, "\n\n# set variances of observed variables to zero\n")
-		SM <- paste(SM, paste(pasteNS(roles, roles, var.id), "~~ 0*", pasteNS(roles, roles, var.id), collapse="\n"))
-	}
-	
 	SM <- paste(SM, "\n\n# set constraints on means for identifiability\n")
 	
-	SM <- paste(SM, paste(paste(SM.prefix, style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
-	SM <- paste(SM, paste(paste(SM.prefix, style$partner, ".", roles, sep="", collapse=" + "), "== 0\n"))
-	
-	for (p in roles) {
-		SM <- paste(SM, paste(paste(SM.prefix, style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
-	}
-	for (p in roles) {
-		SM <- paste(SM, paste(paste(SM.prefix, style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
-	}
+	 SM <- paste(SM, paste(paste(SM.prefix, style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	 SM <- paste(SM, paste(paste(SM.prefix, style$partner, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	 
+	 for (p in roles) {
+	 	SM <- paste(SM, paste(paste(SM.prefix, style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
+	 }
+	 for (p in roles) {
+	 	SM <- paste(SM, paste(paste(SM.prefix, style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
+	 }
 	
 }
+
+
+## ======================================================================
+## Label variances for easy retrieval
+## ======================================================================
+
+LAB <- "# Define labels for variances\n"
+VAR.prefix <- ".VAR."
+if (fe == TRUE) {
+	LAB <- paste(LAB, paste(style$familyeffect, " ~ ", VAR.prefix, style$familyeffect, "*", style$familyeffect, "\n", sep=""))
+}
+
+for (p in roles) {LAB <- paste(LAB, style$actor, ".", p, " ~ ", VAR.prefix, style$actor, ".", p, "*", style$actor, ".", p, "\n", sep="")}
+for (p in roles) {LAB <- paste(LAB, style$partner, ".", p, " ~ ", VAR.prefix, style$partner, ".", p, "*", style$partner, ".", p, "\n", sep="")}
+
+for (p in roles) {
+	for (t in roles) {
+		if (p != t) {LAB <- paste(LAB, style$relationship, ".", p, ".", t, " ~ ", VAR.prefix, style$relationship, ".", p, ".", t, "*", style$relationship, ".", p, ".", t, "\n", sep="")}
+	}
+}
+
 	
 ## ======================================================================
 ## Put everything together
@@ -283,8 +299,7 @@ if (means==TRUE) {
 }
 
 
-cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("dep1", "dep2"), means=TRUE))
-
-cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("dep1", "dep2"), means=TRUE, err="no"))
-
-cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))
+# cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("dep1", "dep2")))
+# cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("dep1", "dep2"), means=TRUE, err="no"))
+# cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))
+# cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))

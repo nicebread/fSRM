@@ -3,7 +3,7 @@
 anovaList <- function(modellist) {
 	# a0: list without NULLs
 	
-	mlist2 <- sapply(modellist, function(x) return(x$res))
+	mlist2 <- sapply(modellist, function(x) return(x$fit))
 	
 	mods <- mlist2[!sapply(mlist2, function(x) is.null(x))]
 	mods <- mods[!sapply(mods, function(x) !inspect(x, "converged"))]

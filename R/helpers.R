@@ -1,7 +1,7 @@
 # get correlations between latent factors
 getCor <- function(x, ops="~~", g="") {
-	eff <- parameterEstimates(x$res)
-	SS <- standardizedSolution(x$res, type="std.all")
+	eff <- parameterEstimates(x$fit)
+	SS <- standardizedSolution(x$fit, type="std.all")
 	#sel <- SS$op %in% ops & !is.na(SS$est.std) & SS$est.std != 0 & SS$est.std < .99999 & !grepl(paste(x$var.id, collapse="|"), SS$lhs)
 	sel <- SS$op %in% ops & !is.na(SS$est) & SS$est.std != 0 & !grepl(paste(x$var.id, collapse="|"), SS$rhs)
 	if (g != "") {
@@ -19,9 +19,9 @@ getCor <- function(x, ops="~~", g="") {
 # retrieve model syntax from fSRM object and copy it directly to the clipboard
 # TODO: pbcopy for Windows?
 model <- function(x){
-	cat(x$model)
+	cat(x$syntax)
 	clipboard <- pipe("pbcopy", open="w")
-	write(x$model, clipboard)
+	write(x$syntax, clipboard)
 	close(clipboard)
 }
 
@@ -41,3 +41,6 @@ meanNA <- function(x) {
 	x[x<(-1)] <- NA
 	return(Z2r(mean(r2Z(x), na.rm=TRUE)))
 }
+
+
+
