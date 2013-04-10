@@ -52,14 +52,14 @@ f4.2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4)
 
 
 ## Mean structure
-# 3 persons, 1 indicator, mean structure
-f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, fe=FALSE, means=TRUE)
+# 3 persons, 1 indicator, mean structure: family effect is allowed but automatically constrained to zero
+f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, means=TRUE)
 
 # Alternative approach: update the existing model with new parameters:
 f3.1.m2 <- update(f3.1, means=TRUE)
 
 # 3 persons, 2 indicators, mean structure
-f3.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, fe=FALSE, means=TRUE)
+f3.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, means=TRUE)
 
 # 4 persons, 1 indicator, mean structure
 f4.1.m <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
@@ -75,6 +75,12 @@ f4.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4, means=TRUE)
 
 # ... add intragenerational similarity (now results are identical to Cook, 2000)
 f4.ig <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4, IGSIM=list(c("m", "f"), c("c", "y")))
+
+# print modification indeces
+mod(f3.1)
+
+# predict new cases
+predict(f4.1, dat4[dat4$fam==1, ])
 
 # reestimate the model: force non-significant (co)variances to be zero
 

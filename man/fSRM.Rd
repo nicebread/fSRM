@@ -1,12 +1,13 @@
 \name{fSRM}
-\alias{add}
 \alias{fSRM}
+\alias{predict,}
+\alias{update}
 \title{Run a Social Relations Model with roles ("Family SRM")}
 \usage{
-  fSRM(formula = NULL, data, fe = TRUE, add = "", err = 1,
-    reestimate = 0, min.p = 0.05, IGSIM = list(),
+  fSRM(formula = NULL, data, fe = TRUE, add = "",
+    err = "default", means = FALSE, IGSIM = list(),
     self = FALSE, add.variable = c(), selfmode = "cor",
-    model = "", REESTIMATE = NULL, ...)
+    syntax = "", ...)
 }
 \arguments{
   \item{formula}{A formula that defines the variable names.
@@ -32,15 +33,6 @@
   err = 2: Correlate same items WITHIN RATERS (e.g., Branje
   et al., 2003, Eichelsheim)}
 
-  \item{reestimate}{0 = no reestimation; 1 = negative
-  variances are set to zero --> new estimation; 2 =
-  negative and non-significant variances (with p > min.p)
-  are set to zero --> new estimation}
-
-  \item{min.p}{Minimum p value for reestimation: variances
-  with a p value > min.p are set to zero (see also
-  parameter \code{reestimate})}
-
   \item{IGSIM}{Define intragenerational similarity
   correlations. Must be a list where the levels of actor.id
   and partner.id are combined, e.g.:
@@ -57,18 +49,19 @@
   REFERENCE), if \code{selfmode="kq"} the k and q paths are
   calculated (see Kenny & West, 2010)}
 
-  \item{model}{In that variable the user can directly
+  \item{syntax}{In that variable the user can directly
   provide a lavaan model syntax. Then no automatical model
   syntax is generated; it is important that the variable
   nakes in the formula}
-
-  \item{REESTIMATE}{Internal parameter, do not use.}
 
   \item{add.variable}{Not yet fully implemented: Add
   external variables to the model syntax.}
 
   \item{...}{Additional arguments passed to the \code{sem}
   function of \code{lavaan}}
+
+  \item{means}{Should the structured means of the SRM
+  factors be calculated?}
 }
 \description{
   Run a Social Relations Model with roles ("Family SRM")
@@ -82,7 +75,7 @@
 \references{
   Kenny, D. A., & West, T. V. (2010). Similarity and
   Agreement in Self-and Other Perception: A Meta-Analysis.
-  Personality and Social Psychology Review, 14(2), 196–213.
+  Personality and Social Psychology Review, 14(2), 196-213.
   doi:10.1177/1088868309353414
 }
 

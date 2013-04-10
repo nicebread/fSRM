@@ -24,7 +24,7 @@
 #' @param means Should the structured means of the SRM factors be calculated?
 
 #' @references
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196–213. doi:10.1177/1088868309353414
+#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
 fSRM <-
 function(formula=NULL, data, fe=TRUE, add="", err="default", means=FALSE, IGSIM=list(), self=FALSE, add.variable=c(), selfmode="cor", syntax="", ...) {
@@ -61,6 +61,7 @@ function(formula=NULL, data, fe=TRUE, add="", err="default", means=FALSE, IGSIM=
 	}
 	
 	fam <- merge.rec(fam0, by=group.id)
+	print(str(fam))
 	
 	# remove all-NA columns
 	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))
@@ -71,9 +72,13 @@ function(formula=NULL, data, fe=TRUE, add="", err="default", means=FALSE, IGSIM=
 	roles <- sort(unique(data[, actor.id]))
 	
 	# Do some sanity checks
-	if (length(roles) == 3 & fe ==TRUE) {warning("Data set with 3-member-groups detected - model probably is not identified. Maybe you should remove the family effect (fe = FALSE)?")}
+	if (length(roles) == 3 & fe == TRUE & means == FALSE) {warning("Data set with 3-member-groups detected - model probably is not identified. Maybe you should remove the family effect (fe = FALSE) or some of the reciprocities?")}
 	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {
 		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")
+	}
+	if (means == TRUE && fe == FALSE) {
+		warning("If mean structure for a three person family is requested, the family effect is allowed, but its variance constrained to zero.")
+		fe <- TRUE
 	}
 	
 	
@@ -102,6 +107,7 @@ function(formula=NULL, data, fe=TRUE, add="", err="default", means=FALSE, IGSIM=
 		
 	res <- list(
 		fit		= m,
+		SS		= standardizedSolution(m, type="std.all"),
 		syntax	= syntax,
 		roles	= roles,
 		actor.id 	= actor.id,
@@ -109,11 +115,11 @@ function(formula=NULL, data, fe=TRUE, add="", err="default", means=FALSE, IGSIM=
 		group.id 	= group.id,
 		var.id	= var.id,
 		fe		= fe,
+		means	= means,
 		IGSIM	= IGSIM,
 		self	= self,
 		selfmode	= selfmode,
 		call	= call,
-		min.p	= min.p,
 		data	= fam)
 	
 	attr(res, "class") <- "fSRM"

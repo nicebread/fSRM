@@ -1,7 +1,7 @@
-- variable naming within fSRM object:
-	- syntax = lavaan syntax?
-	- model = lavaan object?
-	
+- include self-ratings
+
+- include external variables (--> what data format would be suitable?)
+
 - formula: + for "only main effects", * for "including relationship effects"
 - long or wide format?
 	- How to add additional non-round-robin variables to the analyses? E.g. age
@@ -11,17 +11,11 @@
 
 - Remove the "add"-parameter from fSRM: simply provide the complete syntax in "model"
 
-- include mean effects (cf. Rasbash)
-
 - group comparisons (multi-group SEM)
-
-- case studies (additional function after fSRM has been fit)
 
 - instead of "fe=FALSE": drop = c("group", "actor", "partner") in case of three members
 
 - getCor function: show all (co)variances, even the negative ones
-
-- styling option: use "actor" instead of "A" in the syntax, etc.
 
 - resestimation: no recursion, make another function: reestimate(x)
 	- if a variance is set to zero, also remove the covariances with it
@@ -31,7 +25,23 @@
 	- Print a note in the output: now it's relationship + ERROR variance!
 	- in relative variance table: remove "error" and "explained" column
 	
-	
+
+David Kenny remarks:
+
+Mean structure
+------------------------
+DAK: So one ends up forcing the actor means to sum to zero, the partner means to sum to zero, and the relationship means to sum to zero by row and column (i.e., actor and partner).   This is an "ANOVA" parameterization.  One could do others.  Ideally, it would be nice if the user had some control on this.  Another plan would be have one person be the key person and the mean would be moved into that person's actor (or partner) effect.  It would be nice too if you could separately test if each of these sets of means were zero. (Easy for me to ask!)
+
+DAK:  Bill would know more about prior papers (as he has done most of them).  Perhaps as options you have no means (or no model on the means) and means, all set to one or one of them to one and the other free.
+
+DAK:  As you say the key has to do with whether the mean parameters are just-identified or not.  If they are over-identified, then the variances will change.   One can (and maybe should) test if the contraints do not worsen the fit and so do not distort the variances. 
+
+DAK: I think this depends some on how you implemented replications.  One way is all the loadings are fixed to one (I think this is what Bill often does).  This approach has 12 mean parameters and 24 means, so the means add 12 df.  One may in this situation add an additional parameter that the means for one of the two measures is different for one of the two measures.
+
+DAK:  An alternative plan would be to fix all the loading to 1 for one indicator, but free to the same value for the other indicator.  This would add just one df, so the means would have 11 df.  
+
+
+
 	
 HOWTO improve model fit:
 1. Set negative variances to zero.

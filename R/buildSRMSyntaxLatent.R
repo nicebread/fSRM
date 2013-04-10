@@ -19,7 +19,7 @@
 #' @param means Should the structured means of the SRM factors be calculated?
 
 #' @references
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196–213. doi:10.1177/1088868309353414
+#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
 
 buildSRMSyntaxLatent <-
@@ -170,28 +170,28 @@ function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err="default", mean
 	
 	
 	# self-ratings: assumed similarity and self-other agreement
-	# if (self == TRUE) {
-	# 	SELF <- "# Build self-rating factors:\n"
-	# 	for (p in roles) {
-	# 			# TODO: hier mit 1* oder ohne? paste("1*", paste(p, p, var.id, sep="_")
-	# 			SELF <- paste(SELF, "S", p, " =~ ", paste("", paste(p, p, var.id, sep="_"), sep="", collapse=" + "), "\n", sep="")
-	# 	}
-	# 	
-	# 	if (selfmode=="cor") {
-	# 		SELF <- paste(SELF, "\n\n# Assumed similarity:\n")
-	# 		for (p in roles) {SELF <- paste(SELF, "S", p, " ~~ A", p, "\n", sep="")}
-	# 	
-	# 		SELF <- paste(SELF, "\n\n# Self-other-agreement:\n")
-	# 		for (p in roles) {SELF <- paste(SELF, "S", p, " ~~ P", p, "\n", sep="")}
-	# 	}
-	# 	if (selfmode=="kq") {
-	# 		SELF <- paste(SELF, "\n\n# Assumed similarity:\n")
-	# 		for (p in roles) {SELF <- paste(SELF, "S", p, " ~ A", p, "\n", sep="")}
-	# 	
-	# 		SELF <- paste(SELF, "\n\n# Self-other-agreement:\n")
-	# 		for (p in roles) {SELF <- paste(SELF, "S", p, " ~ P", p, "\n", sep="")}
-	# 	}
-	# }
+	if (self == TRUE) {
+		SELF <- "# Build self-rating factors:\n"
+		for (p in roles) {
+				# TODO: hier mit 1* oder ohne? paste("1*", paste(p, p, var.id, sep="_")
+				SELF <- paste(SELF, style$self, ".", p, " =~ ", paste("", paste(p, p, var.id, sep="_"), sep="", collapse=" + "), "\n", sep="")
+		}
+		
+		if (selfmode=="cor") {
+			SELF <- paste(SELF, "\n\n# Assumed similarity:\n")
+			for (p in roles) {SELF <- paste(SELF, style$self, ".", p, " ~~ ", style$actor, ".", p, "\n", sep="")}
+		
+			SELF <- paste(SELF, "\n\n# Self-other-agreement:\n")
+			for (p in roles) {SELF <- paste(SELF, style$self, ".", p, " ~~ ", style$partner, ".", p, "\n", sep="")}
+		}
+		if (selfmode=="kq") {
+			SELF <- paste(SELF, "\n\n# Assumed similarity:\n")
+			for (p in roles) {SELF <- paste(SELF, style$self, ".", p, " ~ ", style$actor, ".", p, "\n", sep="")}
+		
+			SELF <- paste(SELF, "\n\n# Self-other-agreement:\n")
+			for (p in roles) {SELF <- paste(SELF, style$self, ".", p, " ~ ", style$partner, ".", p, "\n", sep="")}
+		}
+	}
 
 
 	# any other variables?
@@ -225,7 +225,7 @@ function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err="default", mean
 
 SM <- ""
 if (means==TRUE) {
-	SM.prefix <- "x"
+	SM.prefix <- ".means."
 	SM <- ""
 	SM <- "\n## Compute structured means\n# Define labels for subsequent constraints\n"
 	
@@ -240,6 +240,11 @@ if (means==TRUE) {
 		for (t in roles) {
 			if (p != t) {SM <- paste(SM, style$relationship, ".", p, ".", t, " ~ ", SM.prefix, style$relationship, ".", p, ".", t, "*1\n", sep="")}
 		}
+	}
+	
+	if (length(roles)==3) {
+		SM <- paste(SM, "\n\n# For three person families: set variance of family effect to zero\n")
+		SM <- paste(SM, style$familyeffect, "~~ 0*", style$familyeffect)
 	}
 	
 	SM <- paste(SM, "\n\n# set means of observed variables to zero\n")
@@ -303,3 +308,5 @@ for (p in roles) {
 # cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("dep1", "dep2"), means=TRUE, err="no"))
 # cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))
 # cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))
+
+cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1"), fe=FALSE, self=TRUE))

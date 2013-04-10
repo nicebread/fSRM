@@ -2,12 +2,14 @@ Encoding: UTF-8
 Package: fSRM
 Type: Package
 Title: Social Relations Analyses with roles ("Family SRM")
-Version: 0.1.3
-Date: 2013-03-28
+Version: 0.1.4
+Date: 2013-04-10
 Author: Felix Schönbrodt, Lara Stas, Tom Loeys
 Maintainer: Felix Schönbrodt <felix@nicebread.de>
 Description: The package computes Social Relations Analysis with roles ("Family
-    SRM"), using a structural equation modeling approach.
+    SRM"), using a structural equation modeling approach. Groups ranging from
+    three members up to an unlimited number of members are supported and the
+    mean structure can be computed.
 Depends:
     lavaan,
     plyr,
@@ -20,6 +22,7 @@ Collate:
     'helpers.R'
     'merge.rec.R'
     'mod.r'
-    'percTable.latent.R'
     'print.fSRM.R'
-    'varComp.latent.R'
+    '0-skinning.R'
+    'percTable.R'
+    'varComp.R'

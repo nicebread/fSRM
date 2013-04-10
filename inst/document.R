@@ -1,9 +1,9 @@
 # check for non-ASCII characters
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")
 library(tools)
-for (nm in list.files(".", pattern="\\.[r|R]", recursive=TRUE)) {
+for (nm in list.files("R/.", pattern="\\.[r|R]", recursive=FALSE)) {
 	cat(nm,":")    
-   showNonASCIIfile(nm)    
+   showNonASCIIfile(paste0("R/",nm))
 	cat("\n")
 }
 

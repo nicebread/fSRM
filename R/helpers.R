@@ -1,11 +1,11 @@
 # get correlations between latent factors
 getCor <- function(x, ops="~~", g="") {
 	eff <- parameterEstimates(x$fit)
-	SS <- standardizedSolution(x$fit, type="std.all")
+	SS <- x$SS
 	#sel <- SS$op %in% ops & !is.na(SS$est.std) & SS$est.std != 0 & SS$est.std < .99999 & !grepl(paste(x$var.id, collapse="|"), SS$lhs)
-	sel <- SS$op %in% ops & !is.na(SS$est) & SS$est.std != 0 & !grepl(paste(x$var.id, collapse="|"), SS$rhs)
+	sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs)
 	if (g != "") {
-		sel <- SS$op %in% ops & !is.na(SS$est) & SS$est.std != 0 & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))
+		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))
 	}
 	SS2 <- cbind(eff[sel, ], COR=SS[sel, "est.std"])
 	

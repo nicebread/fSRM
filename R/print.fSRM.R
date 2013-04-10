@@ -3,6 +3,7 @@
 print.fSRM <-
 function(x, digits=3, ...) {
 	library(plyr)
+	if (is.null(x$SS)) {x$SS <- standardizedSolution(x$fit, type="std.all")}
 	## The model for 4 members must have 31 free parameters and 47 df!
 	cat("----------------\n")
 	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")
@@ -28,7 +29,7 @@ function(x, digits=3, ...) {
 	print(T)
 	
 	cat("\n\nRelative variance decomposition:\n----------------\n")
-	print(round(percTable.latent(x)$stand))
+	print(round(percTable(x)$stand))
 	
 
 	cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")
@@ -42,8 +43,7 @@ function(x, digits=3, ...) {
 	
 	if (length(x$IGSIM) > 0) {
 		cat("\n\nIntragenerational similarity:\n----------------\n")
-		igsim <- SS[grepl("IGSIM", SS$label), ]
-		
+		igsim <- SS[grepl("IGSIM", SS$label), ]		
 		print(igsim)
 	}
 	
@@ -51,15 +51,15 @@ function(x, digits=3, ...) {
 		AS <- data.frame()
 		for (t in x$roles) {
 			
-			if (x$selfmode == "cor") {F <- paste("A", t, " ~~ ", "S", t, sep="")}
-			if (x$selfmode == "kq") {F <- paste("S", t, " ~ ", "A", t, sep="")}
+			if (x$selfmode == "cor") {F <- paste(style$actor, ".", t, " ~~ ", style$self, ".", t, sep="")}
+			if (x$selfmode == "kq") {F <- paste(style$self, ".", t, " ~ ", style$actor, ".", t, sep="")}
 						
 			AS0 <- SS[SS$f == F, ]
 			AS0$comment <- ""
 
 			# get Variance of components --> if that is < min.p, correlation is not reliable!
-			SD1 <- SS[SS$f == paste("P", t, " ~~ ", "P", t, sep=""), ]
-			SD2 <- SS[SS$f == paste("S", t, " ~~ ", "S", t, sep=""), ]
+			SD1 <- SS[SS$f == paste(style$partner, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]
+			SD2 <- SS[SS$f == paste(style$self, ".", t, " ~~ ", style$self, ".", t, sep=""), ]
 			if (is.na(SD1$pvalue)) SD1$pvalue <- 1
 			if (is.na(SD2$pvalue)) SD2$pvalue <- 1
 
@@ -80,15 +80,15 @@ function(x, digits=3, ...) {
 		
 		SO <- data.frame()
 		for (t in x$roles) {
-			if (x$selfmode == "cor") {F <- paste("P", t, " ~~ ", "S", t, sep="")}
-			if (x$selfmode == "kq") {F <- paste("S", t, " ~ ", "P", t, sep="")}
+			if (x$selfmode == "cor") {F <- paste(style$partner, ".", t, " ~~ ", style$self, ".", t, sep="")}
+			if (x$selfmode == "kq") {F <- paste(style$self, ".", t, " ~ ", style$partner, ".", t, sep="")}
 						
 			SO0 <- SS[SS$f == F, ]
 			SO0$comment <- ""
 
 			# get Variance of components --> if that is < min.p, correlation is not reliable!
-			SD1 <- SS[SS$f == paste("P", t, " ~~ ", "P", t, sep=""), ]
-			SD2 <- SS[SS$f == paste("S", t, " ~~ ", "S", t, sep=""), ]
+			SD1 <- SS[SS$f == paste(style$partner, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]
+			SD2 <- SS[SS$f == paste(style$self, ".", t, " ~~ ", style$self, ".", t, sep=""), ]
 			if (is.na(SD1$pvalue)) SD1$pvalue <- 1
 			if (is.na(SD2$pvalue)) SD2$pvalue <- 1
 
@@ -108,4 +108,14 @@ function(x, digits=3, ...) {
 		cat("\n\nSelf-Other agreement: Mean r =", round(meanNA(SO$COR), digits),"(out of bound estimates set to NA)\n----------------\n")
 		print(SO, row.names=TRUE)
 	}
+	
+	if (x$means == TRUE) {
+		cat("\n\nMean structure\n----------------\n")
+		MS <- eff[grepl(".means.", eff$label, fixed=TRUE), c(1, 5:10)]
+		colnames(MS)[1] <- "factor"
+		MS[, -1] <- round(MS[, -1], digits)
+		rownames(MS) <- NULL
+		print(MS)
+	}
+	
 }

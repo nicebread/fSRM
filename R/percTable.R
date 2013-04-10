@@ -1,8 +1,8 @@
-percTable.latent <-
+percTable <-
 function(x) {
 	library(plyr)
 	eff <- parameterEstimates(x$fit)
-	SS <- standardizedSolution(x$fit)
+	SS <- x$SS
 	
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	res <- matrix(NA, ncol=6, nrow=length(x$roles)*(length(x$roles)-1))
@@ -16,9 +16,9 @@ function(x) {
 				#print(paste(p, t))
 				res[count, 1:4] <- c(
 					ifelse(x$fe == TRUE, eff[eff$f == "FE ~~ FE", "est"], 0), 
-					eff[eff$f == paste("A", x$roles[p], " ~~ ", "A", x$roles[p], sep=""), "est"],
-					eff[eff$f == paste("P", x$roles[t], " ~~ ", "P", x$roles[t], sep=""), "est"],
-					eff[eff$f == paste(paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), "~~", paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep="")), "est"])
+					eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), "est"],
+					eff[eff$f == paste(style$partner, ".", x$roles[t], " ~~ ", style$partner, ".", x$roles[t], sep=""), "est"],
+					eff[eff$f == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), sep=" "), "est"])
 					
 					# error in all indicators
 					err <- c()

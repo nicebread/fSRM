@@ -3,8 +3,9 @@
 \title{Build lavaan syntax for a Social Relations Model with roles ("Family SRM")}
 \usage{
   buildSRMSyntaxLatent(roles, var.id, self = FALSE,
-    IGSIM = list(), fe = TRUE, err = 2, add.variable = c(),
-    selfmode = "cor", ...)
+    IGSIM = list(), fe = TRUE, err = "default",
+    means = FALSE, add.variable = c(), selfmode = "cor",
+    ...)
 }
 \arguments{
   \item{roles}{A vector with all role labels.}
@@ -16,10 +17,15 @@
   at least 4 members per group.}
 
   \item{err}{Defines the type of correlations between error
-  terms. err = 1: Correlate same items BETWEEN ALL RATERS
-  (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000);
-  err = 2: Correlate same items WITHIN RATERS (e.g., Branje
-  et al., 2003, Eichelsheim)}
+  terms. err = "no": no error term correlations - this is
+  the required mode for single indicators. err = "within":
+  If multiple indicators are present, correlate same items
+  WITHIN raters (e.g., Branje et al., 2003, Eichelsheim).
+  err = "all": If multiple indicators are present,
+  correlate same items BETWEEN raters (e.g., Dyadic Data
+  Analysis, Kenny, Kashy, & Cook, 2000). err = "default":
+  Set err to "no" for single indicators and to "all" for
+  multiple indicators.}
 
   \item{IGSIM}{Define intragenerational similarity
   correlations. Must be a list where the levels of actor.id
@@ -41,6 +47,9 @@
   external variables to the model syntax.}
 
   \item{...}{Additional arguments (not documented yet)}
+
+  \item{means}{Should the structured means of the SRM
+  factors be calculated?}
 }
 \description{
   Build lavaan syntax for a Social Relations Model with
@@ -53,7 +62,7 @@
 \references{
   Kenny, D. A., & West, T. V. (2010). Similarity and
   Agreement in Self-and Other Perception: A Meta-Analysis.
-  Personality and Social Psychology Review, 14(2), 196–213.
+  Personality and Social Psychology Review, 14(2), 196-213.
   doi:10.1177/1088868309353414
 }
 
