@@ -14,7 +14,7 @@ sourceDir("../R")#
 #install_github("fSRM", "felice303")#
 #library(fSRM)
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-load("FIRM00.RData")#
+load("FIRMdemo.RData")#
 #
 # prepare data for fSRM analysis#
 RRdat2 <- merge(dat00[, c("pid", "sex", "age", "role")], RRdat, by="pid")#
