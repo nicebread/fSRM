@@ -3,3 +3,6 @@
 
 # Example code in package build process
 *-Ex.R
+
+# SPSS data sets should not be uploaded to Github
+*.sav

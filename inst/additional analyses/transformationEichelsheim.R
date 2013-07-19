@@ -4,8 +4,9 @@
 library(lavaan) 
 library(Hmisc)
 library(foreign)
-setwd("H:/home/Doctoraat/r-package/dataset Branje")
-Branje <- spss.get("H:/home/Doctoraat/r-package/dataset Branje/Branje.sav", use.value.labels=T)
+
+# Better point to a relative path in the package directory
+Branje <- spss.get("datasets/Branje.sav", use.value.labels=T)
 attach(Branje)
 BranjeSRM <- cbind(group, nrinegmv1, nrinegmv2, nrinegms1, nrinegms2, nrinegma1, nrinegma2, 
                    nrinegvm1, nrinegvm2, nrinegvs1, nrinegvs2, nrinegva1, nrinegva2, nrinegsm1, nrinegsm2,
@@ -14,12 +15,11 @@ BranjeSRM <- cbind(group, nrinegmv1, nrinegmv2, nrinegms1, nrinegms2, nrinegma1,
               # group: 1 = above norm, 2 = below norm
 detach(Branje)
 BranjeSRM <- as.data.frame(BranjeSRM)
-names(BranjeSRM) <- c('group', 'MOFAa', 'MOFAb', 'MOC1a', 'MOC1b', 'MOC2a', 'MOC2b', 'FAMOa', 'FAMOb','FAC1a','FAC1b','FAC2a', 'FAC2b', 'C1MOa',
-                      'C1MOb', 'C1FAa', 'C1FAb', 'C1C2a', 'C1C2b', 'C2MOa' , 'C2MOb','C2FAa','C2FAb','C2C1a','C2C1b')
+names(BranjeSRM) <- c('group', 'MOFAa', 'MOFAb', 'MOC1a', 'MOC1b', 'MOC2a', 'MOC2b', 'FAMOa', 'FAMOb','FAC1a','FAC1b','FAC2a', 'FAC2b', 'C1MOa','C1MOb', 'C1FAa', 'C1FAb', 'C1C2a', 'C1C2b', 'C2MOa' , 'C2MOb','C2FAa','C2FAb','C2C1a','C2C1b')
 
 # MD:
   # EQS deletes automatically all the observations with missing data: 47 in group 1 en 17 in group 2 
-BranjeSRM[BranjeSRM==999] = NA
+BranjeSRM[BranjeSRM==999]  <-  NA
 BranjeSRM <- na.omit(BranjeSRM)
 
 
