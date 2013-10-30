@@ -118,14 +118,26 @@ mod(f3.1)
 # predict new cases
 predict(f4.1, dat4[dat4$fam==1, ])
 
-# reestimate the model: force non-significant (co)variances to be zero
 
-# compare modelfits with and without IGSIM
+## ======================================================================
+## Test deltamethod
+## ======================================================================
 
-# compare modelfits with and without reestimation
+# 4 persons, 1 indicator
+f4.1 <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
+f4.1
+cat(f4.1$syntax)
 
+x <- f4.1
 
-# change the method correlations to the style of Eichelsheim et al. 2009 (only correlate error terms of one measure *within one rater*)
-
-
-# --> you get better CFI, TLI, Chi2, AIC and BIC. The less restricted model s3 is NOT significantly worse than s2, so s3 would be preferable.
+eff <- parameterEstimates(x$fit, standardized=TRUE)
+vc <- vcov(x$fit)
+Wald.actor <- c()
+for (r in x$roles) {
+	minusone <- eff[grepl(".means.A", eff$label) & eff$lhs != paste0(style$actor, ".", r), ]
+	print(minusone)
+	vc.minusone <- vc[minusone$label, minusone$label]
+	print(solve(vc.minusone))
+	Wald.actor <- c(Wald.actor, minusone$est %*% solve(vc.minusone) %*% minusone$est)
+}
+Wald.actor

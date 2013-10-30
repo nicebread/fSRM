@@ -128,15 +128,20 @@ ffac1=~ 1*YFAC1;fc1fa=~1*YC1FA;
 ffac2=~ 1*YFAC2;fc2fa=~1*YC2FA;
 fc1c2=~ 1*YC1C2;fc2c1=~1*YC2C1;
 
-
+#variances
 ffam~~ffam
 factmo~~factmo; factfa~~factfa; factc1~~factc1; factc2~~factc2;
 fparmo~~fparmo; fparfa~~fparfa; fparc1~~fparc1; fparc2~~fparc2;
 fmofa~~fmofa;ffamo~~ffamo;fmoc1~~fmoc1;fc1mo~~fc1mo;fmoc2~~fmoc2;fc2mo~~fc2mo;
 ffac1~~ffac1;fc1fa~~fc1fa;ffac2~~ffac2;fc2fa~~fc2fa;fc2c1~~fc2c1;fc1c2~~fc1c2;
+
+# gen. rec.
 factmo~~fparmo; factfa~~fparfa; factc1~~fparc1; factc2~~fparc2;
+
+# dyad. rec.
 ffamo~~fmofa;fc1mo~~fmoc1;fc2mo~~fmoc2;fc1fa~~ffac1;fc2fa~~ffac2;fc1c2~~fc2c1;
 
+# define labels for all latent variables
 ffam   ~ fam*1
 factmo ~ actmo*1
 factfa ~ actfa*1
@@ -213,13 +218,18 @@ for(i in 1:N) {
   data_h025 <- simulateData(SRM_sim, sample.nobs=25)  
   fit25 <- lavaan(SRM, data=data_h025)
   coeff25 <- cbind(parameterEstimates(fit25)[80:100,4], parameterEstimates(fit25)[80:100,5])
+  
+  
+  # take the actor variances, always leave one out
   act_c225 <- as.double(coeff25[2:4,2])
   act_c125 <- as.double(coeff25[c(2,3,5),2])
   act_mo25 <- as.double(coeff25[3:5,2])  
   act_fa25 <- as.double(coeff25[c(2,4,5),2])
   vcov25 <- vcov(fit25)
+  
   vcov_c225 <- vcov25[33:35, 33:35]
   actc2_25 <- c(actc2_25, act_c225 %*% solve(vcov_c225) %*% act_c225)
+  
   vcov_c125 <- vcov25[c(33,34,36), c(33,34,36)]
   actc1_25 <- c(actc1_25, act_c125 %*% solve(vcov_c125) %*% act_c125)
   vcov_mo25 <- vcov25[34:36, 34:36]

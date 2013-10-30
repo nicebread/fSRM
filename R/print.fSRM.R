@@ -31,9 +31,11 @@ function(x, digits=3, ...) {
 	print(round(percTable(x)$stand))
 	
 
-	cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")
-	GR <- getGR(x)
-	print(GR, row.names=TRUE)
+	if (!x$drop %in% c("actor", "partner", "reciprocities")) {
+		cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")
+		GR <- getGR(x)
+		print(GR, row.names=TRUE)
+	}
 	
 	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")
 	DR <- getDR(x)

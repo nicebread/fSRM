@@ -1,19 +1,25 @@
 # get correlations between latent factors
-getCor <- function(x, ops="~~", g="") {
-	eff <- parameterEstimates(x$fit)
-	SS <- x$SS
-	#sel <- SS$op %in% ops & !is.na(SS$est.std) & SS$est.std != 0 & SS$est.std < .99999 & !grepl(paste(x$var.id, collapse="|"), SS$lhs)
-	sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs)
-	if (g != "") {
-		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))
+getCor <- function(x, ops="~~", g="", label="") {
+	eff <- parameterEstimates(x$fit, standardized=TRUE)
+	
+	if (label=="") {
+		sel <- eff$op %in% ops & !is.na(eff$est) & !grepl(paste(x$var.id, collapse="|"), eff$rhs)
+		if (g != "") {
+			sel <- eff$op %in% ops & !is.na(eff$est) & !grepl(paste(x$var.id, collapse="|"), eff$rhs) & (grepl(g, eff$lhs) | grepl(g, eff$rhs))
+		}
+	} else {
+		sel <- grepl(label, eff$label, fixed=TRUE)
+		#TODO: include (g != "")? What does it mean?
 	}
-	SS2 <- cbind(eff[sel, ], r=SS[sel, "est.std"])
+	SS2 <- eff[sel, ]
+	
+	# insert label column if missing
 	if (is.null(SS2$label)) {
 		SS2 <- cbind(SS2[1:3], label="", SS2[, 4:10])
 	}
 	
 	N <- apply(SS2[, 1:3], 1, paste, collapse=" ", sep=" ")	# formula names
-	SS3 <- data.frame(component=N, label=SS2$label, round(SS2[, -c(1:4)], 3))
+	SS3 <- data.frame(component=N, label=SS2$label, round(SS2[, c("est", "se", "z", "pvalue", "ci.lower", "ci.upper", "std.lv")], 3))
 	SS3$component <- as.character(SS3$component)
 	colnames(SS3) <- c("component", "label", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper", "r")
 	return(SS3[, c(1, 2, 9, 6, 3:5, 7:8)])
