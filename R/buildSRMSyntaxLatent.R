@@ -9,8 +9,8 @@
 #' @export
 #' @param roles A vector with all role labels.
 #' @param var.id A vector with the variable names of the DV indicators
-#' @param fe Should the family effect be included? Requires at least 4 members per group.
-#' @param err Defines the type of correlations between error terms. err = "no": no error term correlations - this is the required mode for single indicators. err = "within": If multiple indicators are present, correlate same items WITHIN raters (e.g., Branje et al., 2003, Eichelsheim). err = "all": If multiple indicators are present, correlate same items BETWEEN raters (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000). err = "default": Set err to "no" for single indicators and to "all" for multiple indicators.
+#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "reciprocities" - drop individual reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.
+#' @param err Defines the type of correlations between error terms. err = "no": no error term correlations - this is the required mode for single indicators. err = "all": If multiple indicators are present, correlate same items BETWEEN raters (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000). err = "default": Set err to "no" for single indicators and to "all" for multiple indicators.
 #' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.
 #' @param self Should self-ratings be included in the analysis (if present in the data set)?
 #' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)
@@ -23,12 +23,13 @@
 
 
 buildSRMSyntaxLatent <-
-function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err="default", means=FALSE, add.variable=c(), selfmode="cor", ...) {
+function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, add.variable=c(), selfmode="cor", ...) {
 	
-	err <- match.arg(err, c("no", "all", "within", "default"))
+	# define defaults for parameters
+	err <- match.arg(err, c("no", "all", "default"))
 	if (err == "default" & length(var.id) == 1) {err <- "no"}
 	if (err == "default" & length(var.id) > 1) {err <- "all"}
-
+		
 	dots <- list(...)
 
 	# helper function: paste two vectors together, but only if elements are not identical
@@ -127,33 +128,34 @@ function(roles, var.id, self=FALSE, IGSIM = list(), fe=TRUE, err="default", mean
 		}
 	}
 	
-	if (length(var.id) > 1 & err == "within") {
-		# ERR2: Correlate for same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
-		# define correlations between error terms
-		ERR <- "# Method covariance: Correlations among error terms of one item within actors:\n"
-		count <- 1
-	
-	
-		for (v in 1:length(var.id)) {
-			for (p in 1:length(roles)) {
-				for (t1 in 1:length(roles)) {
-					for (t2 in 1:length(roles)) {
-						if (self == FALSE) {
-							if (p != t1 & p != t2 & t1 < t2) {
-								ERR <- paste(ERR, pasteNS(roles[p], roles[t1], var.id[v]), " ~~ ERR", count, "*", pasteNS(roles[p], roles[t2], var.id[v]), "\n", sep="")
-								count <- count + 1
-							}
-						} else {
-							if (t1 < t2) {
-								ERR <- paste(ERR, paste(roles[p], roles[t1], var.id[v], sep="_"), " ~~ ERR", count, "*", paste(roles[p], roles[t2], var.id[v], sep="_"), "\n", sep="")
-								count <- count + 1
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	# TODO: The old within-error correlations - I think we could delete that
+	# if (length(var.id) > 1 & err == "within") {
+# 		# ERR2: Correlate for same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
+# 		# define correlations between error terms
+# 		ERR <- "# Method covariance: Correlations among error terms of one item within actors:\n"
+# 		count <- 1
+# 	
+# 	
+# 		for (v in 1:length(var.id)) {
+# 			for (p in 1:length(roles)) {
+# 				for (t1 in 1:length(roles)) {
+# 					for (t2 in 1:length(roles)) {
+# 						if (self == FALSE) {
+# 							if (p != t1 & p != t2 & t1 < t2) {
+# 								ERR <- paste(ERR, pasteNS(roles[p], roles[t1], var.id[v]), " ~~ ERR", count, "*", pasteNS(roles[p], roles[t2], var.id[v]), "\n", sep="")
+# 								count <- count + 1
+# 							}
+# 						} else {
+# 							if (t1 < t2) {
+# 								ERR <- paste(ERR, paste(roles[p], roles[t1], var.id[v], sep="_"), " ~~ ERR", count, "*", paste(roles[p], roles[t2], var.id[v], sep="_"), "\n", sep="")
+# 								count <- count + 1
+# 							}
+# 						}
+# 					}
+# 				}
+# 			}
+# 		}
+# 	}
 
 
 
@@ -229,7 +231,7 @@ if (means==TRUE) {
 	SM <- ""
 	SM <- "\n## Compute structured means\n# Define labels for subsequent constraints\n"
 	
-	if (fe == TRUE) {
+	if (drop != "family") {
 		SM <- paste(SM, paste(style$familyeffect, " ~ ", SM.prefix, style$familyeffect, "*1\n", sep=""))
 	}
 
@@ -271,7 +273,7 @@ if (means==TRUE) {
 
 LAB <- "# Define labels for variances\n"
 VAR.prefix <- ".VAR."
-if (fe == TRUE) {
+if (drop != "family") {
 	LAB <- paste(LAB, paste(style$familyeffect, " ~ ", VAR.prefix, style$familyeffect, "*", style$familyeffect, "\n", sep=""))
 }
 
@@ -294,8 +296,12 @@ for (p in roles) {
 	SRM <- paste(SRM, "### ROLES:'", paste(roles, collapse="','"), "'\n", sep="")
 	SRM <- paste(SRM, "### VARID:'", paste(var.id, collapse="','"), "'\n", sep="")
 	
-	if (fe==TRUE) SRM <- paste(SRM, FE)
-	SRM <- paste(SRM, AE, PE, RE, ERR, GR, DR, sep="\n")
+	if (drop != "family") 	SRM <- paste(SRM, FE, sep="\n")
+	if (drop != "actor") 	SRM <- paste(SRM, AE, sep="\n")
+	if (drop != "partner") 	SRM <- paste(SRM, PE, sep="\n")
+	if (!drop %in% c("actor", "partner", "reciprocities")) SRM <- paste(SRM, GR, sep="\n")
+			
+	SRM <- paste(SRM, RE, DR, ERR, sep="\n")
 	if (length(IGSIM) > 0) {SRM <- paste(SRM, igsim, sep="\n")}
 	if (self == TRUE) {SRM <- paste(SRM, SELF, sep="\n")}
 	if (addv!="") SRM <- paste(SRM, addv)
@@ -309,4 +315,4 @@ for (p in roles) {
 # cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))
 # cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))
 
-cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1"), fe=FALSE, self=TRUE))
+#cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1"), fe=FALSE, self=TRUE))

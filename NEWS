@@ -1,0 +1,12 @@
+# Version 0.2
+
+## New features
+
+- Replaced `fe` parameter in fSRM by `drop`: Now the user can drop either the family effect, the actor, the partner effects, or the reciprocities when only three members are present.
+
+## Changes
+
+- The structure of the raw data is not shown anymore when executing the fSRM function
+- Fixed some inconsistencies in labeling
+- Preliminarily dropped analyses with self-ratings (they probably will be added later again)
+- Removed error correlations type "within": This has been described in the literature, but actually never been used.

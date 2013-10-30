@@ -7,12 +7,16 @@ getCor <- function(x, ops="~~", g="") {
 	if (g != "") {
 		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))
 	}
-	SS2 <- cbind(eff[sel, ], COR=SS[sel, "est.std"])
+	SS2 <- cbind(eff[sel, ], r=SS[sel, "est.std"])
+	if (is.null(SS2$label)) {
+		SS2 <- cbind(SS2[1:3], label="", SS2[, 4:10])
+	}
 	
 	N <- apply(SS2[, 1:3], 1, paste, collapse=" ", sep=" ")	# formula names
-	SS3 <- data.frame(f=N, round(SS2[, -c(1:4)], 3), label=SS2[, 4])
-	SS3$f <- as.character(SS3$f)
-	return(SS3)
+	SS3 <- data.frame(component=N, label=SS2$label, round(SS2[, -c(1:4)], 3))
+	SS3$component <- as.character(SS3$component)
+	colnames(SS3) <- c("component", "label", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper", "r")
+	return(SS3[, c(1, 2, 9, 6, 3:5, 7:8)])
 }
 
 

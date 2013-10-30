@@ -39,34 +39,70 @@ dat4 <- dat.wide
 
 ## No mean structure, standard models
 # 3 persons, 1 indicator
-f3.1 <- fSRM(dep1 ~ actor*partner | fam, dat3, fe=FALSE)
+f3.1 <- fSRM(dep1 ~ actor*partner | fam, dat3)
+f3.1
+
+# Test: drop something else...
+f3.1.d <- fSRM(dep1 ~ actor*partner | fam, dat3, drop="actor")
+f3.1.d
+
+f3.1.d <- fSRM(dep1 ~ actor*partner | fam, dat3, drop="partner")
+f3.1.d
+
+f3.1.d <- fSRM(dep1 ~ actor*partner | fam, dat3, drop="reciprocities")
+f3.1.d
+
 
 # 3 persons, 2 indicators
-f3.2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, fe=FALSE)
+f3.2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3)
+f3.2
+
+# Test: drop something else...
+f3.2.d <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, drop="actor")
+f3.2.d
+
+f3.2.d <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, drop="partner")
+f3.2.d
+
+f3.2.d <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, drop="reciprocities")
+f3.2.d
+
+
 
 # 4 persons, 1 indicator
 f4.1 <- fSRM(dep1 ~ actor*partner | fam, dat4)
+f4.1
+
+# Test: drop something in 4-members
+f4.1.d <- fSRM(dep1 ~ actor*partner | fam, dat4, drop="actor")
+f4.1.d
+
 
 # 4 persons, 2 indicators
 f4.2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4)
+f4.2
 
 
 ## Mean structure
 # 3 persons, 1 indicator, mean structure: family effect is allowed but automatically constrained to zero
 f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, means=TRUE)
+f3.1.m
 
 # Alternative approach: update the existing model with new parameters:
 f3.1.m2 <- update(f3.1, means=TRUE)
+f3.1.m2
 
 # 3 persons, 2 indicators, mean structure
 f3.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, means=TRUE)
+f3.2.m
 
 # 4 persons, 1 indicator, mean structure
 f4.1.m <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
+f4.1.m
 
 # 4 persons, 2 indicators, mean structure
 f4.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4, means=TRUE)
-
+f4.2.m
 
 
 ## ======================================================================

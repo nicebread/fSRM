@@ -3,7 +3,7 @@
 \title{Build lavaan syntax for a Social Relations Model with roles ("Family SRM")}
 \usage{
   buildSRMSyntaxLatent(roles, var.id, self = FALSE,
-    IGSIM = list(), fe = TRUE, err = "default",
+    IGSIM = list(), drop = "default", err = "default",
     means = FALSE, add.variable = c(), selfmode = "cor",
     ...)
 }
@@ -13,19 +13,24 @@
   \item{var.id}{A vector with the variable names of the DV
   indicators}
 
-  \item{fe}{Should the family effect be included? Requires
-  at least 4 members per group.}
+  \item{drop}{In three-member families at least one
+  component has to be dropped. \code{drop} defines which
+  one: "none": drop nothing; "family" - drop family effect;
+  "reciprocities" - drop individual reciprocities; "actor"
+  - drop actor factors and actor-partner covariances;
+  "partner" - drop partner effects and actor-partner
+  covariances; "default": drop nothing in >= 4 members and
+  drop family effect with 3 members. Although usually not
+  necessary, the drop parameter can also be applied to >= 4
+  member families.}
 
   \item{err}{Defines the type of correlations between error
   terms. err = "no": no error term correlations - this is
-  the required mode for single indicators. err = "within":
-  If multiple indicators are present, correlate same items
-  WITHIN raters (e.g., Branje et al., 2003, Eichelsheim).
-  err = "all": If multiple indicators are present,
-  correlate same items BETWEEN raters (e.g., Dyadic Data
-  Analysis, Kenny, Kashy, & Cook, 2000). err = "default":
-  Set err to "no" for single indicators and to "all" for
-  multiple indicators.}
+  the required mode for single indicators. err = "all": If
+  multiple indicators are present, correlate same items
+  BETWEEN raters (e.g., Dyadic Data Analysis, Kenny, Kashy,
+  & Cook, 2000). err = "default": Set err to "no" for
+  single indicators and to "all" for multiple indicators.}
 
   \item{IGSIM}{Define intragenerational similarity
   correlations. Must be a list where the levels of actor.id

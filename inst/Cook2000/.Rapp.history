@@ -1,0 +1,2207 @@
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+Gives a structured table of all (co)variances#
+#
+varComp <- function(x) {#
+	eff <- as.data.frame(parameterEstimates(x$fit))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	res <- matrix(NA, ncol=6, nrow=ifelse(x$fe==TRUE, 1, 0) + ifelse(x$self==TRUE, length(x$roles), 0) + length(x$roles)*2 + length(x$roles)*(length(x$roles)-1))#
+	colnames(res) <- c("est","se","z","pvalue","ci.lower","ci.upper")#
+	rownames(res) <- rep("", nrow(res))#
+#
+	count <- 1#
+	if (x$fe == TRUE) {#
+		rownames(res)[1] <- "FE ~~ FE"#
+		res[1, ] <- as.matrix(eff[eff$f == "FE ~~ FE", c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		count <- count + 1#
+	}#
+#
+	for (p in 1:length(x$roles)) {#
+		res[count, ]  <- as.matrix(eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(res)[count] <- paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep="")#
+		count <- count + 1#
+	}#
+	for (p in 1:length(x$roles)) {#
+		res[count, ]  <- as.matrix(eff[eff$f == paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(res)[count] <-  paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep="")#
+		count <- count + 1#
+	}#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if (p != t) {#
+			res[count, ]  <- as.matrix(eff[eff$f == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), sep=" "), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+			rownames(res)[count] <- paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""))#
+			count <- count + 1#
+		}#
+		}#
+	}#
+	if (x$self == TRUE) {#
+		for (p in 1:length(x$roles)) {#
+			res[count, ]  <- as.matrix(eff[eff$f == paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+			rownames(res)[count] <-  paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep="")#
+			count <- count + 1#
+		}#
+	}#
+	res2 <- data.frame(f=rownames(res), as.data.frame(res))#
+	rownames(res2) <- NULL#
+	res2$f <- as.character(res2$f)#
+	colnames(res2) <- c("component", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper")#
+	return(res2)#
+}#
+# retrieve generalized reciprocity from fSRM object#
+getGR <- function(x) {#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+	#T <- varComp(x)#
+	GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- SS[SS$component == paste(style$actor, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+		# retrieve p values of this (co)variance component#
+		#SD1 <- T[T$f == paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		#SD2 <- T[T$f == paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		#if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		#if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		GR <- rbind(GR, GR0)#
+	}#
+	GR$r <- as.numeric(GR$r)#
+	rownames(GR) <- NULL#
+	GR[, c(1, 8, 5, 2:4, 6:7)]#
+}#
+# retrieve dyadic reciprocity from fSRM object#
+getDR <- function(x) {#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+	#T <- varComp(x)#
+	DR <- data.frame()#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if ((p < t) & (x$roles[p] != x$roles[t])) {#
+				DR0 <- SS[SS$component == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[t], ".", x$roles[p], sep=""), sep=" "), ]#
+				#SD1 <- T[paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), ]#
+				#SD2 <- T[paste("R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep=""), ]#
+#
+				#if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+				#if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+				DR <- rbind(DR, DR0)#
+			}#
+		}#
+	}#
+	DR$r <- as.numeric(DR$r)#
+	rownames(DR) <- NULL#
+	DR[, c(1, 8, 5, 2:4, 6:7)]#
+}
+f3.1
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+#
+sourceDir("../R")#
+#
+# alternatively: load from GitHub#
+#library(devtools)#
+#install_github("fSRM", "felice303")#
+#library(fSRM)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f3.1 <- fSRM(dep1 ~ actor*partner | fam, dat3, fe=FALSE)#
+f3.1
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f3.2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, fe=FALSE)#
+f3.2
+x <- f3.2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+library(plyr)#
+	if (is.null(x$SS)) {x$SS <- standardizedSolution(x$fit, type="std.all")}#
+	## The model for 4 members must have 31 free parameters and 47 df!#
+	cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$fit)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$fit)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff <- as.data.frame(parameterEstimates(x$fit))
+eff
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff$f <- paste(eff$lhs, eff$op, eff$rhs)
+eff
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS <- getCor(x, ops=c("~~", "~"))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+ops=c("~~", "~")
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff <- parameterEstimates(x$fit)#
+	SS <- x$SS
+SS
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs)#
+	if (g != "") {#
+		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))#
+	}
+sel
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS2 <- cbind(eff[sel, ], COR=SS[sel, "est.std"])
+SS2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS2 <- cbind(eff[sel, ], r=SS[sel, "est.std"])
+SS2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+N <- apply(SS2[, 1:3], 1, paste, collapse=" ", sep=" ")	# formula names
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS3 <- data.frame(f=N, round(SS2[, -c(1:3)], 3))
+SS3
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS2[, -c(1:3)]
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+round(SS2[, -c(1:3)], 3)
+str(SS2)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff <- parameterEstimates(x$fit)#
+	SS <- x$SS
+str(SS)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs)#
+	if (g != "") {#
+		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))#
+	}
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS2 <- cbind(eff[sel, ], r=SS[sel, "est.std"])
+str(SS2)
+str(SS)
+str(eff)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff <- parameterEstimates(x$fit)
+eff
+str(eff)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff$label <- NULL
+str(eff)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff <- parameterEstimates(x$fit)#
+	eff$label <- NULL#
+	SS <- x$SS#
+	#sel <- SS$op %in% ops & !is.na(SS$est.std) & SS$est.std != 0 & SS$est.std < .99999 & !grepl(paste(x$var.id, collapse="|"), SS$lhs)#
+	sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs)#
+	if (g != "") {#
+		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))#
+	}#
+	SS2 <- cbind(eff[sel, ], r=SS[sel, "est.std"])#
+	N <- apply(SS2[, 1:3], 1, paste, collapse=" ", sep=" ")	# formula names#
+	SS3 <- data.frame(component=N, round(SS2[, -c(1:3)], 3))
+SS3
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS3$component <- as.character(SS3$component)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+return(SS3[, c(1, 8, 5, 2:4, 6:7)])
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS3[, c(1, 8, 5, 2:4, 6:7)]
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+get correlations between latent factors#
+getCor <- function(x, ops="~~", g="") {#
+	eff <- parameterEstimates(x$fit)#
+	eff$label <- NULL#
+	SS <- x$SS#
+	#sel <- SS$op %in% ops & !is.na(SS$est.std) & SS$est.std != 0 & SS$est.std < .99999 & !grepl(paste(x$var.id, collapse="|"), SS$lhs)#
+	sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs)#
+	if (g != "") {#
+		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))#
+	}#
+	SS2 <- cbind(eff[sel, ], r=SS[sel, "est.std"])#
+	N <- apply(SS2[, 1:3], 1, paste, collapse=" ", sep=" ")	# formula names#
+	SS3 <- data.frame(component=N, round(SS2[, -c(1:3)], 3))#
+	SS3$component <- as.character(SS3$component)#
+	colnames(SS3) <- c("component", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper", "r")#
+	return(SS3[, c(1, 8, 5, 2:4, 6:7)])#
+}
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS <- getCor(x, ops=c("~~", "~"))
+SS
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x)#
+	T[, -1] <- round(T[, -1], digits)#
+	print(T)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable(x)$stand))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")#
+	GR <- getGR(x)#
+	print(GR, row.names=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))
+SS
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- SS[SS$component == paste(style$actor, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+		# retrieve p values of this (co)variance component#
+		#SD1 <- T[T$f == paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		#SD2 <- T[T$f == paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		#if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		#if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		GR <- rbind(GR, GR0)#
+	}
+GR
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+GR$r <- as.numeric(GR$r)#
+	rownames(GR) <- NULL
+GR
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")#
+	GR <- getGR(x)#
+	print(GR, row.names=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+Gives a structured table of all (co)variances#
+#
+varComp <- function(x) {#
+	eff <- as.data.frame(parameterEstimates(x$fit))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	res <- matrix(NA, ncol=6, nrow=ifelse(x$fe==TRUE, 1, 0) + ifelse(x$self==TRUE, length(x$roles), 0) + length(x$roles)*2 + length(x$roles)*(length(x$roles)-1))#
+	colnames(res) <- c("est","se","z","pvalue","ci.lower","ci.upper")#
+	rownames(res) <- rep("", nrow(res))#
+#
+	count <- 1#
+	if (x$fe == TRUE) {#
+		rownames(res)[1] <- "FE ~~ FE"#
+		res[1, ] <- as.matrix(eff[eff$f == "FE ~~ FE", c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		count <- count + 1#
+	}#
+#
+	for (p in 1:length(x$roles)) {#
+		res[count, ]  <- as.matrix(eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(res)[count] <- paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep="")#
+		count <- count + 1#
+	}#
+	for (p in 1:length(x$roles)) {#
+		res[count, ]  <- as.matrix(eff[eff$f == paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(res)[count] <-  paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep="")#
+		count <- count + 1#
+	}#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if (p != t) {#
+			res[count, ]  <- as.matrix(eff[eff$f == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), sep=" "), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+			rownames(res)[count] <- paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""))#
+			count <- count + 1#
+		}#
+		}#
+	}#
+	if (x$self == TRUE) {#
+		for (p in 1:length(x$roles)) {#
+			res[count, ]  <- as.matrix(eff[eff$f == paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+			rownames(res)[count] <-  paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep="")#
+			count <- count + 1#
+		}#
+	}#
+	res2 <- data.frame(f=rownames(res), as.data.frame(res))#
+	rownames(res2) <- NULL#
+	res2$f <- as.character(res2$f)#
+	colnames(res2) <- c("component", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper")#
+	return(res2)#
+}#
+# retrieve generalized reciprocity from fSRM object#
+getGR <- function(x) {#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+	#T <- varComp(x)#
+	GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- SS[SS$component == paste(style$actor, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+		# retrieve p values of this (co)variance component#
+		#SD1 <- T[T$f == paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		#SD2 <- T[T$f == paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		#if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		#if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		GR <- rbind(GR, GR0)#
+	}#
+	GR$r <- as.numeric(GR$r)#
+	rownames(GR) <- NULL#
+	GR#
+}#
+# retrieve dyadic reciprocity from fSRM object#
+getDR <- function(x) {#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+	#T <- varComp(x)#
+	DR <- data.frame()#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if ((p < t) & (x$roles[p] != x$roles[t])) {#
+				DR0 <- SS[SS$component == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[t], ".", x$roles[p], sep=""), sep=" "), ]#
+				#SD1 <- T[paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), ]#
+				#SD2 <- T[paste("R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep=""), ]#
+#
+				#if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+				#if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+				DR <- rbind(DR, DR0)#
+			}#
+		}#
+	}#
+	DR$r <- as.numeric(DR$r)#
+	rownames(DR) <- NULL#
+	DR#
+}
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")#
+	GR <- getGR(x)#
+	print(GR, row.names=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+DR <- getDR(x)#
+	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	print(DR, row.names=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntragenerational similarity:\n----------------\n")#
+		igsim <- SS[grepl("IGSIM", SS$label), ]		#
+		print(igsim)#
+	}
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+print.fSRM <-#
+function(x, digits=3, ...) {#
+	library(plyr)#
+	if (is.null(x$SS)) {x$SS <- standardizedSolution(x$fit, type="std.all")}#
+	## The model for 4 members must have 31 free parameters and 47 df!#
+	cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$fit)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$fit)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$fit))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x)#
+	T[, -1] <- round(T[, -1], digits)#
+	print(T)#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable(x)$stand))#
+	cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")#
+	GR <- getGR(x)#
+	print(GR, row.names=TRUE)#
+	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	DR <- getDR(x)#
+	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	print(DR, row.names=TRUE)#
+	if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntragenerational similarity:\n----------------\n")#
+		igsim <- SS[grepl("IGSIM", SS$label), ]		#
+		print(igsim)#
+	}#
+	if (x$self == TRUE) {#
+		AS <- data.frame()#
+		for (t in x$roles) {#
+			if (x$selfmode == "cor") {F <- paste(style$actor, ".", t, " ~~ ", style$self, ".", t, sep="")}#
+			if (x$selfmode == "kq") {F <- paste(style$self, ".", t, " ~ ", style$actor, ".", t, sep="")}#
+			AS0 <- SS[SS$f == F, ]#
+			AS0$comment <- ""#
+#
+			# get Variance of components --> if that is < min.p, correlation is not reliable!#
+			SD1 <- SS[SS$f == paste(style$partner, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+			SD2 <- SS[SS$f == paste(style$self, ".", t, " ~~ ", style$self, ".", t, sep=""), ]#
+			if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+			if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+#
+			if (SD1["pvalue"] > x$min.p | SD2["pvalue"] > x$min.p) {#
+				AS0$COR <- NA_real_#
+				AS0$comment <- paste("One of the variance components has p <", x$min.p)#
+			}#
+			if (AS0$pvalue > x$min.p) {#
+				AS0$COR <- NA_real_#
+				AS0$comment <- paste("Covariance estimate has p <", x$min.p)#
+			}#
+#
+			AS <- rbind(AS, AS0)#
+		}#
+		cat("\n\nAssumed similarity: Mean r =", round(meanNA(AS$COR), digits),"(out of bound estimates set to zero)\n----------------\n")#
+		print(AS,row.names=TRUE)#
+		SO <- data.frame()#
+		for (t in x$roles) {#
+			if (x$selfmode == "cor") {F <- paste(style$partner, ".", t, " ~~ ", style$self, ".", t, sep="")}#
+			if (x$selfmode == "kq") {F <- paste(style$self, ".", t, " ~ ", style$partner, ".", t, sep="")}#
+			SO0 <- SS[SS$f == F, ]#
+			SO0$comment <- ""#
+#
+			# get Variance of components --> if that is < min.p, correlation is not reliable!#
+			SD1 <- SS[SS$f == paste(style$partner, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+			SD2 <- SS[SS$f == paste(style$self, ".", t, " ~~ ", style$self, ".", t, sep=""), ]#
+			if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+			if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+#
+			if (SD1["pvalue"] > x$min.p | SD2["pvalue"] > x$min.p) {#
+				SO0$COR <- NA_real_#
+				SO0$comment <- paste("One of the variance components has p <", x$min.p)#
+			}#
+			if (SO0$pvalue > x$min.p) {#
+				SO0$COR <- NA_real_#
+				SO0$comment <- paste("Covariance estimate has p <", x$min.p)#
+			}#
+#
+			SO <- rbind(SO, SO0)#
+		}#
+		SO$COR <- as.numeric(SO$COR)#
+		cat("\n\nSelf-Other agreement: Mean r =", round(meanNA(SO$COR), digits),"(out of bound estimates set to NA)\n----------------\n")#
+		print(SO, row.names=TRUE)#
+	}#
+	if (x$means == TRUE) {#
+		cat("\n\nMean structure\n----------------\n")#
+		MS <- eff[grepl(".means.", eff$label, fixed=TRUE), c(1, 5:10)]#
+		colnames(MS)[1] <- "factor"#
+		MS[, -1] <- round(MS[, -1], digits)#
+		rownames(MS) <- NULL#
+		print(MS)#
+	}#
+}
+f3.2
+f3.1
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f4.1 <- fSRM(dep1 ~ actor*partner | fam, dat4)#
+f4.1
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f4.2 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4)#
+f4.2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, means=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+' @title Run a Social Relations Model with roles ("Family SRM")#
+#' @aliases predict, update#
+#'#
+#' @description#
+#' Run a Social Relations Model with roles ("Family SRM")#
+#'#
+#' @details#
+#' A model can be rerun with additional syntax using the \code{add} function:#
+#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
+#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
+#'#
+#' @export#
+#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
+#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
+#' @param fe Should the family effect be included? Requires at least 4 members per group.#
+#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
+#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
+#' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
+#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
+#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
+#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
+#' @param means Should the structured means of the SRM factors be calculated?#
+#
+## OLD PARAMETERS, NOT CURRENTLY USED#
+# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
+# @param self Should self-ratings be included in the analysis (if present in the data set)?#
+#' @references#
+#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
+#
+fSRM <-#
+function(formula=NULL, data, fe=TRUE, add="", means=FALSE, IGSIM=list(), add.variable=c(), selfmode="cor", syntax="", ...) {#
+	library(lavaan)#
+	library(reshape2)#
+	library(plyr)#
+	dots <- list(...)#
+	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
+	self <- FALSE#
+	# save the function call for use in refitting#
+	call <- match.call(expand.dots = TRUE)#
+	# Parse the formula#
+	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
+	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
+	# Retrieve the variable names from the formula#
+	var.id <- lhs#
+	actor.id <- rhs[1]#
+	partner.id <- rhs[2]#
+	group.id <- NULL#
+	if (length(rhs)>=3) {#
+		group.id <- rhs[3]#
+	} else {#
+		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
+	}#
+	# Restructure data format from long to wide#
+	fam0 <- list()#
+	for (v in c(var.id, add.variable)) {#
+		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
+		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
+	}#
+	fam <- merge.rec(fam0, by=group.id)#
+	# remove all-NA columns#
+	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
+	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
+	fam <- na.omit(fam)#
+	included <- fam[, group.id]#
+	roles <- sort(unique(data[, actor.id]))#
+	# Do some sanity checks#
+	if (length(roles) == 3 & fe == TRUE & means == FALSE) {warning("Data set with 3-member-groups detected - model probably is not identified. Maybe you should remove the family effect (fe = FALSE) or some of the reciprocities?")}#
+	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
+		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
+	}#
+	if (means == TRUE && fe == FALSE) {#
+		warning("If mean structure for a three person family is requested, the family effect is allowed, but its variance constrained to zero.")#
+		fe <- TRUE#
+	}#
+	# if no syntax is directly provided:#
+	if (syntax == "") {#
+		syntax0 <- buildSRMSyntaxLatent(roles, var.id, fe=fe, err="default", IGSIM=IGSIM, means=means, self=self, add.variable=add.variable, selfmode=selfmode)#
+		syntax <- paste(syntax0, add, sep="\n")#
+	} else {#
+		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
+	}#
+	print(syntax)#
+	m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)#
+	res <- list(#
+		fit		= m,#
+		SS		= standardizedSolution(m, type="std.all"),#
+		syntax	= syntax,#
+		roles	= roles,#
+		actor.id 	= actor.id,#
+		partner.id 	= partner.id,#
+		group.id 	= group.id,#
+		var.id	= var.id,#
+		fe		= fe,#
+		means	= means,#
+		IGSIM	= IGSIM,#
+		self	= self,#
+		selfmode	= selfmode,#
+		call	= call,#
+		data	= fam)#
+	attr(res, "class") <- "fSRM"#
+	return(res)	#
+}#
+# rerun a fSRM model with new parameters specified#
+update.fSRM <- function(x, ..., evaluate=TRUE) {#
+	call <- x$call#
+    if(is.null(call)) stop("need an fRSM object with call slot")#
+#
+    extras <- match.call(expand.dots = FALSE)$...#
+#
+    if(length(extras) > 0) {#
+        existing <- !is.na(match(names(extras), names(call)))#
+        for(a in names(extras)[existing]) call[[a]] <- extras[[a]]#
+        if(any(!existing)) {#
+            call <- c(as.list(call), extras[!existing])#
+            call <- as.call(call)#
+        }#
+    }#
+    if (evaluate) {#
+        eval(call, parent.frame())#
+    }#
+    else call#
+}#
+# predicts new cases#
+# TODO: @Yves: Allow single row data frames, omit unnecessary sanity checks#
+predict.fSRM <- function(x, newdata, ...) {#
+	# TODO: This snippet is also in fSRM function --> refactor#
+	# Restructure data format from long to wide#
+	fam0 <- list()#
+	for (v in c(x$var.id, x$add.variable)) {#
+		fam0[[v]] <- dcast(newdata[, c(x$var.id, x$actor.id, x$partner.id, x$group.id, x$add.variable)], formula(paste(x$group.id, "~", x$actor.id, "+", x$partner.id)), value.var=v)#
+		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
+	}#
+#
+	fam <- merge.rec(fam0, by=x$group.id)#
+	print(str(x$data))#
+	print(str(fam))#
+	predict(x$fit, newdata=fam)#
+}
+f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, means=TRUE)
+cat("### lavaan syntax for family SRM\n### ROLES:'c','f','m'\n### VARID:'dep1'\n # Family effect:\nFE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1\n\n# Actor effects:\nA.c =~ 1*c_f_dep1 + 1*c_m_dep1\nA.f =~ 1*f_c_dep1 + 1*f_m_dep1\nA.m =~ 1*m_c_dep1 + 1*m_f_dep1\n\n# Partner effects:\nP.c =~ 1*f_c_dep1 + 1*m_c_dep1\nP.f =~ 1*c_f_dep1 + 1*m_f_dep1\nP.m =~ 1*c_m_dep1 + 1*f_m_dep1\n\n# Relationship effects:\nR.c.f =~ 1* c_f_dep1\nR.c.m =~ 1* c_m_dep1\nR.f.c =~ 1* f_c_dep1\nR.f.m =~ 1* f_m_dep1\nR.m.c =~ 1* m_c_dep1\nR.m.f =~ 1* m_f_dep1\n\nc_f_dep1 ~~ 0*c_f_dep1\nc_m_dep1 ~~ 0*c_m_dep1\nf_c_dep1 ~~ 0*f_c_dep1\nf_m_dep1 ~~ 0*f_m_dep1\nm_c_dep1 ~~ 0*m_c_dep1\nm_f_dep1 ~~ 0*m_f_dep1\n# Generalized reciprocity:\nA.c ~~ P.c\nA.f ~~ P.f\nA.m ~~ P.m\n\n# Dyadic reciprocity:\nR.c.f ~~ R.f.c\nR.c.m ~~ R.m.c\nR.f.m ~~ R.m.f\n \n## Compute structured means\n# Define labels for subsequent constraints\n FE ~ .means.FE*1\nA.c ~ .means.A.c*1\nA.f ~ .means.A.f*1\nA.m ~ .means.A.m*1\nP.c ~ .means.P.c*1\nP.f ~ .means.P.f*1\nP.m ~ .means.P.m*1\nR.c.f ~ .means.R.c.f*1\nR.c.m ~ .means.R.c.m*1\nR.f.c ~ .means.R.f.c*1\nR.f.m ~ .means.R.f.m*1\nR.m.c ~ .means.R.m.c*1\nR.m.f ~ .means.R.m.f*1\n \n\n# For three person families: set variance of family effect to zero\n FE ~~ 0* FE \n\n# set means of observed variables to zero\n c_f_dep1 ~ 0\nc_m_dep1 ~ 0\nf_c_dep1 ~ 0\nf_m_dep1 ~ 0\nm_c_dep1 ~ 0\nm_f_dep1 ~ 0 \n\n# set constraints on means for identifiability\n .means.A.c + .means.A.f + .means.A.m == 0\n .means.P.c + .means.P.f + .means.P.m == 0\n .means.R.c.f + .means.R.c.m == 0\n .means.R.f.c + .means.R.f.m == 0\n .means.R.m.c + .means.R.m.f == 0\n .means.R.f.c + .means.R.m.c == 0\n .means.R.c.f + .means.R.m.f == 0\n .means.R.c.m + .means.R.f.m == 0\n\n")
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f3.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, means=TRUE)
+cat("### lavaan syntax for family SRM\n### ROLES:'c','f','m'\n### VARID:'dep1','dep2'\n # Family effect:\nFE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1 + 1*c_f_dep2 + 1*c_m_dep2 + 1*f_c_dep2 + 1*f_m_dep2 + 1*m_c_dep2 + 1*m_f_dep2\n\n# Actor effects:\nA.c =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*c_f_dep2 + 1*c_m_dep2\nA.f =~ 1*f_c_dep1 + 1*f_m_dep1 + 1*f_c_dep2 + 1*f_m_dep2\nA.m =~ 1*m_c_dep1 + 1*m_f_dep1 + 1*m_c_dep2 + 1*m_f_dep2\n\n# Partner effects:\nP.c =~ 1*f_c_dep1 + 1*m_c_dep1 + 1*f_c_dep2 + 1*m_c_dep2\nP.f =~ 1*c_f_dep1 + 1*m_f_dep1 + 1*c_f_dep2 + 1*m_f_dep2\nP.m =~ 1*c_m_dep1 + 1*f_m_dep1 + 1*c_m_dep2 + 1*f_m_dep2\n\n# Relationship effects:\nR.c.f =~ 1* c_f_dep1 + 1* c_f_dep2\nR.c.m =~ 1* c_m_dep1 + 1* c_m_dep2\nR.f.c =~ 1* f_c_dep1 + 1* f_c_dep2\nR.f.m =~ 1* f_m_dep1 + 1* f_m_dep2\nR.m.c =~ 1* m_c_dep1 + 1* m_c_dep2\nR.m.f =~ 1* m_f_dep1 + 1* m_f_dep2\n\n# Method covariance: Correlations among all error terms of the same items:\nc_f_dep1 ~~ MF1*c_m_dep1\nc_f_dep1 ~~ MF2*f_c_dep1\nc_f_dep1 ~~ MF3*f_m_dep1\nc_f_dep1 ~~ MF4*m_c_dep1\nc_f_dep1 ~~ MF5*m_f_dep1\nc_m_dep1 ~~ MF6*f_c_dep1\nc_m_dep1 ~~ MF7*f_m_dep1\nc_m_dep1 ~~ MF8*m_c_dep1\nc_m_dep1 ~~ MF9*m_f_dep1\nf_c_dep1 ~~ MF10*f_m_dep1\nf_c_dep1 ~~ MF11*m_c_dep1\nf_c_dep1 ~~ MF12*m_f_dep1\nf_m_dep1 ~~ MF13*m_c_dep1\nf_m_dep1 ~~ MF14*m_f_dep1\nm_c_dep1 ~~ MF15*m_f_dep1\nc_f_dep2 ~~ MF16*c_m_dep2\nc_f_dep2 ~~ MF17*f_c_dep2\nc_f_dep2 ~~ MF18*f_m_dep2\nc_f_dep2 ~~ MF19*m_c_dep2\nc_f_dep2 ~~ MF20*m_f_dep2\nc_m_dep2 ~~ MF21*f_c_dep2\nc_m_dep2 ~~ MF22*f_m_dep2\nc_m_dep2 ~~ MF23*m_c_dep2\nc_m_dep2 ~~ MF24*m_f_dep2\nf_c_dep2 ~~ MF25*f_m_dep2\nf_c_dep2 ~~ MF26*m_c_dep2\nf_c_dep2 ~~ MF27*m_f_dep2\nf_m_dep2 ~~ MF28*m_c_dep2\nf_m_dep2 ~~ MF29*m_f_dep2\nm_c_dep2 ~~ MF30*m_f_dep2\n\n# Generalized reciprocity:\nA.c ~~ P.c\nA.f ~~ P.f\nA.m ~~ P.m\n\n# Dyadic reciprocity:\nR.c.f ~~ R.f.c\nR.c.m ~~ R.m.c\nR.f.m ~~ R.m.f\n \n## Compute structured means\n# Define labels for subsequent constraints\n FE ~ .means.FE*1\nA.c ~ .means.A.c*1\nA.f ~ .means.A.f*1\nA.m ~ .means.A.m*1\nP.c ~ .means.P.c*1\nP.f ~ .means.P.f*1\nP.m ~ .means.P.m*1\nR.c.f ~ .means.R.c.f*1\nR.c.m ~ .means.R.c.m*1\nR.f.c ~ .means.R.f.c*1\nR.f.m ~ .means.R.f.m*1\nR.m.c ~ .means.R.m.c*1\nR.m.f ~ .means.R.m.f*1\n \n\n# For three person families: set variance of family effect to zero\n FE ~~ 0* FE \n\n# set means of observed variables to zero\n c_f_dep1 ~ 0\nc_m_dep1 ~ 0\nf_c_dep1 ~ 0\nf_m_dep1 ~ 0\nm_c_dep1 ~ 0\nm_f_dep1 ~ 0\nc_f_dep2 ~ 0\nc_m_dep2 ~ 0\nf_c_dep2 ~ 0\nf_m_dep2 ~ 0\nm_c_dep2 ~ 0\nm_f_dep2 ~ 0 \n\n# set constraints on means for identifiability\n .means.A.c + .means.A.f + .means.A.m == 0\n .means.P.c + .means.P.f + .means.P.m == 0\n .means.R.c.f + .means.R.c.m == 0\n .means.R.f.c + .means.R.f.m == 0\n .means.R.m.c + .means.R.m.f == 0\n .means.R.f.c + .means.R.m.c == 0\n .means.R.c.f + .means.R.m.f == 0\n .means.R.c.m + .means.R.f.m == 0\n\n")
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f4.1.m <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f4.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4, means=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f4.ig <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4, IGSIM=list(c("m", "f"), c("c", "y")))
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f4.ig
+x <- f4.ig
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+library(plyr)#
+	if (is.null(x$SS)) {x$SS <- standardizedSolution(x$fit, type="std.all")}#
+	## The model for 4 members must have 31 free parameters and 47 df!#
+	cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$fit)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$fit)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))
+SS
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff <- parameterEstimates(x$fit)#
+	SS <- x$SS#
+	#sel <- SS$op %in% ops & !is.na(SS$est.std) & SS$est.std != 0 & SS$est.std < .99999 & !grepl(paste(x$var.id, collapse="|"), SS$lhs)#
+	sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs)#
+	if (g != "") {#
+		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))#
+	}#
+	SS2 <- cbind(eff[sel, ], r=SS[sel, "est.std"])#
+	N <- apply(SS2[, 1:3], 1, paste, collapse=" ", sep=" ")	# formula names#
+	SS3 <- data.frame(component=N, round(SS2[, -c(1:3)], 3))#
+	SS3$component <- as.character(SS3$component)#
+	colnames(SS3) <- c("component", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper", "r")#
+	return(SS3[, c(1, 8, 5, 2:4, 6:7)])
+SS2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS3 <- data.frame(component=N, round(SS2[, -c(1:4)], 3))#
+	SS3$component <- as.character(SS3$component)
+SS3
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS3 <- data.frame(component=N, label=SS2$label, round(SS2[, -c(1:4)], 3))
+SS3
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS3$component <- as.character(SS3$component)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS3[, c(1, 2, 9, 6, 3:5, 7:8)]
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS3 <- data.frame(component=N, label=SS2$label, round(SS2[, -c(1:4)], 3))#
+	SS3$component <- as.character(SS3$component)#
+	colnames(SS3) <- c("component", "label", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper", "r")
+SS3[, c(1, 2, 9, 6, 3:5, 7:8)]
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+get correlations between latent factors#
+getCor <- function(x, ops="~~", g="") {#
+	eff <- parameterEstimates(x$fit)#
+	SS <- x$SS#
+	#sel <- SS$op %in% ops & !is.na(SS$est.std) & SS$est.std != 0 & SS$est.std < .99999 & !grepl(paste(x$var.id, collapse="|"), SS$lhs)#
+	sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs)#
+	if (g != "") {#
+		sel <- SS$op %in% ops & !is.na(SS$est) & !grepl(paste(x$var.id, collapse="|"), SS$rhs) & (grepl(g, SS$lhs) | grepl(g, SS$rhs))#
+	}#
+	SS2 <- cbind(eff[sel, ], r=SS[sel, "est.std"])#
+	N <- apply(SS2[, 1:3], 1, paste, collapse=" ", sep=" ")	# formula names#
+	SS3 <- data.frame(component=N, label=SS2$label, round(SS2[, -c(1:4)], 3))#
+	SS3$component <- as.character(SS3$component)#
+	colnames(SS3) <- c("component", "label", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper", "r")#
+	return(SS3[, c(1, 2, 9, 6, 3:5, 7:8)])#
+}
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+	#T <- varComp(x)#
+	GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- SS[SS$component == paste(style$actor, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+		# retrieve p values of this (co)variance component#
+		#SD1 <- T[T$f == paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		#SD2 <- T[T$f == paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		#if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		#if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		GR <- rbind(GR, GR0)#
+	}#
+	GR$r <- as.numeric(GR$r)#
+	rownames(GR) <- NULL
+GR
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+GR[, -2]
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+Gives a structured table of all (co)variances#
+#
+varComp <- function(x) {#
+	eff <- as.data.frame(parameterEstimates(x$fit))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	res <- matrix(NA, ncol=6, nrow=ifelse(x$fe==TRUE, 1, 0) + ifelse(x$self==TRUE, length(x$roles), 0) + length(x$roles)*2 + length(x$roles)*(length(x$roles)-1))#
+	colnames(res) <- c("est","se","z","pvalue","ci.lower","ci.upper")#
+	rownames(res) <- rep("", nrow(res))#
+#
+	count <- 1#
+	if (x$fe == TRUE) {#
+		rownames(res)[1] <- "FE ~~ FE"#
+		res[1, ] <- as.matrix(eff[eff$f == "FE ~~ FE", c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		count <- count + 1#
+	}#
+#
+	for (p in 1:length(x$roles)) {#
+		res[count, ]  <- as.matrix(eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(res)[count] <- paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep="")#
+		count <- count + 1#
+	}#
+	for (p in 1:length(x$roles)) {#
+		res[count, ]  <- as.matrix(eff[eff$f == paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+		rownames(res)[count] <-  paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep="")#
+		count <- count + 1#
+	}#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if (p != t) {#
+			res[count, ]  <- as.matrix(eff[eff$f == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), sep=" "), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+			rownames(res)[count] <- paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""))#
+			count <- count + 1#
+		}#
+		}#
+	}#
+	if (x$self == TRUE) {#
+		for (p in 1:length(x$roles)) {#
+			res[count, ]  <- as.matrix(eff[eff$f == paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])#
+			rownames(res)[count] <-  paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep="")#
+			count <- count + 1#
+		}#
+	}#
+	res2 <- data.frame(f=rownames(res), as.data.frame(res))#
+	rownames(res2) <- NULL#
+	res2$f <- as.character(res2$f)#
+	colnames(res2) <- c("component", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper")#
+	return(res2)#
+}#
+# retrieve generalized reciprocity from fSRM object#
+getGR <- function(x) {#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+	#T <- varComp(x)#
+	GR <- data.frame()#
+	for (t in x$roles) {#
+		GR0 <- SS[SS$component == paste(style$actor, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+		# retrieve p values of this (co)variance component#
+		#SD1 <- T[T$f == paste("A", t, " ~~ ", "A", t, sep=""), ]#
+		#SD2 <- T[T$f == paste("P", t, " ~~ ", "P", t, sep=""), ]#
+		#if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+		#if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+		GR <- rbind(GR, GR0)#
+	}#
+	GR$r <- as.numeric(GR$r)#
+	rownames(GR) <- NULL#
+	GR[, -2]#
+}#
+# retrieve dyadic reciprocity from fSRM object#
+getDR <- function(x) {#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+	#T <- varComp(x)#
+	DR <- data.frame()#
+	for (p in 1:length(x$roles)) {#
+		for (t in 1:length(x$roles)) {#
+			if ((p < t) & (x$roles[p] != x$roles[t])) {#
+				DR0 <- SS[SS$component == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[t], ".", x$roles[p], sep=""), sep=" "), ]#
+				#SD1 <- T[paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), ]#
+				#SD2 <- T[paste("R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep=""), ]#
+#
+				#if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+				#if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+				DR <- rbind(DR, DR0)#
+			}#
+		}#
+	}#
+	DR$r <- as.numeric(DR$r)#
+	rownames(DR) <- NULL#
+	DR[, -2]#
+}
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+eff <- as.data.frame(parameterEstimates(x$fit))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x)#
+	T[, -1] <- round(T[, -1], digits)#
+	print(T)#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable(x)$stand))#
+	cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")#
+	GR <- getGR(x)#
+	print(GR, row.names=TRUE)#
+	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	DR <- getDR(x)#
+	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	print(DR, row.names=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+cat("\n\nIntragenerational similarity:\n----------------\n")
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+SS[grepl("IGSIM", SS$label), ]
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+igsim <- SS[grepl("IGSIM", SS$label), ][, -2]
+igsim
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+print.fSRM <-#
+function(x, digits=3, ...) {#
+	library(plyr)#
+	if (is.null(x$SS)) {x$SS <- standardizedSolution(x$fit, type="std.all")}#
+	## The model for 4 members must have 31 free parameters and 47 df!#
+	cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$fit)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$fit)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))#
+	eff <- as.data.frame(parameterEstimates(x$fit))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"))#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x)#
+	T[, -1] <- round(T[, -1], digits)#
+	print(T)#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable(x)$stand))#
+	cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")#
+	GR <- getGR(x)#
+	print(GR, row.names=TRUE)#
+	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	DR <- getDR(x)#
+	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	print(DR, row.names=TRUE)#
+	if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntragenerational similarity:\n----------------\n")#
+		igsim <- SS[grepl("IGSIM", SS$label), ][, -2]#
+		print(igsim)#
+	}#
+	if (x$self == TRUE) {#
+		AS <- data.frame()#
+		for (t in x$roles) {#
+			if (x$selfmode == "cor") {F <- paste(style$actor, ".", t, " ~~ ", style$self, ".", t, sep="")}#
+			if (x$selfmode == "kq") {F <- paste(style$self, ".", t, " ~ ", style$actor, ".", t, sep="")}#
+			AS0 <- SS[SS$f == F, ]#
+			AS0$comment <- ""#
+#
+			# get Variance of components --> if that is < min.p, correlation is not reliable!#
+			SD1 <- SS[SS$f == paste(style$partner, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+			SD2 <- SS[SS$f == paste(style$self, ".", t, " ~~ ", style$self, ".", t, sep=""), ]#
+			if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+			if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+#
+			if (SD1["pvalue"] > x$min.p | SD2["pvalue"] > x$min.p) {#
+				AS0$COR <- NA_real_#
+				AS0$comment <- paste("One of the variance components has p <", x$min.p)#
+			}#
+			if (AS0$pvalue > x$min.p) {#
+				AS0$COR <- NA_real_#
+				AS0$comment <- paste("Covariance estimate has p <", x$min.p)#
+			}#
+#
+			AS <- rbind(AS, AS0)#
+		}#
+		cat("\n\nAssumed similarity: Mean r =", round(meanNA(AS$COR), digits),"(out of bound estimates set to zero)\n----------------\n")#
+		print(AS,row.names=TRUE)#
+		SO <- data.frame()#
+		for (t in x$roles) {#
+			if (x$selfmode == "cor") {F <- paste(style$partner, ".", t, " ~~ ", style$self, ".", t, sep="")}#
+			if (x$selfmode == "kq") {F <- paste(style$self, ".", t, " ~ ", style$partner, ".", t, sep="")}#
+			SO0 <- SS[SS$f == F, ]#
+			SO0$comment <- ""#
+#
+			# get Variance of components --> if that is < min.p, correlation is not reliable!#
+			SD1 <- SS[SS$f == paste(style$partner, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+			SD2 <- SS[SS$f == paste(style$self, ".", t, " ~~ ", style$self, ".", t, sep=""), ]#
+			if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+			if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+#
+			if (SD1["pvalue"] > x$min.p | SD2["pvalue"] > x$min.p) {#
+				SO0$COR <- NA_real_#
+				SO0$comment <- paste("One of the variance components has p <", x$min.p)#
+			}#
+			if (SO0$pvalue > x$min.p) {#
+				SO0$COR <- NA_real_#
+				SO0$comment <- paste("Covariance estimate has p <", x$min.p)#
+			}#
+#
+			SO <- rbind(SO, SO0)#
+		}#
+		SO$COR <- as.numeric(SO$COR)#
+		cat("\n\nSelf-Other agreement: Mean r =", round(meanNA(SO$COR), digits),"(out of bound estimates set to NA)\n----------------\n")#
+		print(SO, row.names=TRUE)#
+	}#
+	if (x$means == TRUE) {#
+		cat("\n\nMean structure\n----------------\n")#
+		MS <- eff[grepl(".means.", eff$label, fixed=TRUE), c(1, 5:10)]#
+		colnames(MS)[1] <- "factor"#
+		MS[, -1] <- round(MS[, -1], digits)#
+		rownames(MS) <- NULL#
+		print(MS)#
+	}#
+}
+f4.1.ig
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f4.ig
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+mod(f3.1)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+predict(f4.1, dat4[dat4$fam==1, ])
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, means=TRUE)
+options(error=recover)
+f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, means=TRUE)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+syntax
+cat(syntax)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+fam
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+ls()
+ls()
+data
+ls()
+group
+warn
+ls()
+data
+ov.names
+ov.names.x
+ls()
+ov.names
+cat(syntax)
+ov.names.y
+syntax
+syntax
+cat("### lavaan syntax for family SRM\n### ROLES:'c','f','m'\n### VARID:'dep1'\n # Family effect:\nFE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1\n\n# Actor effects:\nA.c =~ 1*c_f_dep1 + 1*c_m_dep1\nA.f =~ 1*f_c_dep1 + 1*f_m_dep1\nA.m =~ 1*m_c_dep1 + 1*m_f_dep1\n\n# Partner effects:\nP.c =~ 1*f_c_dep1 + 1*m_c_dep1\nP.f =~ 1*c_f_dep1 + 1*m_f_dep1\nP.m =~ 1*c_m_dep1 + 1*f_m_dep1\n\n# Relationship effects:\nR.c.f =~ 1* c_f_dep1\nR.c.m =~ 1* c_m_dep1\nR.f.c =~ 1* f_c_dep1\nR.f.m =~ 1* f_m_dep1\nR.m.c =~ 1* m_c_dep1\nR.m.f =~ 1* m_f_dep1\n\nc_f_dep1 ~~ 0*c_f_dep1\nc_m_dep1 ~~ 0*c_m_dep1\nf_c_dep1 ~~ 0*f_c_dep1\nf_m_dep1 ~~ 0*f_m_dep1\nm_c_dep1 ~~ 0*m_c_dep1\nm_f_dep1 ~~ 0*m_f_dep1\n# Generalized reciprocity:\nA.c ~~ P.c\nA.f ~~ P.f\nA.m ~~ P.m\n\n# Dyadic reciprocity:\nR.c.f ~~ R.f.c\nR.c.m ~~ R.m.c\nR.f.m ~~ R.m.f\n \n## Compute structured means\n# Define labels for subsequent constraints\n FE ~ .means.FE*1\nA.c ~ .means.A.c*1\nA.f ~ .means.A.f*1\nA.m ~ .means.A.m*1\nP.c ~ .means.P.c*1\nP.f ~ .means.P.f*1\nP.m ~ .means.P.m*1\nR.c.f ~ .means.R.c.f*1\nR.c.m ~ .means.R.c.m*1\nR.f.c ~ .means.R.f.c*1\nR.f.m ~ .means.R.f.m*1\nR.m.c ~ .means.R.m.c*1\nR.m.f ~ .means.R.m.f*1\n \n\n# For three person families: set variance of family effect to zero\n FE ~~ 0* FE \n\n# set means of observed variables to zero\n c_f_dep1 ~ 0\nc_m_dep1 ~ 0\nf_c_dep1 ~ 0\nf_m_dep1 ~ 0\nm_c_dep1 ~ 0\nm_f_dep1 ~ 0 \n\n# set constraints on means for identifiability\n .means.A.c + .means.A.f + .means.A.m == 0\n .means.P.c + .means.P.f + .means.P.m == 0\n .means.R.c.f + .means.R.c.m == 0\n .means.R.f.c + .means.R.f.m == 0\n .means.R.m.c + .means.R.m.f == 0\n .means.R.f.c + .means.R.m.c == 0\n .means.R.c.f + .means.R.m.f == 0\n .means.R.c.m + .means.R.f.m == 0\n\n")
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+FE ~~ 0*FE #
+#
+c_f_dep1 ~ 0#
+c_m_dep1 ~ 0#
+f_c_dep1 ~ 0#
+f_m_dep1 ~ 0#
+m_c_dep1 ~ 0#
+m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ .means.A.c + .means.A.f + .means.A.m == 0#
+ .means.P.c + .means.P.f + .means.P.m == 0#
+ .means.R.c.f + .means.R.c.m == 0#
+ .means.R.f.c + .means.R.f.m == 0#
+ .means.R.m.c + .means.R.m.f == 0#
+ .means.R.f.c + .means.R.m.c == 0#
+ .means.R.c.f + .means.R.m.f == 0#
+ .means.R.c.m + .means.R.f.m == 0#
+ "
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+FE ~~ 0*FE #
+#
+c_f_dep1 ~ 0#
+c_m_dep1 ~ 0#
+f_c_dep1 ~ 0#
+f_m_dep1 ~ 0#
+m_c_dep1 ~ 0#
+m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ # .means.A.c + .means.A.f + .means.A.m == 0#
+ # .means.P.c + .means.P.f + .means.P.m == 0#
+ # .means.R.c.f + .means.R.c.m == 0#
+ # .means.R.f.c + .means.R.f.m == 0#
+ # .means.R.m.c + .means.R.m.f == 0#
+ # .means.R.f.c + .means.R.m.c == 0#
+ # .means.R.c.f + .means.R.m.f == 0#
+ # .means.R.c.m + .means.R.f.m == 0#
+ "
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+#  FE ~ .means.FE*1#
+# A.c ~ .means.A.c*1#
+# A.f ~ .means.A.f*1#
+# A.m ~ .means.A.m*1#
+# P.c ~ .means.P.c*1#
+# P.f ~ .means.P.f*1#
+# P.m ~ .means.P.m*1#
+# R.c.f ~ .means.R.c.f*1#
+# R.c.m ~ .means.R.c.m*1#
+# R.f.c ~ .means.R.f.c*1#
+# R.f.m ~ .means.R.f.m*1#
+# R.m.c ~ .means.R.m.c*1#
+# R.m.f ~ .means.R.m.f*1#
+#  #
+# #
+# FE ~~ 0*FE #
+# #
+# c_f_dep1 ~ 0#
+# c_m_dep1 ~ 0#
+# f_c_dep1 ~ 0#
+# f_m_dep1 ~ 0#
+# m_c_dep1 ~ 0#
+# m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ # .means.A.c + .means.A.f + .means.A.m == 0#
+ # .means.P.c + .means.P.f + .means.P.m == 0#
+ # .means.R.c.f + .means.R.c.m == 0#
+ # .means.R.f.c + .means.R.f.m == 0#
+ # .means.R.m.c + .means.R.m.f == 0#
+ # .means.R.f.c + .means.R.m.c == 0#
+ # .means.R.c.f + .means.R.m.f == 0#
+ # .means.R.c.m + .means.R.f.m == 0#
+ "
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+#  #
+# #
+# FE ~~ 0*FE #
+# #
+# c_f_dep1 ~ 0#
+# c_m_dep1 ~ 0#
+# f_c_dep1 ~ 0#
+# f_m_dep1 ~ 0#
+# m_c_dep1 ~ 0#
+# m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ # .means.A.c + .means.A.f + .means.A.m == 0#
+ # .means.P.c + .means.P.f + .means.P.m == 0#
+ # .means.R.c.f + .means.R.c.m == 0#
+ # .means.R.f.c + .means.R.f.m == 0#
+ # .means.R.m.c + .means.R.m.f == 0#
+ # .means.R.f.c + .means.R.m.c == 0#
+ # .means.R.c.f + .means.R.m.f == 0#
+ # .means.R.c.m + .means.R.f.m == 0#
+ "
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+m
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+#  #
+# #
+# FE ~~ 0*FE #
+# #
+c_f_dep1 ~ 0#
+c_m_dep1 ~ 0#
+f_c_dep1 ~ 0#
+f_m_dep1 ~ 0#
+m_c_dep1 ~ 0#
+m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ # .means.A.c + .means.A.f + .means.A.m == 0#
+ # .means.P.c + .means.P.f + .means.P.m == 0#
+ # .means.R.c.f + .means.R.c.m == 0#
+ # .means.R.f.c + .means.R.f.m == 0#
+ # .means.R.m.c + .means.R.m.f == 0#
+ # .means.R.f.c + .means.R.m.c == 0#
+ # .means.R.c.f + .means.R.m.f == 0#
+ # .means.R.c.m + .means.R.f.m == 0#
+ "
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+FE ~~ 0*FE #
+# c_f_dep1 ~ 0#
+# c_m_dep1 ~ 0#
+# f_c_dep1 ~ 0#
+# f_m_dep1 ~ 0#
+# m_c_dep1 ~ 0#
+# m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ # .means.A.c + .means.A.f + .means.A.m == 0#
+ # .means.P.c + .means.P.f + .means.P.m == 0#
+ # .means.R.c.f + .means.R.c.m == 0#
+ # .means.R.f.c + .means.R.f.m == 0#
+ # .means.R.m.c + .means.R.m.f == 0#
+ # .means.R.f.c + .means.R.m.c == 0#
+ # .means.R.c.f + .means.R.m.f == 0#
+ # .means.R.c.m + .means.R.f.m == 0#
+ "
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+m
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+FE ~~ 0*FE #
+# c_f_dep1 ~ 0#
+# c_m_dep1 ~ 0#
+# f_c_dep1 ~ 0#
+# f_m_dep1 ~ 0#
+# m_c_dep1 ~ 0#
+# m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ .means.A.c + .means.A.f + .means.A.m == 0#
+ .means.P.c + .means.P.f + .means.P.m == 0#
+ .means.R.c.f + .means.R.c.m == 0#
+ .means.R.f.c + .means.R.f.m == 0#
+ .means.R.m.c + .means.R.m.f == 0#
+ .means.R.f.c + .means.R.m.c == 0#
+ .means.R.c.f + .means.R.m.f == 0#
+ .means.R.c.m + .means.R.f.m == 0#
+ "
+m
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+m
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+FE ~~ 0*FE #
+c_f_dep1 ~ 0#
+# c_m_dep1 ~ 0#
+# f_c_dep1 ~ 0#
+# f_m_dep1 ~ 0#
+# m_c_dep1 ~ 0#
+# m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ .means.A.c + .means.A.f + .means.A.m == 0#
+ .means.P.c + .means.P.f + .means.P.m == 0#
+ .means.R.c.f + .means.R.c.m == 0#
+ .means.R.f.c + .means.R.f.m == 0#
+ .means.R.m.c + .means.R.m.f == 0#
+ .means.R.f.c + .means.R.m.c == 0#
+ .means.R.c.f + .means.R.m.f == 0#
+ .means.R.c.m + .means.R.f.m == 0#
+ "
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+FE ~~ 0*FE #
+c_f_dep1 ~~ 0#
+# c_m_dep1 ~ 0#
+# f_c_dep1 ~ 0#
+# f_m_dep1 ~ 0#
+# m_c_dep1 ~ 0#
+# m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ .means.A.c + .means.A.f + .means.A.m == 0#
+ .means.P.c + .means.P.f + .means.P.m == 0#
+ .means.R.c.f + .means.R.c.m == 0#
+ .means.R.f.c + .means.R.f.m == 0#
+ .means.R.m.c + .means.R.m.f == 0#
+ .means.R.f.c + .means.R.m.c == 0#
+ .means.R.c.f + .means.R.m.f == 0#
+ .means.R.c.m + .means.R.f.m == 0#
+ "
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+syntax <-  "#
+### lavaan syntax for family SRM#
+### ROLES:'c','f','m'#
+### VARID:'dep1'#
+ # Family effect:#
+FE =~ 1*c_f_dep1 + 1*c_m_dep1 + 1*f_c_dep1 + 1*f_m_dep1 + 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Actor effects:#
+A.c =~ 1*c_f_dep1 + 1*c_m_dep1#
+A.f =~ 1*f_c_dep1 + 1*f_m_dep1#
+A.m =~ 1*m_c_dep1 + 1*m_f_dep1#
+#
+# Partner effects:#
+P.c =~ 1*f_c_dep1 + 1*m_c_dep1#
+P.f =~ 1*c_f_dep1 + 1*m_f_dep1#
+P.m =~ 1*c_m_dep1 + 1*f_m_dep1#
+#
+# Relationship effects:#
+R.c.f =~ 1* c_f_dep1#
+R.c.m =~ 1* c_m_dep1#
+R.f.c =~ 1* f_c_dep1#
+R.f.m =~ 1* f_m_dep1#
+R.m.c =~ 1* m_c_dep1#
+R.m.f =~ 1* m_f_dep1#
+#
+c_f_dep1 ~~ 0*c_f_dep1#
+c_m_dep1 ~~ 0*c_m_dep1#
+f_c_dep1 ~~ 0*f_c_dep1#
+f_m_dep1 ~~ 0*f_m_dep1#
+m_c_dep1 ~~ 0*m_c_dep1#
+m_f_dep1 ~~ 0*m_f_dep1#
+# Generalized reciprocity:#
+A.c ~~ P.c#
+A.f ~~ P.f#
+A.m ~~ P.m#
+#
+# Dyadic reciprocity:#
+R.c.f ~~ R.f.c#
+R.c.m ~~ R.m.c#
+R.f.m ~~ R.m.f#
+## Compute structured means#
+# Define labels for subsequent constraints#
+ FE ~ .means.FE*1#
+A.c ~ .means.A.c*1#
+A.f ~ .means.A.f*1#
+A.m ~ .means.A.m*1#
+P.c ~ .means.P.c*1#
+P.f ~ .means.P.f*1#
+P.m ~ .means.P.m*1#
+R.c.f ~ .means.R.c.f*1#
+R.c.m ~ .means.R.c.m*1#
+R.f.c ~ .means.R.f.c*1#
+R.f.m ~ .means.R.f.m*1#
+R.m.c ~ .means.R.m.c*1#
+R.m.f ~ .means.R.m.f*1#
+FE ~~ 0*FE #
+c_f_dep1 ~~ 0*c_f_dep1#
+# c_m_dep1 ~ 0#
+# f_c_dep1 ~ 0#
+# f_m_dep1 ~ 0#
+# m_c_dep1 ~ 0#
+# m_f_dep1 ~ 0 #
+#
+# set constraints on means for identifiability#
+ .means.A.c + .means.A.f + .means.A.m == 0#
+ .means.P.c + .means.P.f + .means.P.m == 0#
+ .means.R.c.f + .means.R.c.m == 0#
+ .means.R.f.c + .means.R.f.m == 0#
+ .means.R.m.c + .means.R.m.f == 0#
+ .means.R.f.c + .means.R.m.c == 0#
+ .means.R.c.f + .means.R.m.f == 0#
+ .means.R.c.m + .means.R.f.m == 0#
+ "
+m <- lavaan(#
+			model		= syntax, #
+			data		= fam,#
+			std.ov		= FALSE,#
+			orthogonal	= TRUE,#
+			fixed.x 	= FALSE,#
+			int.ov.free	= TRUE,#
+			int.lv.free = FALSE,#
+			auto.fix.first = FALSE,#
+			auto.fix.single = TRUE,#
+			auto.var 	= TRUE,#
+			auto.cov.lv.x = TRUE,#
+			auto.cov.y 	= TRUE, ...)
+?lavaan
+e-ä
+options(error=NULL)ä
+options(error=NULL)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/deltamethod')
+library(lavaan)#
+#
+# Part 1: the code for simulating data.#
+  # different means and variances are specified based on the real data of Kenny (4person.sav). This code was used for power calculation#
+  # (a simular code was used where the Type I error rate was computed. Therfor the means and variances where equal because we wanted to assume that the null hypothesis was correct)#
+SRM2grp <- '#
+ffam  =~ 1*YMOFA+1*YFAMO+1*YMOC1+1*YC1MO+1*YMOC2+1*YC2MO+#
+1*YFAC1+1*YC1FA+1*YFAC2+1*YC2FA+1*YC1C2+1*YC2C1#
+factmo=~ 1*YMOFA+1*YMOC1+1*YMOC2; #
+factfa=~ 1*YFAMO+1*YFAC1+1*YFAC2#
+factc1=~ 1*YC1FA+1*YC1MO+1*YC1C2; #
+factc2=~ 1*YC2MO+1*YC2C1+1*YC2FA#
+fparmo=~ 1*YFAMO+1*YC1MO+1*YC2MO; #
+fparfa=~ 1*YMOFA+1*YC1FA+1*YC2FA#
+fparc1=~ 1*YFAC1+1*YMOC1+1*YC2C1; #
+fparc2=~ 1*YMOC2+1*YC1C2+1*YFAC2#
+fmofa=~ 1*YMOFA;#
+ffamo=~1*YFAMO;#
+fmoc1=~ 1*YMOC1;#
+fc1mo=~1*YC1MO;#
+fmoc2=~ 1*YMOC2;#
+fc2mo=~1*YC2MO;#
+ffac1=~ 1*YFAC1;#
+fc1fa=~1*YC1FA;#
+ffac2=~ 1*YFAC2;#
+fc2fa=~1*YC2FA;#
+fc1c2=~ 1*YC1C2;#
+fc2c1=~1*YC2C1;#
+#
+# mean/intercepts latents#
+ffam~~c(0.053,0.021)*ffam#
+factmo~~c(0.199,0.125)*factmo;#
+factfa~~c(0.232,0.187)*factfa; #
+factc1~~c(0.149,0.26)*factc1; #
+factc2~~c(0.265,0.206)*factc2;#
+fparmo~~c(0.035,0.058)*fparmo; #
+fparfa~~c(0.108,0.016)*fparfa; #
+fparc1~~c(0.039,0.087)*fparc1; #
+fparc2~~c(0.090,0.064)*fparc2;#
+fmofa~~c(0.251,0.627)*fmofa;#
+ffamo~~c(0.643,0.524)*ffamo;#
+fmoc1~~c(0.182,0.332)*fmoc1;#
+fc1mo~~c(0.119,0.114)*fc1mo;#
+fmoc2~~c(0.254,0.403)*fmoc2;#
+fc2mo~~c(0.178,0.203)*fc2mo;#
+ffac1~~c(0.16,0.168)*ffac1;#
+fc1fa~~c(0.173,0.227)*fc1fa;#
+ffac2~~c(0.112,0.3)*ffac2;#
+fc2fa~~c(0.181,0.459)*fc2fa;#
+fc2c1~~c(0.321,0.395)*fc2c1;#
+fc1c2~~c(0.149,0.272)*fc1c2;#
+factmo~~c(-0.001,0.067)*fparmo; #
+factfa~~c(0,0.011)*fparfa; #
+factc1~~c(0.034,0.068)*fparc1;#
+factc2~~c(0.082,0.063)*fparc2;#
+ffamo~~c(0.041,0.077)*fmofa;#
+fc1mo~~c(0.041,0.077)*fmoc1;#
+fc2mo~~c(0.046,-0.041)*fmoc2;#
+fc1fa~~c(0.060,0.017)*ffac1;#
+fc2fa~~c(0.041,0.070)*ffac2;#
+fc1c2~~c(-0.01,0.031)*fc2c1;#
+#
+ffam   ~ c(1.801,1.875)*1 #
+factmo ~ c(-0.067,-0.107)*1#
+factfa ~ c(0.067,0.138)*1#
+factc1 ~ c(-0.167,-0.101)*1#
+factc2 ~ c(0.166,0.069)*1#
+fparmo ~ c(-0.141,-0.196)*1#
+fparfa ~ c(0.049,0.026)*1#
+fparc1 ~ c(-0.026,0.07)*1#
+fparc2 ~ c(0.118,0.1)*1#
+fmofa ~ c(0.009,0.07)*1#
+ffamo ~ c(0.1,0.132)*1#
+fmoc1 ~ c(-0.022,-0.033)*1#
+fc1mo ~ c(-0.048,-0.07)*1#
+fmoc2 ~ c(0.013,-0.037)*1#
+fc2mo ~ c(-0.052,-0.062)*1#
+ffac1 ~ c(-0.028,-0.104)*1#
+fc1fa ~ c(-0.011,0.005)*1#
+ffac2 ~ c(-0.071,-0.028)*1#
+fc2fa ~ c(0.002,-0.075)*1#
+fc1c2 ~ c(0.059,0.065)*1#
+fc2c1 ~ c(0.05,0.138)*1#
+#
+# mean/intercepts observed#
+YMOFA ~ 0#
+YFAMO ~ 0#
+YMOC1 ~ 0#
+YC1MO ~ 0#
+YMOC2 ~ 0#
+YC2MO ~ 0#
+YFAC1 ~ 0#
+YC1FA ~ 0#
+YFAC2 ~ 0#
+YC2FA ~ 0#
+YC1C2 ~ 0#
+YC2C1 ~ 0#
+#
+# variances observed#
+YMOFA~~0*YMOFA#
+YFAMO~~0*YFAMO#
+YMOC1~~0*YMOC1#
+YC1MO~~0*YC1MO#
+YMOC2~~0*YMOC2#
+YC2MO~~0*YC2MO#
+YFAC1~~0*YFAC1#
+YC1FA~~0*YC1FA#
+YFAC2~~0*YFAC2#
+YC2FA~~0*YC2FA#
+YC1C2~~0*YC1C2#
+YC2C1~~0*YC2C1#
+'#
+# Part 2: the code to fit the simulated data with this model. New paramaters are specified#
+#
+SRM2grpb <- '#
+ffam  =~ 1*YMOFA+1*YFAMO+1*YMOC1+1*YC1MO+1*YMOC2+1*YC2MO+#
+1*YFAC1+1*YC1FA+1*YFAC2+1*YC2FA+1*YC1C2+1*YC2C1#
+factmo=~ 1*YMOFA+1*YMOC1+1*YMOC2; factfa=~ 1*YFAMO+1*YFAC1+1*YFAC2#
+factc1=~ 1*YC1FA+1*YC1MO+1*YC1C2; factc2=~ 1*YC2MO+1*YC2C1+1*YC2FA#
+fparmo=~ 1*YFAMO+1*YC1MO+1*YC2MO; fparfa=~ 1*YMOFA+1*YC1FA+1*YC2FA#
+fparc1=~ 1*YFAC1+1*YMOC1+1*YC2C1; fparc2=~ 1*YMOC2+1*YC1C2+1*YFAC2#
+fmofa=~ 1*YMOFA;ffamo=~1*YFAMO;#
+fmoc1=~ 1*YMOC1;fc1mo=~1*YC1MO;#
+fmoc2=~ 1*YMOC2;fc2mo=~1*YC2MO;#
+ffac1=~ 1*YFAC1;fc1fa=~1*YC1FA;#
+ffac2=~ 1*YFAC2;fc2fa=~1*YC2FA;#
+fc1c2=~ 1*YC1C2;fc2c1=~1*YC2C1;#
+#
+ffam~~c(varfamA,varfamB)*ffam#
+factmo~~c(varactmoA,varactmoB)*factmo; factfa~~c(varactfaA,varactfaB)*factfa; factc1~~c(varactc1A,varactc1B)*factc1; factc2~~c(varactc2A,varactc2B)*factc2;#
+fparmo~~c(varparmoA,varparmoB)*fparmo; fparfa~~c(varparfaA,varparfaB)*fparfa; fparc1~~c(varparc1A,varparc1B)*fparc1; fparc2~~c(varparc2A,varparc2B)*fparc2;#
+fmofa~~c(varmofaA,varmofaB)*fmofa;ffamo~~c(varfamoA,varfamoB)*ffamo;fmoc1~~c(varmoc1A,varmoc1B)*fmoc1;fc1mo~~c(varc1moA,varc1moB)*fc1mo;#
+fmoc2~~c(varmoc2A,varmoc2B)*fmoc2;fc2mo~~c(varc2moA,varc2moB)*fc2mo;#
+ffac1~~c(varfac1A,varfac1B)*ffac1;fc1fa~~c(varc1faA,varc1faB)*fc1fa;ffac2~~c(varfac2A,varfac2B)*ffac2;fc2fa~~c(varc2faA,varc2faB)*fc2fa;#
+fc2c1~~c(varc2c1A,varc2c1B)*fc2c1;fc1c2~~c(varc1c2A,varc1c2B)*fc1c2;#
+factmo~~c(covarmoA,covarmoB)*fparmo; factfa~~c(covarfaA,covarfaB)*fparfa; factc1~~c(covarc1A,covarc1B)*fparc1; factc2~~c(covarc2A,covarc2B)*fparc2;#
+ffamo~~c(covarmofaA,covarmofaB)*fmofa;fc1mo~~c(covarmofaA,covarmofaB)*fmoc1;fc2mo~~c(covarmoc2A,covarmoc2B)*fmoc2;fc1fa~~c(covarfac1A,covarfac1B)*ffac1;#
+fc2fa~~c(covarc2faA,covarc2faB)*ffac2;fc1c2~~c(covarc2c1A,covarc2c1B)*fc2c1;#
+#
+ffam   ~ c(famA,famB)*1#
+factmo ~ c(actmoA,actmoB)*1#
+factfa ~ c(actfaA,actfaB)*1#
+factc1 ~ c(actc1A,actc1B)*1#
+factc2 ~ c(actc2A,actc2B)*1#
+fparmo ~ c(parmoA,parmoB)*1#
+fparfa ~ c(parfaA,parfaB)*1#
+fparc1 ~ c(parc1A,parc1B)*1#
+fparc2 ~ c(parc2A,parc2B)*1#
+fmofa ~ c(mofaA,mofaB)*1#
+ffamo ~ c(famoA,famoB)*1#
+fmoc1 ~ c(moc1A,moc1B)*1#
+fc1mo ~ c(c1moA,c1moB)*1#
+fmoc2 ~ c(moc2A,moc2B)*1#
+fc2mo ~ c(c2moA,c2moB)*1#
+ffac1 ~ c(fac1A,fac1B)*1#
+fc1fa ~ c(c1faA,c1faB)*1#
+ffac2 ~ c(fac2A,fac2B)*1#
+fc2fa ~ c(c2faA,c2faB)*1#
+fc1c2 ~ c(c1c2A,c1c2B)*1#
+fc2c1 ~ c(c2c1A,c2c1B)*1#
+#
+# mean/intercepts observed#
+YMOFA ~ 0#
+YFAMO ~ 0#
+YMOC1 ~ 0#
+YC1MO ~ 0#
+YMOC2 ~ 0#
+YC2MO ~ 0#
+YFAC1 ~ 0#
+YC1FA ~ 0#
+YFAC2 ~ 0#
+YC2FA ~ 0#
+YC1C2 ~ 0#
+YC2C1 ~ 0#
+#
+# variances observed#
+YMOFA~~0*YMOFA#
+YFAMO~~0*YFAMO#
+YMOC1~~0*YMOC1#
+YC1MO~~0*YC1MO#
+YMOC2~~0*YMOC2#
+YC2MO~~0*YC2MO#
+YFAC1~~0*YFAC1#
+YC1FA~~0*YC1FA#
+YFAC2~~0*YFAC2#
+YC2FA~~0*YC2FA#
+YC1C2~~0*YC1C2#
+YC2C1~~0*YC2C1#
+# defined parameters (function of existing *labeled* parameters)#
+fam    := famA - famB#
+actmo := actmoA - actmoB#
+actfa := actfaA - actfaB#
+actc1 := actc1A - actc1B#
+actc2 := actc2A - actc2B#
+parmo := parmoA - parmoB#
+parfa := parfaA - parfaB#
+parc1 := parc1A - parc1B#
+parc2 := parc2A - parc2B#
+mofa  := mofaA - mofaB#
+moc1  := moc1A - moc1B#
+moc2  := moc2A - moc2B#
+famo  := famoA - famoB#
+fac1  := fac1A - fac1B#
+fac2  := fac2A - fac2B#
+c1mo  := c1moA - c1moB#
+c1fa  := c1faA - c1faB#
+c1c2  := c1c2A - c1c2B#
+c2mo  := c2moA - c2moB#
+c2fa  := c2faA - c2faB#
+c2c1  := c2c1A - c2c1B#
+#
+# Constraints#
+actmoA+actfaA+actc1A+actc2A==0#
+parmoA+parfaA+parc1A+parc2A==0#
+mofaA+moc1A+moc2A==0#
+famoA+c1moA+c2moA==0#
+famoA+fac1A+fac2A==0#
+mofaA+c1faA+c2faA==0#
+c1moA+c1faA+c1c2A==0#
+moc1A+fac1A+c2c1A==0#
+c2moA+c2faA+c2c1A==0#
+moc2A+fac2A+c1c2A==0#
+#
+actmoB+actfaB+actc1B+actc2B==0#
+parmoB+parfaB+parc1B+parc2B==0#
+mofaB+moc1B+moc2B==0#
+famoB+c1moB+c2moB==0#
+famoB+fac1B+fac2B==0#
+mofaB+c1faB+c2faB==0#
+c1moB+c1faB+c1c2B==0#
+moc1B+fac1B+c2c1B==0#
+c2moB+c2faB+c2c1B==0#
+moc2B+fac2B+c1c2B==0#
+'#
+#
+fam <-c()#
+actmo <-c()#
+actfa <- c()#
+actc1 <- c()#
+actc2 <- c()#
+parmo <- c()#
+parfa <- c() #
+parc1 <- c()#
+parc2 <- c()#
+mofa <- c()#
+moc1 <- c()#
+moc2 <- c()#
+famo <- c()#
+fac1 <- c()#
+fac2 <- c()#
+c1mo <- c()#
+c1fa <- c()#
+c1c2 <- c()#
+c2mo <- c()#
+c2fa <- c()#
+c2c1 <- c()#
+fit <- c()#
+sim.data <- matrix(NA, 416, 13)#
+N <- 10#
+for(i in 1:N) {#
+  set.seed(i)#
+  sim.data <- simulateData(SRM2grp, sample.nobs=c(50,50), group.label=c("group 1", "group 2"))  #
+  fit <- lavaan(SRM2grpb, data=sim.data,group="group")#
+  fam <- c(fam, parameterEstimates(fit)[249,]$pvalue)#
+  actmo  <- c(actmo, parameterEstimates(fit)[250,]$pvalue)#
+  actfa <- c(actfa, parameterEstimates(fit)[251,]$pvalue)#
+  actc1 <- c(actc1, parameterEstimates(fit)[252,]$pvalue)#
+  actc2 <- c(actc2, parameterEstimates(fit)[253,]$pvalue)#
+  parmo <- c(parmo, parameterEstimates(fit)[254,]$pvalue)#
+  parfa <- c(parfa, parameterEstimates(fit)[255,]$pvalue)#
+  parc1 <- c(parc1, parameterEstimates(fit)[256,]$pvalue)#
+  parc2 <- c(parc2, parameterEstimates(fit)[257,]$pvalue)#
+  mofa <- c(mofa, parameterEstimates(fit)[258,]$pvalue)#
+  moc1 <- c(moc1, parameterEstimates(fit)[259,]$pvalue)#
+  moc2 <- c(moc2, parameterEstimates(fit)[260,]$pvalue)#
+  famo <- c(famo, parameterEstimates(fit)[261,]$pvalue)#
+  fac1 <- c(fac1, parameterEstimates(fit)[262,]$pvalue)#
+  fac2 <- c(fac2, parameterEstimates(fit)[263,]$pvalue)#
+  c1mo <- c(c1mo, parameterEstimates(fit)[264,]$pvalue)#
+  c1fa <- c(c1fa, parameterEstimates(fit)[265,]$pvalue)#
+  c1c2 <- c(c1c2, parameterEstimates(fit)[266,]$pvalue)#
+  c2mo <- c(c2mo, parameterEstimates(fit)[267,]$pvalue)#
+  c2fa <- c(c2fa, parameterEstimates(fit)[268,]$pvalue)#
+  c2c1 <- c(c2c1, parameterEstimates(fit)[269,]$pvalue)#
+  }#
+#
+deltamethode<- cbind(fam, actmo, actfa, actc1,actc2,parmo,parfa,parc1,parc2,mofa,moc1,moc2, famo, fac1,fac2,c1mo,c1fa,c1c2,c2mo,c2fa,c2c1)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/deltamethod')
+N <- 3#
+for(i in 1:N) {#
+  set.seed(i)#
+  print(i)#
+  sim.data <- simulateData(SRM2grp, sample.nobs=c(50,50), group.label=c("group 1", "group 2"))  #
+  fit <- lavaan(SRM2grpb, data=sim.data,group="group")#
+  fam <- c(fam, parameterEstimates(fit)[249,]$pvalue)#
+  actmo  <- c(actmo, parameterEstimates(fit)[250,]$pvalue)#
+  actfa <- c(actfa, parameterEstimates(fit)[251,]$pvalue)#
+  actc1 <- c(actc1, parameterEstimates(fit)[252,]$pvalue)#
+  actc2 <- c(actc2, parameterEstimates(fit)[253,]$pvalue)#
+  parmo <- c(parmo, parameterEstimates(fit)[254,]$pvalue)#
+  parfa <- c(parfa, parameterEstimates(fit)[255,]$pvalue)#
+  parc1 <- c(parc1, parameterEstimates(fit)[256,]$pvalue)#
+  parc2 <- c(parc2, parameterEstimates(fit)[257,]$pvalue)#
+  mofa <- c(mofa, parameterEstimates(fit)[258,]$pvalue)#
+  moc1 <- c(moc1, parameterEstimates(fit)[259,]$pvalue)#
+  moc2 <- c(moc2, parameterEstimates(fit)[260,]$pvalue)#
+  famo <- c(famo, parameterEstimates(fit)[261,]$pvalue)#
+  fac1 <- c(fac1, parameterEstimates(fit)[262,]$pvalue)#
+  fac2 <- c(fac2, parameterEstimates(fit)[263,]$pvalue)#
+  c1mo <- c(c1mo, parameterEstimates(fit)[264,]$pvalue)#
+  c1fa <- c(c1fa, parameterEstimates(fit)[265,]$pvalue)#
+  c1c2 <- c(c1c2, parameterEstimates(fit)[266,]$pvalue)#
+  c2mo <- c(c2mo, parameterEstimates(fit)[267,]$pvalue)#
+  c2fa <- c(c2fa, parameterEstimates(fit)[268,]$pvalue)#
+  c2c1 <- c(c2c1, parameterEstimates(fit)[269,]$pvalue)#
+  }
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/deltamethod')
+deltamethode<- cbind(fam, actmo, actfa, actc1,actc2,parmo,parfa,parc1,parc2,mofa,moc1,moc2, famo, fac1,fac2,c1mo,c1fa,c1c2,c2mo,c2fa,c2c1)
+deltamehode
+deltamethode
+fit
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/deltamethod')
+parameterEstimates(fit)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/deltamethod')
+parameterEstimates(fit)[249,]$pvalue
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/deltamethod')
+parameterEstimates(fit)[249,]
+install_github(repo="swirl", username="ncarchedi")
+remove.packages("lavaan")
+library(lavaan)
+sessionInfo()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f3.1.m <- fSRM(dep1 ~ actor*partner | fam, dat3, means=TRUE)

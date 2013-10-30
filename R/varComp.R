@@ -1,31 +1,36 @@
 # Gives a structured table of all (co)variances
 
-varComp <-
-function(x) {
+varComp <- function(x) {
 	eff <- as.data.frame(parameterEstimates(x$fit))
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
-	res <- matrix(NA, ncol=6, nrow=ifelse(x$fe==TRUE, 1, 0) + ifelse(x$self==TRUE, length(x$roles), 0) + length(x$roles)*2 + length(x$roles)*(length(x$roles)-1))
+	res <- matrix(NA, ncol=6, nrow=ifelse(x$drop!="family", 1, 0) + ifelse(x$self==TRUE, length(x$roles), 0) + length(x$roles)*2 + length(x$roles)*(length(x$roles)-1))
 	
 	colnames(res) <- c("est","se","z","pvalue","ci.lower","ci.upper")
 	rownames(res) <- rep("", nrow(res))
 
 	count <- 1
-	if (x$fe == TRUE) {
+	if (x$drop != "family") {
 		rownames(res)[1] <- "FE ~~ FE"
 		res[1, ] <- as.matrix(eff[eff$f == "FE ~~ FE", c("est","se","z","pvalue","ci.lower","ci.upper")])
 		count <- count + 1
 	}
 
-	for (p in 1:length(x$roles)) {
-		res[count, ]  <- as.matrix(eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])
-		rownames(res)[count] <- paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep="")
-		count <- count + 1
+	if (x$drop != "actor") {
+		for (p in 1:length(x$roles)) {
+			res[count, ]  <- as.matrix(eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])
+			rownames(res)[count] <- paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep="")
+			count <- count + 1
+		}
 	}
-	for (p in 1:length(x$roles)) {
-		res[count, ]  <- as.matrix(eff[eff$f == paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])
-		rownames(res)[count] <-  paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep="")
-		count <- count + 1
+	
+	if (x$drop != "partner") {
+		for (p in 1:length(x$roles)) {
+			res[count, ]  <- as.matrix(eff[eff$f == paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])
+			rownames(res)[count] <-  paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep="")
+			count <- count + 1
+		}
 	}
+	
 	for (p in 1:length(x$roles)) {
 		for (t in 1:length(x$roles)) {
 			if (p != t) {
@@ -44,9 +49,11 @@ function(x) {
 		}
 	}
 	
+	res <- res[rownames(res) != "", ]
 	res2 <- data.frame(f=rownames(res), as.data.frame(res))
 	rownames(res2) <- NULL
 	res2$f <- as.character(res2$f)
+	colnames(res2) <- c("component", "variance", "se", "z", "p.value", "ci.lower", "ci.upper")
 	return(res2)
 }
 
@@ -58,7 +65,7 @@ getGR <- function(x) {
 	#T <- varComp(x)
 	GR <- data.frame()
 	for (t in x$roles) {
-		GR0 <- SS[SS$f == paste(style$actor, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]
+		GR0 <- SS[SS$component == paste(style$actor, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]
 		
 		# retrieve p values of this (co)variance component
 		#SD1 <- T[T$f == paste("A", t, " ~~ ", "A", t, sep=""), ]
@@ -68,9 +75,9 @@ getGR <- function(x) {
 		
 		GR <- rbind(GR, GR0)
 	}
-	GR$COR <- as.numeric(GR$COR)
+	GR$r <- as.numeric(GR$r)
 	rownames(GR) <- NULL
-	GR
+	GR[, -2]
 }
 
 
@@ -84,7 +91,7 @@ getDR <- function(x) {
 		for (t in 1:length(x$roles)) {
 			if ((p < t) & (x$roles[p] != x$roles[t])) {
 				
-				DR0 <- SS[SS$f == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[t], ".", x$roles[p], sep=""), sep=" "), ]
+				DR0 <- SS[SS$component == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[t], ".", x$roles[p], sep=""), sep=" "), ]
 				
 				#SD1 <- T[paste("R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), " ~~ ", "R", substr(x$roles[p], 1, 1), substr(x$roles[t], 1, 1), sep=""), ]
 				#SD2 <- T[paste("R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), " ~~ ", "R", substr(x$roles[t], 1, 1), substr(x$roles[p], 1, 1), sep=""), ]
@@ -96,7 +103,7 @@ getDR <- function(x) {
 			}
 		}
 	}
-	DR$COR <- as.numeric(DR$COR)
+	DR$r <- as.numeric(DR$r)
 	rownames(DR) <- NULL
-	DR
+	DR[, -2]
 }

@@ -2,7 +2,6 @@
 
 print.fSRM <-
 function(x, digits=3, ...) {
-	library(plyr)
 	if (is.null(x$SS)) {x$SS <- standardizedSolution(x$fit, type="std.all")}
 	## The model for 4 members must have 31 free parameters and 47 df!
 	cat("----------------\n")
@@ -38,12 +37,12 @@ function(x, digits=3, ...) {
 	
 	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")
 	DR <- getDR(x)
-	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")
+	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")
 	print(DR, row.names=TRUE)
 	
 	if (length(x$IGSIM) > 0) {
 		cat("\n\nIntragenerational similarity:\n----------------\n")
-		igsim <- SS[grepl("IGSIM", SS$label), ]		
+		igsim <- SS[grepl("IGSIM", SS$label), ][, -2]
 		print(igsim)
 	}
 	

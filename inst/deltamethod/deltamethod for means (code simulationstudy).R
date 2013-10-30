@@ -262,9 +262,10 @@ c2fa <- c()
 c2c1 <- c()
 fit <- c()
 sim.data <- matrix(NA, 416, 13)
-N <- 200
+N <- 2
 for(i in 1:N) {
   set.seed(i)
+  print(i)
   sim.data <- simulateData(SRM2grp, sample.nobs=c(50,50), group.label=c("group 1", "group 2"))  
   fit <- lavaan(SRM2grpb, data=sim.data,group="group")
   fam <- c(fam, parameterEstimates(fit)[249,]$pvalue)

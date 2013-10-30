@@ -4,10 +4,9 @@
 \alias{update}
 \title{Run a Social Relations Model with roles ("Family SRM")}
 \usage{
-  fSRM(formula = NULL, data, fe = TRUE, add = "",
-    err = "default", means = FALSE, IGSIM = list(),
-    self = FALSE, add.variable = c(), selfmode = "cor",
-    syntax = "", ...)
+  fSRM(formula = NULL, data, drop = "default", add = "",
+    means = FALSE, IGSIM = list(), add.variable = c(),
+    selfmode = "cor", syntax = "", ...)
 }
 \arguments{
   \item{formula}{A formula that defines the variable names.
@@ -20,18 +19,20 @@
   \code{formula}. Must be in long format where each row
   describes one directed dyadic relationship.}
 
-  \item{fe}{Should the family effect be included? Requires
-  at least 4 members per group.}
+  \item{drop}{In three-member families at least one
+  component has to be dropped. \code{drop} defines which
+  one: "none": drop nothing; "family" - drop family effect;
+  "reciprocities" - drop individual reciprocities; "actor"
+  - drop actor factors and actor-partner covariances;
+  "partner" - drop partner effects and actor-partner
+  covariances; "default": drop nothing in >= 4 members and
+  drop family effect with 3 members. Although usually not
+  necessary, the drop parameter can also be applied to >= 4
+  member families.}
 
   \item{add}{Additional lavaan syntax pasted at the end of
   the generated model. Can contain, for example, user
   specified error correlations.}
-
-  \item{err}{Defines the type of correlations between error
-  terms. err = 1: Correlate same items BETWEEN ALL RATERS
-  (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000);
-  err = 2: Correlate same items WITHIN RATERS (e.g., Branje
-  et al., 2003, Eichelsheim)}
 
   \item{IGSIM}{Define intragenerational similarity
   correlations. Must be a list where the levels of actor.id
@@ -39,9 +40,6 @@
   \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here
   "m"other and "f"ather are defined as one generation, and
   "y"ounger and "o"lder as the other generation.}
-
-  \item{self}{Should self-ratings be included in the
-  analysis (if present in the data set)?}
 
   \item{selfmode}{Defines the style how the selfratings are
   combined with the latent actor and partner effects. If

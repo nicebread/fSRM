@@ -1,13 +1,12 @@
 percTable <-
 function(x) {
-	library(plyr)
 	eff <- parameterEstimates(x$fit)
 	SS <- x$SS
 	
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	res <- matrix(NA, ncol=6, nrow=length(x$roles)*(length(x$roles)-1))
 	
-	colnames(res) <- c("Family", "Actor Effect", "Partner Effect", "Relationship Effect", "Error", "SUM")
+	colnames(res) <- c("Family", "Actor", "Partner", "Relationship", "Error", "SUM")
 	rownames(res) <- rep("", nrow(res))
 	count <- 1
 	for (p in 1:length(x$roles)) {
@@ -15,9 +14,10 @@ function(x) {
 			if (x$roles[p] != x$roles[t]) {
 				#print(paste(p, t))
 				res[count, 1:4] <- c(
-					ifelse(x$fe == TRUE, eff[eff$f == "FE ~~ FE", "est"], 0), 
-					eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), "est"],
-					eff[eff$f == paste(style$partner, ".", x$roles[t], " ~~ ", style$partner, ".", x$roles[t], sep=""), "est"],
+					ifelse(x$drop != "family", eff[eff$f == "FE ~~ FE", "est"], 0), 
+					
+					ifelse(x$drop != "actor", eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), "est"], 0),
+					ifelse(x$drop != "partner", eff[eff$f == paste(style$partner, ".", x$roles[t], " ~~ ", style$partner, ".", x$roles[t], sep=""), "est"], 0), 
 					eff[eff$f == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), sep=" "), "est"])
 					
 					# error in all indicators

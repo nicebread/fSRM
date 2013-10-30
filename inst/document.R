@@ -10,6 +10,9 @@ for (nm in list.files("R/.", pattern="\\.[r|R]", recursive=FALSE)) {
 library(devtools)
 
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")
+devtools::load_code()
+
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")
 devtools::document()
 
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")
