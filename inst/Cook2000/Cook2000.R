@@ -120,24 +120,9 @@ predict(f4.1, dat4[dat4$fam==1, ])
 
 
 ## ======================================================================
-## Test deltamethod
+## Wald-test for equality of means
 ## ======================================================================
 
-# 4 persons, 1 indicator
-f4.1 <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
-f4.1
-cat(f4.1$syntax)
-
-x <- f4.1
-
-eff <- parameterEstimates(x$fit, standardized=TRUE)
-vc <- vcov(x$fit)
-Wald.actor <- c()
-for (r in x$roles) {
-	minusone <- eff[grepl(".means.A", eff$label) & eff$lhs != paste0(style$actor, ".", r), ]
-	print(minusone)
-	vc.minusone <- vc[minusone$label, minusone$label]
-	print(solve(vc.minusone))
-	Wald.actor <- c(Wald.actor, minusone$est %*% solve(vc.minusone) %*% minusone$est)
-}
-Wald.actor
+f4.1.m <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
+f4.1.m
+equalMeans(f4.1.m)

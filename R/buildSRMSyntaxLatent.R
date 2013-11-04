@@ -244,7 +244,7 @@ if (means==TRUE) {
 		}
 	}
 	
-	if (length(roles)==3) {
+	if (drop != "family") {
 		SM <- paste(SM, "\n\n# For three person families: set variance of family effect to zero\n")
 		SM <- paste(SM, style$familyeffect, "~~ 0*", style$familyeffect)
 	}

@@ -26,3 +26,4 @@ Collate:
     '0-skinning.R'
     'percTable.R'
     'varComp.R'
+    'equalMeans.R'

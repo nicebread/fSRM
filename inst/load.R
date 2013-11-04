@@ -7,6 +7,10 @@ sourceDir <- function(path, trace = TRUE, ...) {
 }
 
 sourceDir("../R")
+library(lavaan)
+library(plyr)
+library(reshape2)
+library(ggplot2)
 
 # alternatively: load from GitHub
 #library(devtools)

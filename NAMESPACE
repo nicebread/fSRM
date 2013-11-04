@@ -1,2 +1,3 @@
 export(buildSRMSyntaxLatent)
+export(equalMeans)
 export(fSRM)
