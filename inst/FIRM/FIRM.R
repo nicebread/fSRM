@@ -7,7 +7,7 @@ head(RRdat4)
 
 # POWER: 1 indicator
 
-pow1 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+pow1 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), means=TRUE)
 
 pow2 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), means=TRUE)
 

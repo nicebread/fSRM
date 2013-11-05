@@ -1,9 +1,10 @@
-# Version 0.2
+# Version 0.2.1
 
 ## New features
 
 - Replaced `fe` parameter in fSRM by `drop`: Now the user can drop either the family effect, the actor, the partner effects, or the reciprocities when only three members are present.
 - New function equalMeans() tests actor and partner means for equality
+- Implemented delta method: all means of two groups can be compared simultaneously. Set `delta=TRUE`and `group="group"`in fSRM, and you're done!
 
 ## Changes
 

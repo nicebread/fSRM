@@ -17,13 +17,15 @@
 #' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
 #' @param ... Additional arguments (not documented yet)
 #' @param means Should the structured means of the SRM factors be calculated?
+#' @param delta Compare groups with the delta method?
+#' @param groupnames Vector with the names of the groups (i.e., the values of the group column in the data set)
 
 #' @references
 #' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
 
 buildSRMSyntaxLatent <-
-function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, add.variable=c(), selfmode="cor", ...) {
+function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, delta=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", ...) {
 	
 	# define defaults for parameters
 	err <- match.arg(err, c("no", "all", "default"))
@@ -226,7 +228,7 @@ function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default
 ## ======================================================================
 
 SM <- ""
-if (means==TRUE) {
+if (means==TRUE & delta == FALSE) {
 	SM.prefix <- ".means."
 	SM <- ""
 	SM <- "\n## Compute structured means\n# Define labels for subsequent constraints\n"
@@ -265,6 +267,98 @@ if (means==TRUE) {
 	 }
 	
 }
+
+
+
+## ======================================================================
+## Delta method for gropu comparisons
+## ======================================================================
+
+
+DM <- ""
+if (delta==TRUE) {
+	if (is.null(groupnames)) stop("You must provide the names of the groups in `groupnames`.")
+	DM.prefix <- ".means"
+	DM.var <- ".var"
+	DM <- ""
+	DM <- "\n\n## deltamethod for comparing two groups\n"
+	
+	if (drop != "family") {
+		DM <- paste(DM, paste(style$familyeffect, " ~ c(", paste0(DM.prefix, groupnames, ".", style$familyeffect, collapse=","), ")*1\n", sep=""))
+	}
+
+	# new labels for the means
+	for (p in roles) {DM <- paste(DM, style$actor, ".", p, " ~ c(", paste0(DM.prefix, groupnames, ".", style$actor, ".", p, collapse=","), ")*1\n", sep="")}
+	for (p in roles) {DM <- paste(DM, style$partner, ".", p, " ~ c(", paste0(DM.prefix, groupnames, ".", style$partner, ".", p, collapse=","), ")*1\n", sep="")}
+
+	for (p in roles) {
+		for (t in roles) {
+			if (p != t) {DM <- paste(DM, style$relationship, ".", p, ".", t, " ~ c(", paste0(DM.prefix, groupnames, ".", style$relationship, ".", p, ".", t, collapse=","), ")*1\n", sep="")}
+		}
+	}
+	
+	# new labels for the variances
+	for (p in roles) {DM <- paste(DM, style$actor, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$actor, ".", p, collapse=","), ")*", style$actor, ".", p, "\n", sep="")}
+	for (p in roles) {DM <- paste(DM, style$partner, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$partner, ".", p, collapse=","), ")*", style$partner, ".", p, "\n", sep="")}
+
+	for (p in roles) {
+		for (t in roles) {
+			if (p != t) {DM <- paste(DM, style$relationship, ".", p, ".", t, " ~~ c(", paste0(DM.var, groupnames, ".", style$relationship, ".", p, ".", t, collapse=","), ")*", style$relationship, ".", p, ".", t, "\n", sep="")}
+		}
+	}
+	
+	# FIXME: Is this correct?
+	if (length(roles)==3) {
+		DM <- paste(DM, "\n\n# For three person families: set variance of family effect to zero\n")
+		DM <- paste(DM, style$familyeffect, "~~ 0*", style$familyeffect)
+	}
+	
+	DM <- paste(DM, "\n\n# set means of observed variables to zero\n")
+	DM <- paste(DM, paste(pasteNS(roles, roles, var.id), "~ 0", collapse="\n"))
+	
+	# ---------------------------------------------------------------------
+	# Constraints for identifiability
+	DM <- paste(DM, "\n\n# set constraints on means for identifiability\n")
+	
+	 DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	 DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	 
+	 for (p in roles) {
+	 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
+	 }
+	 for (p in roles) {
+	 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
+	 }
+
+	 DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	 DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	 
+	 for (p in roles) {
+	 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
+	 }
+	 for (p in roles) {
+	 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
+	 }
+	 
+	 # ---------------------------------------------------------------------
+	 # Defined parameters
+	 
+	 DM <- paste(DM, "\n\n# Defined parameters for group comparison\n")
+	 
+		for (p in roles) {DM <- paste(DM, ".meanDiff.", style$actor, ".", p, " := ", DM.prefix, groupnames[1], ".", style$actor, ".", p, " - ", DM.prefix, groupnames[2], ".", style$actor, ".", p, "\n", sep="")}
+		for (p in roles) {DM <- paste(DM, ".meanDiff.", style$partner, ".", p, " := ", DM.prefix, groupnames[1], ".", style$partner, ".", p, " - ", DM.prefix, groupnames[2], ".", style$partner, ".", p, "\n", sep="")}		
+		
+ 	for (p in roles) {
+ 		for (t in roles) {
+ 			if (p != t) {DM <- paste(DM, ".meanDiff.", style$relationship, ".", p, ".", t, " := ", DM.prefix, groupnames[1], ".", style$relationship, ".", p, ".", t, " - ", DM.prefix, groupnames[2], ".", style$relationship, ".", p, ".", t, "\n", sep="")}
+ 		}
+ 	}
+
+	
+}
+
+
+
 
 
 ## ======================================================================
@@ -306,6 +400,7 @@ for (p in roles) {
 	if (self == TRUE) {SRM <- paste(SRM, SELF, sep="\n")}
 	if (addv!="") SRM <- paste(SRM, addv)
 	SRM <- paste(SRM, SM)
+	SRM <- paste(SRM, DM)
 	return(SRM)
 }
 

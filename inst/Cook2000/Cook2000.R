@@ -126,3 +126,15 @@ predict(f4.1, dat4[dat4$fam==1, ])
 f4.1.m <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
 f4.1.m
 equalMeans(f4.1.m)
+
+
+## ======================================================================
+## deltamethod test
+## ======================================================================
+
+# split the data set into two groups
+dat.g <- dat4
+dat.g$group <- ifelse(dat.g$fam <= 104, "A", "B")
+
+f4.d <- fSRM(dep1 ~ actor*partner | fam, dat.g, means=TRUE, group="group", delta=TRUE)
+f4.d

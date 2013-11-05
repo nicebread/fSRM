@@ -1,7 +1,11 @@
 percTable <-
-function(x) {
+function(x, group=1) {
 	eff <- parameterEstimates(x$fit)
-	SS <- x$SS
+	
+	if (!is.null(eff$group))
+		eff <- eff[eff$group==group, ]
+	
+	SS <- getCor(x, ops=c("~~", "~"), group=group)
 	
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	res <- matrix(NA, ncol=6, nrow=length(x$roles)*(length(x$roles)-1))

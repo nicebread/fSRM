@@ -20,6 +20,8 @@
 #' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
 #' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}
 #' @param means Should the structured means of the SRM factors be calculated?
+#' @param group Variable name indicating group membership
+#' @param delta Compare groups with the delta method?
 
 ## OLD PARAMETERS, NOT CURRENTLY USED
 # @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
@@ -30,7 +32,7 @@
 #' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
 fSRM <-
-function(formula=NULL, data, drop="default", add="", means=FALSE, IGSIM=list(), add.variable=c(), selfmode="cor", syntax="", ...) {
+function(formula=NULL, data, drop="default", add="", means=FALSE, delta=FALSE, IGSIM=list(), add.variable=c(), selfmode="cor", syntax="", group=NULL, ...) {
 	
 	dots <- list(...)
 	
@@ -56,6 +58,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, IGSIM=list(), 
 	}
 	
 	# Restructure data format from long to wide
+	
 	fam0 <- list()
 	for (v in c(var.id, add.variable)) {
 		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)
@@ -63,6 +66,13 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, IGSIM=list(), 
 	}
 	
 	fam <- merge.rec(fam0, by=group.id)
+	
+	# add group variable (for group comparison)
+	if (!is.null(group)) {
+		g2 <- ddply(data, group.id, function(x) x[1, group])
+		colnames(g2) <- c(group.id, group)
+		fam <- merge(fam, g2, by=group.id)
+	}
 	
 	# remove all-NA columns
 	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))
@@ -78,23 +88,32 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, IGSIM=list(), 
 		message("Three-member families: Dropping family factor per default.")
 		drop <- "family"
 	}
-	if (drop == "default" & length(roles) > 3) {err <- "nothing"}
+	if (drop == "default" & length(roles) > 3) {drop <- "nothing"}
 	
 	# Do some sanity checks
 	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}
 	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {
 		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")
 	}
+	if (delta==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")
 	
 	
 	# if no syntax is directly provided:
 	if (syntax == "") {
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, self=self, add.variable=add.variable, selfmode=selfmode)
+		
+		if (!is.null(group)) {
+			groupnames <- as.character(unique(fam$group))
+		} else {
+			groupnames <- NULL
+		}
+		
+		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, delta=delta, groupnames=groupnames, self=self, add.variable=add.variable, selfmode=selfmode)
 	
 		syntax <- paste(syntax0, add, sep="\n")
 	} else {
 		print("Model syntax is directly specified; skipping buildfSRMSyntax")
 	}
+
 	
 	m <- lavaan(
 			model		= syntax, 
@@ -108,11 +127,16 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, IGSIM=list(), 
 			auto.fix.single = TRUE,
 			auto.var 	= TRUE,
 			auto.cov.lv.x = TRUE,
-			auto.cov.y 	= TRUE, ...)
+			auto.cov.y 	= TRUE, 
+			group		= group, ...)
 		
+	suppressWarnings(
+		SS <- standardizedSolution(m, type="std.all")
+	)
+	
 	res <- list(
 		fit		= m,
-		SS		= standardizedSolution(m, type="std.all"),
+		SS		= SS,
 		syntax	= syntax,
 		roles	= roles,
 		actor.id 	= actor.id,
@@ -121,6 +145,9 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, IGSIM=list(), 
 		var.id	= var.id,
 		drop	= drop,
 		means	= means,
+		delta	= delta,
+		group	= group,
+		groupnames = groupnames,
 		IGSIM	= IGSIM,
 		self	= self,
 		selfmode	= selfmode,

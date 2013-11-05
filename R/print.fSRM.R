@@ -1,8 +1,10 @@
-
+#' @S3method print fSRM
 
 print.fSRM <-
 function(x, digits=3, ...) {
-	if (is.null(x$SS)) {x$SS <- standardizedSolution(x$fit, type="std.all")}
+	
+	# Print model summary for all groups
+	
 	## The model for 4 members must have 31 free parameters and 47 df!
 	cat("----------------\n")
 	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")
@@ -16,29 +18,56 @@ function(x, digits=3, ...) {
 	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))
 	
 	
+	if (is.null(x$group)) {
+		print.singlegroup(x, group=1, digits=digits)
+	} else {
+		# print stats for each group
+		for (g in 1:length(x$groupnames)) {
+			cat("\n\n#####################################\n")
+			cat(paste0("Statistics for group", g, "\n"))
+			cat("#####################################\n")
+			print.singlegroup(x, group=g, digits=digits)
+		}
+		cat("\n\n#####################################\n")
+		cat(paste0("Difference of means between groups (", x$groupnames[1], "-", x$groupnames[2], ")\n"))
+		cat("#####################################\n")
+		
+		MD <- getCor(x, label=".meanDiff.", group=0)
+		colnames(MD)[5] <- "diff"
+		print(MD[, c(2, 5, 4, 6:9)])
+	}
+}
+
+
+
+
+
+
+print.singlegroup <-
+function(x, group=1, digits=3) {
 	eff <- as.data.frame(parameterEstimates(x$fit))
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	
 	# SS = standardized solution: get correlation for that
-	SS <- getCor(x, ops=c("~~", "~"))
+	SS <- getCor(x, ops=c("~~", "~"), group=group)
 
 	cat("\n\nVariance decomposition:\n----------------\n")
-	T <- varComp(x)
+	T <- varComp(x, group=group)
 	T[, -1] <- round(T[, -1], digits)
 	print(T)
 	
 	cat("\n\nRelative variance decomposition:\n----------------\n")
-	print(round(percTable(x)$stand))
+	print(round(percTable(x, group=group)$stand))
 	
 
 	if (!x$drop %in% c("actor", "partner", "reciprocities")) {
 		cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")
-		GR <- getGR(x)
+		GR <- getGR(x, group=group)
 		print(GR, row.names=TRUE)
 	}
 	
 	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")
-	DR <- getDR(x)
+	DR <- getDR(x, group=group)
 	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")
 	print(DR, row.names=TRUE)
 	
@@ -112,8 +141,12 @@ function(x, digits=3, ...) {
 	
 	if (x$means == TRUE) {
 		cat("\n\nMean structure\n----------------\n")
-		MS <- eff[grepl(".means.", eff$label, fixed=TRUE), c(1, 5:10)]
-		colnames(MS)[1] <- "factor"
+		if (is.null(x$group)) {
+			MS <- eff[grepl(".means.", eff$label, fixed=TRUE), c(1, 5:10)]
+		} else {
+			MS <- eff[grepl(paste0(".means", x$groupnames[group], "."), eff$label, fixed=TRUE), c(1, 6:11)]
+		}
+		colnames(MS) <- c("factor", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper")
 		MS[, -1] <- round(MS[, -1], digits)
 		rownames(MS) <- NULL
 		print(MS)

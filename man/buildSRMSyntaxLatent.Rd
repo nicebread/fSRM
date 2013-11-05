@@ -4,8 +4,8 @@
 \usage{
   buildSRMSyntaxLatent(roles, var.id, self = FALSE,
     IGSIM = list(), drop = "default", err = "default",
-    means = FALSE, add.variable = c(), selfmode = "cor",
-    ...)
+    means = FALSE, delta = FALSE, groupnames = NULL,
+    add.variable = c(), selfmode = "cor", ...)
 }
 \arguments{
   \item{roles}{A vector with all role labels.}
@@ -55,6 +55,11 @@
 
   \item{means}{Should the structured means of the SRM
   factors be calculated?}
+
+  \item{delta}{Compare groups with the delta method?}
+
+  \item{groupnames}{Vector with the names of the groups
+  (i.e., the values of the group column in the data set)}
 }
 \description{
   Build lavaan syntax for a Social Relations Model with

@@ -267,7 +267,7 @@ for(i in 1:N) {
   set.seed(i)
   print(i)
   sim.data <- simulateData(SRM2grp, sample.nobs=c(50,50), group.label=c("group 1", "group 2"))  
-  fit <- lavaan(SRM2grpb, data=sim.data,group="group")
+  fit <- lavaan(SRM2grpb, data=sim.data, group="group")
   fam <- c(fam, parameterEstimates(fit)[249,]$pvalue)
   actmo  <- c(actmo, parameterEstimates(fit)[250,]$pvalue)
   actfa <- c(actfa, parameterEstimates(fit)[251,]$pvalue)

@@ -1,23 +1,26 @@
 # Gives a structured table of all (co)variances
 
-varComp <- function(x) {
+varComp <- function(x, group=1) {
 	eff <- as.data.frame(parameterEstimates(x$fit))
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	res <- matrix(NA, ncol=6, nrow=ifelse(x$drop!="family", 1, 0) + ifelse(x$self==TRUE, length(x$roles), 0) + length(x$roles)*2 + length(x$roles)*(length(x$roles)-1))
 	
 	colnames(res) <- c("est","se","z","pvalue","ci.lower","ci.upper")
 	rownames(res) <- rep("", nrow(res))
+	
+	# adjustements for multigroup case: add a group variable with only one group
+	if (is.null(eff$group)) eff$group <- 1
 
 	count <- 1
 	if (x$drop != "family") {
 		rownames(res)[1] <- "FE ~~ FE"
-		res[1, ] <- as.matrix(eff[eff$f == "FE ~~ FE", c("est","se","z","pvalue","ci.lower","ci.upper")])
+		res[1, ] <- as.matrix(eff[eff$f == "FE ~~ FE" & eff$group==group, c("est","se","z","pvalue","ci.lower","ci.upper")])
 		count <- count + 1
 	}
 
 	if (x$drop != "actor") {
 		for (p in 1:length(x$roles)) {
-			res[count, ]  <- as.matrix(eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])
+			res[count, ]  <- as.matrix(eff[eff$f == paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep="") & eff$group==group, c("est","se","z","pvalue","ci.lower","ci.upper")])
 			rownames(res)[count] <- paste(style$actor, ".", x$roles[p], " ~~ ", style$actor, ".", x$roles[p], sep="")
 			count <- count + 1
 		}
@@ -25,7 +28,7 @@ varComp <- function(x) {
 	
 	if (x$drop != "partner") {
 		for (p in 1:length(x$roles)) {
-			res[count, ]  <- as.matrix(eff[eff$f == paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])
+			res[count, ]  <- as.matrix(eff[eff$f == paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep="") & eff$group==group, c("est","se","z","pvalue","ci.lower","ci.upper")])
 			rownames(res)[count] <-  paste(style$partner, ".", x$roles[p], " ~~ ", style$partner, ".", x$roles[p], sep="")
 			count <- count + 1
 		}
@@ -34,20 +37,21 @@ varComp <- function(x) {
 	for (p in 1:length(x$roles)) {
 		for (t in 1:length(x$roles)) {
 			if (p != t) {
-			res[count, ]  <- as.matrix(eff[eff$f == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), sep=" "), c("est","se","z","pvalue","ci.lower","ci.upper")])
+			res[count, ]  <- as.matrix(eff[eff$f == paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), sep=" ") & eff$group==group, c("est","se","z","pvalue","ci.lower","ci.upper")])
 			rownames(res)[count] <- paste(paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""), "~~", paste(style$relationship, ".", x$roles[p], ".", x$roles[t], sep=""))
 			count <- count + 1
 		}
 		}
 	}
 	
-	if (x$self == TRUE) {
-		for (p in 1:length(x$roles)) {
-			res[count, ]  <- as.matrix(eff[eff$f == paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])
-			rownames(res)[count] <-  paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep="")
-			count <- count + 1
-		}
-	}
+	# TODO: include self ratings
+	# if (x$self == TRUE) {
+# 		for (p in 1:length(x$roles)) {
+# 			res[count, ]  <- as.matrix(eff[eff$f == paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep=""), c("est","se","z","pvalue","ci.lower","ci.upper")])
+# 			rownames(res)[count] <-  paste(style$self, ".", x$roles[p], " ~~ ", style$self, ".", x$roles[p], sep="")
+# 			count <- count + 1
+# 		}
+# 	}
 	
 	res <- res[rownames(res) != "", ]
 	res2 <- data.frame(f=rownames(res), as.data.frame(res))
@@ -59,10 +63,10 @@ varComp <- function(x) {
 
 
 # retrieve generalized reciprocity from fSRM object
-getGR <- function(x) {
+getGR <- function(x, group=1) {
+	
 	# SS = standardized solution: get correlation for that
-	SS <- getCor(x, ops=c("~~", "~"))
-	#T <- varComp(x)
+	SS <- getCor(x, ops=c("~~", "~"), group=group)
 	GR <- data.frame()
 	for (t in x$roles) {
 		GR0 <- SS[SS$component == paste(style$actor, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]
@@ -82,9 +86,9 @@ getGR <- function(x) {
 
 
 # retrieve dyadic reciprocity from fSRM object
-getDR <- function(x) {
+getDR <- function(x, group=1) {
 	# SS = standardized solution: get correlation for that
-	SS <- getCor(x, ops=c("~~", "~"))
+	SS <- getCor(x, ops=c("~~", "~"), group=group)
 	#T <- varComp(x)
 	DR <- data.frame()
 	for (p in 1:length(x$roles)) {

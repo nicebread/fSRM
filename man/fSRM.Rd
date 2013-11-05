@@ -5,8 +5,9 @@
 \title{Run a Social Relations Model with roles ("Family SRM")}
 \usage{
   fSRM(formula = NULL, data, drop = "default", add = "",
-    means = FALSE, IGSIM = list(), add.variable = c(),
-    selfmode = "cor", syntax = "", ...)
+    means = FALSE, delta = FALSE, IGSIM = list(),
+    add.variable = c(), selfmode = "cor", syntax = "",
+    group = NULL, ...)
 }
 \arguments{
   \item{formula}{A formula that defines the variable names.
@@ -60,6 +61,10 @@
 
   \item{means}{Should the structured means of the SRM
   factors be calculated?}
+
+  \item{group}{Variable name indicating group membership}
+
+  \item{delta}{Compare groups with the delta method?}
 }
 \description{
   Run a Social Relations Model with roles ("Family SRM")

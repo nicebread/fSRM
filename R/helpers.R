@@ -1,6 +1,13 @@
 # get correlations between latent factors
-getCor <- function(x, ops="~~", g="", label="") {
-	eff <- parameterEstimates(x$fit, standardized=TRUE)
+getCor <- function(x, ops="~~", g="", label="", group=1) {
+	suppressWarnings(
+		eff <- parameterEstimates(x$fit, standardized=TRUE)
+	)
+	
+	# adjustements for multigroup case: add a group variable with only one group
+	if (is.null(eff$group)) eff$group <- 1
+	
+	eff <- eff[eff$group==group, ]
 	
 	if (label=="") {
 		sel <- eff$op %in% ops & !is.na(eff$est) & !grepl(paste(x$var.id, collapse="|"), eff$rhs)
