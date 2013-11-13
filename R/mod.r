@@ -1,13 +1,21 @@
 mod <- function(x, minMI = 10) {
+	if (x$means == TRUE | x$delta ==TRUE) {
+		stop("Modification indices do not work when mean structure or delta method are used.")
+	}
+	
 	MI <- modindices(x$fit, standardized=TRUE)
 	MI <- MI[order(MI$mi, decreasing=TRUE), ]
 	
 	# Joereskog: MI > 5 before consideration of respecification
 	# Rosseel: MI > 10 before consideration of respecification
+	if (max(MI$mi, na.rm=TRUE) < minMI) {
+		print(paste0("No modification index is larger then ", minMI, "."))
+		invisible(NULL)
+	}
 	MI2 <- MI[!is.na(MI$mi) & MI$mi>minMI, ]
 	if (nrow(MI2)>0) {
 		return(MI2)
 	} else {
-		return(NULL)
+		invisible(NULL)
 	}
 }

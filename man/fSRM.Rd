@@ -73,7 +73,10 @@
   A model can be rerun with additional syntax using the
   \code{add} function: \code{s1 <- fSRM(dep1/dep2 ~
   actor*partner | fam, dat2)} \code{s2 <- add(s1, "Ac ~~
-  Pm")}
+  Pm")} A model can be run with new parameters using the
+  update function: \code{s1 <- fSRM(dep1/dep2 ~
+  actor*partner | fam, dat2)} \code{s2 <- update(s1,
+  delta=TRUE)}
 }
 \references{
   Kenny, D. A., & West, T. V. (2010). Similarity and

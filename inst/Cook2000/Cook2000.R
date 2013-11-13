@@ -111,12 +111,14 @@ f4.2.m
 
 # ... add intragenerational similarity (now results are identical to Cook, 2000)
 f4.ig <- fSRM(dep1/dep2 ~ actor*partner | fam, dat4, IGSIM=list(c("m", "f"), c("c", "y")))
+f4.ig
 
 # print modification indeces
 mod(f3.1)
 
 # predict new cases
 predict(f4.1, dat4[dat4$fam==1, ])
+predict(f4.1, dat4[dat4$fam %in% c(1, 2), ])
 
 
 ## ======================================================================
@@ -127,14 +129,25 @@ f4.1.m <- fSRM(dep1 ~ actor*partner | fam, dat4, means=TRUE)
 f4.1.m
 equalMeans(f4.1.m)
 
+f3.2.m <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, means=TRUE)
+f3.2.m
+equalMeans(f3.2.m)
+
 
 ## ======================================================================
 ## deltamethod test
 ## ======================================================================
 
 # split the data set into two groups
-dat.g <- dat4
-dat.g$group <- ifelse(dat.g$fam <= 104, "A", "B")
+dat.4g <- dat4
+dat.4g$group <- ifelse(dat.4g$fam <= 104, "A", "B")
 
-f4.d <- fSRM(dep1 ~ actor*partner | fam, dat.g, means=TRUE, group="group", delta=TRUE)
+f4.d <- fSRM(dep1 ~ actor*partner | fam, dat.4g, means=TRUE, group="group", delta=TRUE)
 f4.d
+
+
+dat.3g <- dat3
+dat.3g$group <- ifelse(dat.3g$fam <= 104, "A", "B")
+
+f3.d <- fSRM(dep1 ~ actor*partner | fam, dat.3g, means=TRUE, group="group", delta=TRUE, drop="family")
+f3.d

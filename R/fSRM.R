@@ -8,6 +8,9 @@
 #' A model can be rerun with additional syntax using the \code{add} function:
 #' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}
 #' \code{s2 <- add(s1, "Ac ~~ Pm")}
+#' A model can be run with new parameters using the update function:
+#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}
+#' \code{s2 <- update(s1, delta=TRUE)}
 #'
 #' @export
 #' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.
@@ -84,11 +87,11 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, delta=FALSE, I
 	
 	# define defaults for drop
 	drop <- match.arg(drop, c("nothing", "family", "reciprocities", "actor", "partner", "default"))
-	if (drop == "default" & length(roles) == 3) {
+	if (drop == "default" & length(roles) == 3 & syntax=="") {
 		message("Three-member families: Dropping family factor per default.")
 		drop <- "family"
 	}
-	if (drop == "default" & length(roles) > 3) {drop <- "nothing"}
+	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}
 	
 	# Do some sanity checks
 	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}
@@ -113,6 +116,8 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, delta=FALSE, I
 	} else {
 		print("Model syntax is directly specified; skipping buildfSRMSyntax")
 	}
+	
+	cat(syntax)
 
 	
 	m <- lavaan(
@@ -183,7 +188,6 @@ update.fSRM <- function(x, ..., evaluate=TRUE) {
 
 
 # predicts new cases
-# TODO: @Yves: Allow single row data frames, omit unnecessary sanity checks
 predict.fSRM <- function(x, newdata, ...) {
 	
 	# TODO: This snippet is also in fSRM function --> refactor
@@ -196,7 +200,7 @@ predict.fSRM <- function(x, newdata, ...) {
 
 	fam <- merge.rec(fam0, by=x$group.id)
 	
-	print(str(x$data))
-	print(str(fam))
+	#print(str(x$data))
+	#print(str(fam))
 	predict(x$fit, newdata=fam)
 }

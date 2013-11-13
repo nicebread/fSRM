@@ -1,6 +1,21 @@
+# Version 0.2.2
+
+## New Features
+
+- Delta method now also compares variances between two groups
+- Delta method works for 3-person families, and with dropping of factors
+- equalMeans() now provides a Wald test for equality of relationship effect means
+
+## Changes and Bug Fixed
+
+- `drop` does not remove the factor, but rather sets its variance to zero.
+- Improved output of the mod() function
+- Mean structure for 3-person family now works correctly
+- The family effect now is included in the delta method
+
 # Version 0.2.1
 
-## New features
+## New Features
 
 - Replaced `fe` parameter in fSRM by `drop`: Now the user can drop either the family effect, the actor, the partner effects, or the reciprocities when only three members are present.
 - New function equalMeans() tests actor and partner means for equality
