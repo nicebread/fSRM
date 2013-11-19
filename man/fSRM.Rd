@@ -1,11 +1,9 @@
 \name{fSRM}
 \alias{fSRM}
-\alias{predict,}
-\alias{update}
 \title{Run a Social Relations Model with roles ("Family SRM")}
 \usage{
   fSRM(formula = NULL, data, drop = "default", add = "",
-    means = FALSE, delta = FALSE, IGSIM = list(),
+    means = FALSE, diff = FALSE, IGSIM = list(),
     add.variable = c(), selfmode = "cor", syntax = "",
     group = NULL, ...)
 }
@@ -23,13 +21,13 @@
   \item{drop}{In three-member families at least one
   component has to be dropped. \code{drop} defines which
   one: "none": drop nothing; "family" - drop family effect;
-  "reciprocities" - drop individual reciprocities; "actor"
-  - drop actor factors and actor-partner covariances;
-  "partner" - drop partner effects and actor-partner
-  covariances; "default": drop nothing in >= 4 members and
-  drop family effect with 3 members. Although usually not
-  necessary, the drop parameter can also be applied to >= 4
-  member families.}
+  "GR" - drop generalized reciprocities; "actor" - drop
+  actor factors and actor-partner covariances; "partner" -
+  drop partner effects and actor-partner covariances;
+  "default": drop nothing in >= 4 members and drop family
+  effect with 3 members. Although usually not necessary,
+  the drop parameter can also be applied to >= 4 member
+  families.}
 
   \item{add}{Additional lavaan syntax pasted at the end of
   the generated model. Can contain, for example, user
@@ -64,7 +62,7 @@
 
   \item{group}{Variable name indicating group membership}
 
-  \item{delta}{Compare groups with the delta method?}
+  \item{diff}{Compare groups with the delta method?}
 }
 \description{
   Run a Social Relations Model with roles ("Family SRM")
@@ -76,7 +74,7 @@
   Pm")} A model can be run with new parameters using the
   update function: \code{s1 <- fSRM(dep1/dep2 ~
   actor*partner | fam, dat2)} \code{s2 <- update(s1,
-  delta=TRUE)}
+  diff=TRUE)}
 }
 \references{
   Kenny, D. A., & West, T. V. (2010). Similarity and

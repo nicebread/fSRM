@@ -9,7 +9,7 @@
 #' @export
 #' @param roles A vector with all role labels.
 #' @param var.id A vector with the variable names of the DV indicators
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "reciprocities" - drop individual reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.
+#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.
 #' @param err Defines the type of correlations between error terms. err = "no": no error term correlations - this is the required mode for single indicators. err = "all": If multiple indicators are present, correlate same items BETWEEN raters (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000). err = "default": Set err to "no" for single indicators and to "all" for multiple indicators.
 #' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.
 #' @param self Should self-ratings be included in the analysis (if present in the data set)?
@@ -17,7 +17,7 @@
 #' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
 #' @param ... Additional arguments (not documented yet)
 #' @param means Should the structured means of the SRM factors be calculated?
-#' @param delta Compare groups with the delta method?
+#' @param diff Compare groups with the delta method?
 #' @param groupnames Vector with the names of the groups (i.e., the values of the group column in the data set)
 
 #' @references
@@ -25,7 +25,7 @@
 
 
 buildSRMSyntaxLatent <-
-function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, delta=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", ...) {
+function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", ...) {
 	
 	# define defaults for parameters
 	err <- match.arg(err, c("no", "all", "default"))
@@ -226,7 +226,7 @@ function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default
 ## ======================================================================
 
 SM <- ""
-if (means==TRUE & delta == FALSE) {
+if (means==TRUE & diff == FALSE) {
 	SM.prefix <- ".means."
 	SM <- ""
 	SM <- "\n## Compute structured means\n# Define labels for subsequent constraints\n"
@@ -272,7 +272,7 @@ if (means==TRUE & delta == FALSE) {
 
 
 DM <- ""
-if (delta==TRUE) {
+if (diff==TRUE) {
 	if (is.null(groupnames)) stop("You must provide the names of the groups in `groupnames`.")
 	DM.prefix <- ".means"
 	DM.var <- ".var"
@@ -395,13 +395,13 @@ for (p in roles) {
 
 ## ======================================================================
 ## Set variance of dropped factors to zero
-## Dropping has to be different when delta = TRUE
+## Dropping has to be different when diff = TRUE
 ## ======================================================================
 
 DROP <- ""
 
-if (delta == FALSE) {
-	if (!drop %in% c("nothing", "reciprocities")) DROP <- "# Dropping factors:\n##################\n"
+if (diff == FALSE) {
+	if (!drop %in% c("nothing", "GR")) DROP <- "# Dropping factors:\n##################\n"
 	if (drop == "family") {
 		DROP <- paste(DROP, paste0(style$familyeffect, " ~~ 0*", style$familyeffect, "\n"))
 	}
@@ -435,14 +435,16 @@ if (delta == FALSE) {
 	SRM <- paste(SRM, FE, sep="\n")
 	SRM <- paste(SRM, AE, sep="\n")
 	SRM <- paste(SRM, PE, sep="\n")
+	SRM <- paste(SRM, RE, sep="\n")
 	
-	if (!drop %in% c("actor", "partner", "reciprocities"))
+	if (!drop %in% c("actor", "partner", "GR"))
 		SRM <- paste(SRM, GR, sep="\n")
 	
-	SRM <- paste(SRM, DROP, sep="\n")
-			
-	SRM <- paste(SRM, RE, DR, ERR, sep="\n")
+	SRM <- paste(SRM, DR, sep="\n")
 	if (length(IGSIM) > 0) {SRM <- paste(SRM, igsim, sep="\n")}
+	SRM <- paste(SRM, DROP, sep="\n")
+	SRM <- paste(SRM, ERR, sep="\n")
+			
 	if (self == TRUE) {SRM <- paste(SRM, SELF, sep="\n")}
 	if (addv!="") SRM <- paste(SRM, addv)
 	SRM <- paste(SRM, SM)

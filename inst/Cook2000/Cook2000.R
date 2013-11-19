@@ -49,7 +49,7 @@ f3.1.d
 f3.1.d <- fSRM(dep1 ~ actor*partner | fam, dat3, drop="partner")
 f3.1.d
 
-f3.1.d <- fSRM(dep1 ~ actor*partner | fam, dat3, drop="reciprocities")
+f3.1.d <- fSRM(dep1 ~ actor*partner | fam, dat3, drop="GR")
 f3.1.d
 
 
@@ -64,7 +64,7 @@ f3.2.d
 f3.2.d <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, drop="partner")
 f3.2.d
 
-f3.2.d <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, drop="reciprocities")
+f3.2.d <- fSRM(dep1/dep2 ~ actor*partner | fam, dat3, drop="GR")
 f3.2.d
 
 
@@ -115,6 +115,7 @@ f4.ig
 
 # print modification indeces
 mod(f3.1)
+mod(f3.1, minMI=1)
 
 # predict new cases
 predict(f4.1, dat4[dat4$fam==1, ])
@@ -142,12 +143,13 @@ equalMeans(f3.2.m)
 dat.4g <- dat4
 dat.4g$group <- ifelse(dat.4g$fam <= 104, "A", "B")
 
-f4.d <- fSRM(dep1 ~ actor*partner | fam, dat.4g, means=TRUE, group="group", delta=TRUE)
+f4.d <- fSRM(dep1 ~ actor*partner | fam, dat.4g, means=TRUE, group="group", diff=TRUE)
 f4.d
 
+f4.d2 <- update(f4.d, drop="family")
 
 dat.3g <- dat3
 dat.3g$group <- ifelse(dat.3g$fam <= 104, "A", "B")
 
-f3.d <- fSRM(dep1 ~ actor*partner | fam, dat.3g, means=TRUE, group="group", delta=TRUE, drop="family")
+f3.d <- fSRM(dep1 ~ actor*partner | fam, dat.3g, means=TRUE, group="group", diff=TRUE, drop="family")
 f3.d

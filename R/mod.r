@@ -1,5 +1,15 @@
+#' @title Get modification indices for a fSRM object
+#' @aliases mod
+#'
+#' @description
+#' Get modification indices for a fSRM object.
+#'
+#' @export
+#' @param x A fSRM object.
+#' @param minMI Minimum size of modification indices to be printed.
+
 mod <- function(x, minMI = 10) {
-	if (x$means == TRUE | x$delta ==TRUE) {
+	if (x$means == TRUE | x$diff ==TRUE) {
 		stop("Modification indices do not work when mean structure or delta method are used.")
 	}
 	

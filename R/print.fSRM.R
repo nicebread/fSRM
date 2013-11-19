@@ -68,7 +68,7 @@ function(x, group=1, digits=3) {
 	print(round(percTable(x, group=group)$stand))
 	
 
-	if (!x$drop %in% c("actor", "partner", "reciprocities")) {
+	if (!x$drop %in% c("actor", "partner", "GR")) {
 		cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")
 		GR <- getGR(x, group=group)
 		print(GR, row.names=TRUE)

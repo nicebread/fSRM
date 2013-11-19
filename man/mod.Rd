@@ -1,0 +1,16 @@
+\name{mod}
+\alias{mod}
+\title{Get modification indices for a fSRM object}
+\usage{
+  mod(x, minMI = 10)
+}
+\arguments{
+  \item{x}{A fSRM object.}
+
+  \item{minMI}{Minimum size of modification indices to be
+  printed.}
+}
+\description{
+  Get modification indices for a fSRM object.
+}
+

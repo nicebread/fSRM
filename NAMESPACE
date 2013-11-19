@@ -1,4 +1,7 @@
+S3method(predict,fSRM)
 S3method(print,fSRM)
+S3method(update,fSRM)
 export(buildSRMSyntaxLatent)
 export(equalMeans)
 export(fSRM)
+export(mod)

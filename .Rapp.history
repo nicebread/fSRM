@@ -1,4 +1,7 @@
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+======================================================================#
+## Load Cook 2000 data set; construct three and four member data sets#
+## ======================================================================#
 library(foreign)#
 library(reshape2)#
 dat0 <- read.spss("Cook2000.sav", to.data.frame=TRUE)#
@@ -27,16 +30,41 @@ dat3 <- dat.wide[dat.wide$actor %in% c("c", "f", "m") & dat.wide$partner %in% c(
 dat4 <- dat.wide
 library(fSRM)
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-dat.g <- dat4#
-dat.g$group <- ifelse(dat.g$fam <= 104, "A", "B")#
-#
-f4.d <- fSRM(dep1 ~ actor*partner | fam, dat.g, means=TRUE, group="group", delta=TRUE)#
-f4.d
-print(f4.d)
+4 persons, 1 indicator#
+f4.1 <- fSRM(dep1 ~ actor*partner | fam, dat4)#
+f4.1
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+predict(f4.1, dat4[dat4$fam==1, ])
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
 devtools::document()
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::check()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::check()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::check()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()#
+#
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::check()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()#
+#
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::check()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
 devtools::install()
-f4.d

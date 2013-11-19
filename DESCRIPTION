@@ -2,8 +2,8 @@ Encoding: UTF-8
 Package: fSRM
 Type: Package
 Title: Social Relations Analyses with roles ("Family SRM")
-Version: 0.2.2
-Date: 2013-11-13
+Version: 0.2.3
+Date: 2013-11-19
 Author: Felix Schönbrodt, Lara Stas, Tom Loeys
 Maintainer: Felix Schönbrodt <felix@nicebread.de>
 Description: The package computes Social Relations Analysis with roles ("Family
@@ -27,3 +27,4 @@ Collate:
     'percTable.R'
     'varComp.R'
     'equalMeans.R'
+    'generics.R'

@@ -4,7 +4,7 @@
 \usage{
   buildSRMSyntaxLatent(roles, var.id, self = FALSE,
     IGSIM = list(), drop = "default", err = "default",
-    means = FALSE, delta = FALSE, groupnames = NULL,
+    means = FALSE, diff = FALSE, groupnames = NULL,
     add.variable = c(), selfmode = "cor", ...)
 }
 \arguments{
@@ -16,13 +16,13 @@
   \item{drop}{In three-member families at least one
   component has to be dropped. \code{drop} defines which
   one: "none": drop nothing; "family" - drop family effect;
-  "reciprocities" - drop individual reciprocities; "actor"
-  - drop actor factors and actor-partner covariances;
-  "partner" - drop partner effects and actor-partner
-  covariances; "default": drop nothing in >= 4 members and
-  drop family effect with 3 members. Although usually not
-  necessary, the drop parameter can also be applied to >= 4
-  member families.}
+  "GR" - drop generalized reciprocities; "actor" - drop
+  actor factors and actor-partner covariances; "partner" -
+  drop partner effects and actor-partner covariances;
+  "default": drop nothing in >= 4 members and drop family
+  effect with 3 members. Although usually not necessary,
+  the drop parameter can also be applied to >= 4 member
+  families.}
 
   \item{err}{Defines the type of correlations between error
   terms. err = "no": no error term correlations - this is
@@ -56,7 +56,7 @@
   \item{means}{Should the structured means of the SRM
   factors be calculated?}
 
-  \item{delta}{Compare groups with the delta method?}
+  \item{diff}{Compare groups with the delta method?}
 
   \item{groupnames}{Vector with the names of the groups
   (i.e., the values of the group column in the data set)}
