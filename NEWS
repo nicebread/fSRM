@@ -1,3 +1,14 @@
+# Version 0.2.4
+
+## New Features
+
+- Negative variances can be automatically set to zero: setZero = "negative", or set all non-significant variances to zero: setZero = "nonsig". Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significatn variances to zero! This parameter does not work yet with multiple groups.
+- Included two data sets, based on Bill Cook's (2000) study: Attachment anxiety in 4-person families (attanx3 and attanx4, see also http://davidakenny.net/kkc/c9/c9.htm), and attachment dependency (attdep)
+
+Cook, W. L. (2000). Understanding attachment security in family context. Journal of Personality and Social Psychology, 78, 285–294. doi:10.1037/0022-3514.78.2.285
+
+
+
 # Version 0.2.3
 
 - renamed parameter for `drop`: before: "reciprocities", now: "GR"

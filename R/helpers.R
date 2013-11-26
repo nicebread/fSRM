@@ -35,7 +35,7 @@ getCor <- function(x, ops="~~", g="", label="", group=1) {
 
 # retrieve model syntax from fSRM object and copy it directly to the clipboard
 # TODO: pbcopy for Windows?
-model <- function(x){
+syntax <- function(x){
 	cat(x$syntax)
 	clipboard <- pipe("pbcopy", open="w")
 	write(x$syntax, clipboard)

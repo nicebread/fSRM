@@ -4,8 +4,8 @@
 \usage{
   fSRM(formula = NULL, data, drop = "default", add = "",
     means = FALSE, diff = FALSE, IGSIM = list(),
-    add.variable = c(), selfmode = "cor", syntax = "",
-    group = NULL, ...)
+    add.variable = c(), syntax = "", group = NULL,
+    setZero = "none", ...)
 }
 \arguments{
   \item{formula}{A formula that defines the variable names.
@@ -40,12 +40,6 @@
   "m"other and "f"ather are defined as one generation, and
   "y"ounger and "o"lder as the other generation.}
 
-  \item{selfmode}{Defines the style how the selfratings are
-  combined with the latent actor and partner effects. If
-  \code{selfmode="cor"} they are correlated (as in
-  REFERENCE), if \code{selfmode="kq"} the k and q paths are
-  calculated (see Kenny & West, 2010)}
-
   \item{syntax}{In that variable the user can directly
   provide a lavaan model syntax. Then no automatical model
   syntax is generated; it is important that the variable
@@ -62,7 +56,17 @@
 
   \item{group}{Variable name indicating group membership}
 
-  \item{diff}{Compare groups with the delta method?}
+  \item{diff}{Compare groups with the delta method? You
+  need to specify a group identifier in parameter
+  \code{group}.}
+
+  \item{setZero}{Should misbehaving variances be set to
+  zero? If "negative", all negative variances are
+  constrained to zero. If "nonsig", all nonsignificant
+  variances are constrained to zero. Please note: The
+  purpose of this function is to reproduce published
+  results; usually it is *not* recommended to set
+  non-significant variances to zero!}
 }
 \description{
   Run a Social Relations Model with roles ("Family SRM")

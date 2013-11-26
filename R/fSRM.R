@@ -18,26 +18,27 @@
 #' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.
 #' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.
 #' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.
-#' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)
 #' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula
 #' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
 #' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}
 #' @param means Should the structured means of the SRM factors be calculated?
 #' @param group Variable name indicating group membership
-#' @param diff Compare groups with the delta method?
+#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.
+#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significant variances to zero!
 
 ## OLD PARAMETERS, NOT CURRENTLY USED
 # @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
 # @param self Should self-ratings be included in the analysis (if present in the data set)?
-
+# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)
 
 #' @references
 #' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
 fSRM <-
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), selfmode="cor", syntax="", group=NULL, ...) {
+function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {
 	
 	dots <- list(...)
+	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))
 	
 	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE
 	self <- FALSE
@@ -110,27 +111,39 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 			groupnames <- NULL
 		}
 		
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable, selfmode=selfmode)
+		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)
 	
 		syntax <- paste(syntax0, add, sep="\n")
 	} else {
 		print("Model syntax is directly specified; skipping buildfSRMSyntax")
 	}
 	
-	m <- lavaan(
-			model		= syntax, 
-			data		= fam,
-			std.ov		= FALSE,
-			orthogonal	= TRUE,
-			fixed.x 	= FALSE,
-			int.ov.free	= TRUE,
-			int.lv.free = FALSE,
-			auto.fix.first = FALSE,
-			auto.fix.single = TRUE,
-			auto.var 	= TRUE,
-			auto.cov.lv.x = TRUE,
-			auto.cov.y 	= TRUE, 
-			group		= group, ...)
+	# suppress some types of lavaan warning
+	withCallingHandlers({	
+		m <- lavaan(
+				model		= syntax, 
+				data		= fam,
+				std.ov		= FALSE,
+				orthogonal	= TRUE,
+				fixed.x 	= FALSE,
+				int.ov.free	= TRUE,
+				int.lv.free = FALSE,
+				auto.fix.first = FALSE,
+				auto.fix.single = TRUE,
+				auto.var 	= TRUE,
+				auto.cov.lv.x = TRUE,
+				auto.cov.y 	= TRUE, 
+				group		= group, ...)
+		},	  # end of "withCallingHandlers"
+
+		# suppress two types of warning
+		  warning=function(w) {
+		   W <- as.character(w)
+		   if (
+			   grepl("some estimated variances are negative", w$message) |
+			   grepl("covariance matrix of latent variables is not positive definite", w$message)
+ 			  ) {invokeRestart("muffleWarning")}
+	})
 		
 	suppressWarnings(
 		SS <- standardizedSolution(m, type="std.all")
@@ -152,10 +165,36 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 		groupnames = groupnames,
 		IGSIM	= IGSIM,
 		self	= self,
-		selfmode	= selfmode,
 		call	= call,
 		data	= fam)
 	
 	attr(res, "class") <- "fSRM"
-	return(res)	
+	
+	# ---------------------------------------------------------------------
+	# After fitting: check, if some variances should be set to zero
+	
+	if (setZero %in% c("negative", "nonsig")) {
+		T <- varComp(res, group=1)
+		if (setZero == "negative") {
+			to.zero <- T$component[which(T$variance < 0)]
+		}
+		if (setZero == "nonsig") {
+			to.zero <- T$component[which(T$p.value > .05)]
+			if (length(to.zero) > 0) {
+				warning("Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significant variances to zero!")
+			}
+		}
+		if (length(to.zero) > 0) {
+			cat(paste0("Following variances are ", setZero, " and are constrained to be zero:\n", paste(to.zero, collapse="\n"), "\n\nNow reestimating model..."))
+			add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",
+			paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))
+		
+			res2 <- update(res, add=add, setZero="none")
+			return(res2)
+		} else {
+			return(res)
+		}
+	} else {
+		return(res)
+	}
 }
