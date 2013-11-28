@@ -32,6 +32,7 @@ Only the variable measuring fear of rejection in family relationships is include
 Cook (2000) deduced this variable from the anxiety dimension of the adult attachment scale (Collins & Read, 1990).
 The orignial data consisted of four person families (i.e. two parents and two children), but in order to obtain 
 a three person family the oldest sibling is systematically deleted in accordance with Kenny, Kashy & Cook (2006). 
+The following labels are used: the mother is called "m", the father "f" and the youngest child "y".
 The data are presented in the long format.
 }
 \usage{data(attanx3)}
@@ -49,12 +50,15 @@ The data are presented in the long format.
 This dataset was retrieved from \url{http://davidakenny.net/kkc/c9/c9.htm} and converted to an R dataset.
 }    
 \references{
+Collins, N. L., & Read, S. J. (1990, April). Adult attachment, working models, and
+relationship quality in dating couples. Journal of personality and social psychology,
+58 (4), 644-663.
+
 Cook, W. L. (2000). Understanding attachment security in family context. Journal of
 Personality and Social Psychology, 78 (2), 285–294.
 
 Kenny, D. A., Kashy, D. A., & Cook, W. L. (2006). Dyadic Data Analysis. United States of America: The Guilford Press.
 }
-
 \examples{
 head(attanx3)
 }
