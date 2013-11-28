@@ -34,7 +34,7 @@ the father "f", the oldest child "c" and the youngest child "y".
 }
 \usage{data(attanx3)}
 \format{
-  A data frame with 1249 variables (comming from 208 different families) containing four different variables. 
+  A data frame with 2497 rows (coming from 208 different families) containing four different variables. 
   \describe{
     \item{\code{family.id}}{An indicator for the family.}
     \item{\code{perceiver.id}}{An indicator of the rater in the dyad, either "m", "f", "c" or "y"}
@@ -43,7 +43,7 @@ the father "f", the oldest child "c" and the youngest child "y".
     }
   }
 \source{
-This dataset was retrieved from \url{http://davidakenny.net/kkc/c9/c9.htm} and converted to an R dataset.
+This dataset was retrieved from \url{http://davidakenny.net/kkc/c9/c9.htm} in wide format and converted to an R dataset in long format.
 }    
 \references{
 Collins, N. L., & Read, S. J. (1990, April). Adult attachment, working models, and
