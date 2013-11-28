@@ -53,7 +53,6 @@ relationship quality in dating couples. Journal of personality and social psycho
 Cook, W. L. (2000). Understanding attachment security in family context. Journal of
 Personality and Social Psychology, 78 (2), 285–294.
 }
-
 \examples{
-head(attanx3)
+head(attanx4)
 }
