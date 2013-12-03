@@ -174,6 +174,10 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 	# After fitting: check, if some variances should be set to zero
 	
 	if (setZero %in% c("negative", "nonsig")) {
+		if (!is.null(group)) {
+			warning("Automatically setting negative variances to zero does not work yet for multiple groups! Negative variances are *not* set to zero!")
+			return(res)
+		}
 		T <- varComp(res, group=1)
 		if (setZero == "negative") {
 			to.zero <- T$component[which(T$variance < 0)]

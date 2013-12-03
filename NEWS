@@ -1,3 +1,8 @@
+# Verison 0.2.5
+
+- Now prints a warning if it is attempted to automatically set negative variances to zero in the multiple-group case (Not implemented yet).
+- Added helper functions which help to import data sets from different formats: `import()`
+
 # Version 0.2.4
 
 ## New Features
@@ -6,7 +11,6 @@
 - Included two data sets, based on Bill Cook's (2000) study: Attachment anxiety in 4-person families (attanx3 and attanx4, see also http://davidakenny.net/kkc/c9/c9.htm), and attachment dependency (attdep)
 
 Cook, W. L. (2000). Understanding attachment security in family context. Journal of Personality and Social Psychology, 78, 285–294. doi:10.1037/0022-3514.78.2.285
-
 
 
 # Version 0.2.3

@@ -119,6 +119,7 @@ attdep.g$group <- ifelse(attdep.g$family.id <= 104, "A", "B")
 f4.d <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep.g, means=TRUE, group="group", diff=TRUE)
 f4.d
 
+# This does not work yet ...
 f4.d <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep.g, means=TRUE, group="group", diff=TRUE, setZero="negative")
 f4.d
 
