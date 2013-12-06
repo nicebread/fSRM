@@ -17,2253 +17,350 @@ library(ggplot2)#
 #library(devtools)#
 #install_github("fSRM", "felice303")#
 #library(fSRM)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-load("FIRMdemo.RData")#
-head(RRdat4)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4)#
-T <- varComp(n1, group=1)#
-T$component[which(T$variance < 0)]
-syntax(n1)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable, selfmode=selfmode)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	m <- lavaan(#
-			model		= syntax, #
-			data		= fam,#
-			std.ov		= FALSE,#
-			orthogonal	= TRUE,#
-			fixed.x 	= FALSE,#
-			int.ov.free	= TRUE,#
-			int.lv.free = FALSE,#
-			auto.fix.first = FALSE,#
-			auto.fix.single = TRUE,#
-			auto.var 	= TRUE,#
-			auto.cov.lv.x = TRUE,#
-			auto.cov.y 	= TRUE, #
-			group		= group, ...)#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		selfmode	= selfmode,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		stop();#
-	}#
-	return(res)	#
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+library(devtools)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+check for non-ASCII characters#
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+library(tools)#
+for (nm in list.files("R/.", pattern="\\.[r|R]", recursive=FALSE)) {#
+	cat(nm,":")    #
+   showNonASCIIfile(paste0("R/",nm))#
+	cat("\n")#
 }
-options(error=recover)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-ls()
-res
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	m <- lavaan(#
-			model		= syntax, #
-			data		= fam,#
-			std.ov		= FALSE,#
-			orthogonal	= TRUE,#
-			fixed.x 	= FALSE,#
-			int.ov.free	= TRUE,#
-			int.lv.free = FALSE,#
-			auto.fix.first = FALSE,#
-			auto.fix.single = TRUE,#
-			auto.var 	= TRUE,#
-			auto.cov.lv.x = TRUE,#
-			auto.cov.y 	= TRUE, #
-			group		= group, ...)#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		stop();#
-	}#
-	return(res)	#
-}
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-res
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-T <- varComp(res, group=1)
-T
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-T$component[which(T$variance < 0)]
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-to.zero <- T$component[which(T$p.value > .05)]
-to.zero
-syntax(res)
-to.zero
-gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))
-add
-cat(add)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-res2 <- update(res, add=add)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-res2 <- update(res, add=add, setZero="")
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	m <- lavaan(#
-			model		= syntax, #
-			data		= fam,#
-			std.ov		= FALSE,#
-			orthogonal	= TRUE,#
-			fixed.x 	= FALSE,#
-			int.ov.free	= TRUE,#
-			int.lv.free = FALSE,#
-			auto.fix.first = FALSE,#
-			auto.fix.single = TRUE,#
-			auto.var 	= TRUE,#
-			auto.cov.lv.x = TRUE,#
-			auto.cov.y 	= TRUE, #
-			group		= group, ...)#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		#stop();#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="")#
-	}#
-	return(res)	#
-}
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-setZero
-ls()
-extras
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	m <- lavaan(#
-			model		= syntax, #
-			data		= fam,#
-			std.ov		= FALSE,#
-			orthogonal	= TRUE,#
-			fixed.x 	= FALSE,#
-			int.ov.free	= TRUE,#
-			int.lv.free = FALSE,#
-			auto.fix.first = FALSE,#
-			auto.fix.single = TRUE,#
-			auto.var 	= TRUE,#
-			auto.cov.lv.x = TRUE,#
-			auto.cov.y 	= TRUE, #
-			group		= group, ...)#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		#stop();#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		stop();#
-	}#
-	return(res)	#
-}
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-ls()
-res2
-res
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-			   W <- as.character(w$call)#
-			   print(W)#
-			   if (#
-				   (W[1] == "sqrt" & W[2] == "diag(def.cov)" & grepl("NaNs", w$message)) |#
-				   (W[1] == "sqrt" & W[2] == "b3 * b5") |#
-				   (W[1] == "nlminb" & W[2] == "x.par")#
-				  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		#stop();#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		return(res2)#
-	} else {#
-		return(res)#
-	}#
-}
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-			  print(w)#
-			  print(w$call)#
-			   W <- as.character(w$call)#
-			   print(W)#
-			   if (#
-				   (W[1] == "sqrt" & W[2] == "diag(def.cov)" & grepl("NaNs", w$message)) |#
-				   (W[1] == "sqrt" & W[2] == "b3 * b5") |#
-				   (W[1] == "nlminb" & W[2] == "x.par")#
-				  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		#stop();#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		return(res2)#
-	} else {#
-		return(res)#
-	}#
-}
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-			  print("1")#
-			  print(w)#
-			  print("2")#
-			  print(w$call)#
-			  print("3")#
-		   W <- as.character(w$call)#
-		   print(W)#
-		   print("4")#
-		   print(as.character(w))#
-			   if (#
-				   (W[1] == "sqrt" & W[2] == "diag(def.cov)" & grepl("NaNs", w$message)) |#
-				   (W[1] == "sqrt" & W[2] == "b3 * b5") |#
-				   (W[1] == "nlminb" & W[2] == "x.par")#
-				  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		#stop();#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		return(res2)#
-	} else {#
-		return(res)#
-	}#
-}
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-		   W <- as.character(w)#
-		   if (#
-			   grepl("some estimated variances are negative", w$message) |#
-			   grepl("covariance matrix of latent variables is not positive definite", w$message) |#
- 			  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		#stop();#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		return(res2)#
-	} else {#
-		return(res)#
-	}#
-}
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-		   W <- as.character(w)#
-		   if (#
-			   grepl("some estimated variances are negative", w$message) |#
-			   grepl("covariance matrix of latent variables is not positive definite", w$message) |#
- 			  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		#stop();#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		return(res2)#
-	} else {#
-		return(res)#
-	}#
-}
-options(error=NULL)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-		   W <- as.character(w)#
-		   if (#
-			   grepl("some estimated variances are negative", w$message) |#
-			   grepl("covariance matrix of latent variables is not positive definite", w$message)#
- 			  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		#stop();#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		return(res2)#
-	} else {#
-		return(res)#
-	}#
-}
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-n1
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-		   W <- as.character(w)#
-		   if (#
-			   grepl("some estimated variances are negative", w$message) |#
-			   grepl("covariance matrix of latent variables is not positive definite", w$message)#
- 			  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		print(paste0("Following variances are ", setZero, " and are constrained to be zero:\n", paste(to.zero, collapse="\n"), ".\nNow reestimating model."))#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		return(res2)#
-	} else {#
-		return(res)#
-	}#
-}
-n1
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. TODO: Warning, that you probably shouldn't do that.#
-#
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-		   W <- as.character(w)#
-		   if (#
-			   grepl("some estimated variances are negative", w$message) |#
-			   grepl("covariance matrix of latent variables is not positive definite", w$message)#
- 			  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-		}#
-		cat(paste0("Following variances are ", setZero, " and are constrained to be zero:\n", paste(to.zero, collapse="\n"), ".\nNow reestimating model..."))#
-		add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-		paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-		res2 <- update(res, add=add, setZero="none")#
-		return(res2)#
-	} else {#
-		return(res)#
-	}#
-}
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-n1
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="nonsig")
-n1
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/FIRM')
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative", mean=TRUE)
-n1
-syntax(n1)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-load(attdep)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-f4.1.m <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep, means=TRUE)#
-f4.1.m
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-data(attdep)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
 devtools::install()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::install()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::install()
+data(attanx3)
+data(attanx4)
 data(attdep)
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+data(attdep)#
+#
+# construct a 3-person data set#
 attdep3 <- attdep[attdep$perceiver.id != "y" & attdep$target.id != "y", ]
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-f4.1.m <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep, means=TRUE)#
-f4.1.m
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-equalMeans(f4.1.m)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-f3.2.m <- fSRM(dep1/dep2 ~ perceiver.id*target.id | family.id, attdep3, means=TRUE)#
-f3.2.m#
-equalMeans(f3.2.m)
+f3.1 <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep3)#
+f3.1
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
 attdep.g <- attdep#
-attdep.g$group <- ifelse(attdep.g$family.id <= 104, "A", "B")#
-#
+attdep.g$group <- ifelse(attdep.g$family.id <= 104, "A", "B")
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
 f4.d <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep.g, means=TRUE, group="group", diff=TRUE)#
 f4.d
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
+f4.d <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep.g, means=TRUE, group="group", diff=TRUE, setZero="negative")#
+f4.d
+syntax(f4.d)
+model(f4.d)
+f4.d$syntax
+cat(f4.d$syntax)
+?import
+import
+import()
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-' @title Run a Social Relations Model with roles ("Family SRM")#
-#' @aliases fSRM#
-#'#
-#' @description#
-#' Run a Social Relations Model with roles ("Family SRM")#
-#'#
-#' @details#
-#' A model can be rerun with additional syntax using the \code{add} function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- add(s1, "Ac ~~ Pm")}#
-#' A model can be run with new parameters using the update function:#
-#' \code{s1 <- fSRM(dep1/dep2 ~ actor*partner | fam, dat2)}#
-#' \code{s2 <- update(s1, diff=TRUE)}#
-#'#
-#' @export#
-#' @param formula A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.#
-#' @param data A data frame with all variables defined by \code{formula}. Must be in long format where each row describes one directed dyadic relationship.#
-#' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.#
-#' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.#
-#' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.#
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula#
-#' @param add.variable Not yet fully implemented: Add external variables to the model syntax.#
-#' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}#
-#' @param means Should the structured means of the SRM factors be calculated?#
-#' @param group Variable name indicating group membership#
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.#
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significant variances to zero!#
+ReadTransform <- function() {#
+#### Read in the dataset #####
+  require(tcltk)#
+  getSPSS <- function() {#
+    name <- tclvalue(tkgetOpenFile(#
+      filetypes = "{{SPSS Files} {.sav}} {{All files} *}"))#
+    if (name == "") return;#
+    require(foreign)   #
+    MyData <- read.spss(name, use.value.label = TRUE, to.data.frame = TRUE)#
+    assign("MyData", MyData, envir = .GlobalEnv)#
+    # tkdestroy(tt) # zodat automatisch het venster weggaat#
+    cat("Datafile is loaded\n")#
+    tkconfigure(button.SPSS, text = "Data inserted")#
+  }#
+  getCSV <- function() {#
+    name <- tclvalue(tkgetOpenFile(#
+      filetypes = "{{CSV Files} {.csv}} {{All files} *}"))#
+    if (name == "") return;#
+    MyData <- read.csv(name)#
+    assign("MyData", MyData, envir = .GlobalEnv)#
+    # tkdestroy(tt)#
+    cat("Datafile is loaded\n")#
+    tkconfigure(button.CSV, text = "Data inserted")#
+  }#
+  getTXT <- function() {#
+    name <- tclvalue(tkgetOpenFile(#
+      filetypes = "{{TXT Files} {.txt}} {{All files} *}"))#
+    if (name == "") return;#
+    MyData <- read.table(name, header = T)#
+    assign("MyData", MyData, envir = .GlobalEnv)#
+    # tkdestroy(tt)#
+    cat("Datafile is loaded\n")#
+    tkconfigure(button.TXT, text = "Data inserted")#
+  }#
+#### Transformation of the dataset #####
+  launchDialog <- function() {#
+    onOK <- function() {#
+      #Define the variables where the position of the characters will be inserted (actor, partner, indicator, group)#
+      var <- as.character(tclvalue(Entry0))#
+      group <- as.character(tclvalue(Entrygr))#
+      fam <- as.character(tclvalue(EntryID))#
+      act_from <- as.character(tclvalue(Entry1))#
+      act_to <- as.character(tclvalue(Entry2))#
+      part_from <- as.character(tclvalue(Entry3))#
+      part_to <- as.character(tclvalue(Entry4))#
+      ind_from <- as.character(tclvalue(Entry5))#
+      ind_to <- as.character(tclvalue(Entry6))#
+      # Transform from wide to long format#
+      # Select only the relevant variables#
+      if (var == "") {#
+        tkmessageBox(title="Warning", message = "Please insert the columnnumbers containing the dyadic measurements of interest (i.e. the measured variables)!") }#
+      else {#
+        b <- strsplit(var,",")[[1]]#
+        ind <- grep(":",b)#
+        DVs <- c()#
+        cnt <- 1#
+        for(i in 1:length(b)){#
+          if(i %in% ind){#
+            sequ <- as.numeric(strsplit(b[i],":")[[1]])#
+            # bij A:B de : van verwijderen#
+            lengthsequ <-diff(c(sequ[1],sequ[2]))#
+            # Hoogste - laagste waarde van element dat oorspronkelijk : bevatte#
+            DVs[cnt:(cnt+lengthsequ)] <- sequ[1]:sequ[2]#
+            # DVs heeft het aantal elementen dat er tussen A en B zit (A:B), en deze worden opgevuld door de getallen die er echt tussenzitten#
+            cnt <- cnt+lengthsequ+1#
+          } else {#
+            DVs[cnt] <- as.numeric(b[i])#
+            # voeg aan deze vector gewoon dat getal toe#
+            cnt <- cnt+1#
+              }} #
+           }#
+          # Add an family ID to the basic dataset, #
+      library(reshape2)#
+      if(group != ""){#
+        if (fam != ""){#
+        SRMData <<- melt(MyData, id.vars=c(fam, group), measure.vars=c(DVs))     }#
+        else {MyData$family_ID <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars=c("family_ID",group), measure.vars=c(DVs))}   #
+     }#
+      else {#
+        if (fam != ""){#
+           SRMData <<- melt(MyData, id.vars=fam, measure.vars=c(DVs))     }#
+        else {MyData$family_ID <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars="family_ID", measure.vars=c(DVs))#
+              }   #
+        }#
+      # Substract the characters of interest from the variable names + create useful pop-up warnings when something is not inserted#
+      # Actor ID's:#
+      if (act_from == "From" |  act_from == "" | act_to == "To" | act_to == "") #
+      {tkmessageBox(title="Warning", message = "The characters of the rater are not correctly inserted")}#
+      else {SRMData$actor.id <<- substr(SRMData$variable, act_from, act_to)#
+      }#
+      # Partner ID's:#
+      if (part_from == "From" |  part_from == "" | part_to == "To" | part_to == "") #
+      {tkmessageBox(title="Warning", message = "The characters of the person being rated are not correctly inserted")}#
+      else  {SRMData$partner.id <<- substr(SRMData$variable, part_from, part_to)#
+      }    #
+      # Indicator:#
+      if (ind_from == "From" |  ind_from == "") #
+      {value <- tkmessageBox(title="No Indicators", message = "No indicators were defined. Is this correct?", icon = "info", type="yesno", default="yes")#
+       value <- tclvalue(value)#
+       if (value == "no") return()      }#
+      else#
+      {SRMData$ind <<- substr(SRMData$variable, ind_from, ind_to) }#
+      # Only return if all fields are completed (except for the indicator and group)#
+      if (act_from != "From" &  act_from != "" & act_to != "To" & act_to != "" & part_from != "From" &  part_from != "" & part_to != "To" & part_to != "")#
+      {  cat("A new datafile called 'SRMData' is ceated\n")#
+        tkdestroy(popup)#
+       tkfocus(tt)} #
+    }#
+    # Basic lay-out of the new pop-up window#
+    popup <- tktoplevel()#
+    tktitle(popup) <- "Transformation of the dataset"#
+    tkgrid(tklabel(popup, text = "       "))#
+        # Ask for family ID#
+    heading <- tklabel(popup, text="If present, enter the variable name that contains the identifications of ...                                         ")#
+    ID <- tklabel(popup, text="   the different families.           ")                                          #
+    gr <- tklabel(popup, text="   the different groups.            ")    #
+    tkgrid(tklabel(popup, text = "       "))#
+    EntryID <- tclVar("")#
+    Entrygr <- tclVar("")#
+    e.fam <- tkentry(popup,width="25", textvariable=EntryID)#
+    e.gr <- tkentry(popup,width="25", textvariable=Entrygr)#
+    tkgrid(heading, columnspan=3)#
+    tkgrid(ID, e.fam)#
+    tkgrid(gr, e.gr)#
+    tkgrid(tklabel(popup, text = "       "))#
+    tkgrid(tklabel(popup, text = "       "))#
+    tkgrid.configure(ID, gr, sticky = "e")#
+    tkgrid.configure(heading, e.fam, e.gr, sticky = "w")#
+      # Ask the position of the dyadic measurements#
+    font1 <- tkfont.create(family="times",size=9,slant="italic")#
+    ?tkfont.create#
+    Entry0 <- tclVar("")#
+    e.dyad <- tkentry(popup,width="25", textvariable=Entry0)#
+    blanco <- tklabel(popup, text="")#
+    heading0 <- tklabel(popup, text="Specify the column numbers of the dyadic measurements in your original dataset                                                  ")#
+    ex <-   tklabel(popup, text="E.g. variables 1 until 9, 11, 13 and 15 are entered as",font=font1)#
+    ex2 <-   tklabel(popup, text="1:9, 11, 13, 15",font=font1, background="white")#
+    tkgrid(heading0, columnspan=3)#
+    tkgrid(blanco, e.dyad)#
+    tkgrid(ex, ex2)#
+    tkgrid.configure(ex, blanco, sticky="e")#
+    tkgrid.configure(ex2, e.dyad, sticky="w")#
+    tkgrid(tklabel(popup, text = "       "))#
+      # Start subtracting part from variable names#
+    heading2 <- tklabel(popup, text="Based on the variable names of the dyadic measurements, define the position of the characters of ...                  ")#
+    tkgrid(heading2, columnspan=3)#
+    tkgrid(tklabel(popup, text = "       "))#
+    #Everything for inserting the characters of the actor ID:#
+    l.actor <- tklabel(popup, text="   the rater in the dyadic measurement?")#
+    Entry1 <- tclVar("From")#
+    Entry2 <- tclVar("To")#
+    e.actor1 <- tkentry(popup,width="6", textvariable=Entry1)#
+    e.actor2 <- tkentry(popup,width="6", textvariable=Entry2)#
+    tkgrid(l.actor, e.actor1, e.actor2)#
+    tkgrid(tklabel(popup, text = "       "))#
+    #Everything for inserting the characters of the partner ID:#
+    l.partner <- tklabel(popup, text="   the person being rated in the dyadic measurement?")#
+    Entry3 <- tclVar("From")#
+    Entry4 <- tclVar("To")#
+    e.partner1 <- tkentry(popup,width="6", textvariable=Entry3)#
+    e.partner2 <- tkentry(popup,width="6", textvariable=Entry4)   #
+    tkgrid(l.partner, e.partner1, e.partner2)#
+    tkgrid(tklabel(popup, text = "       "))#
+    #Everything for inserting the characters of the indicator:#
+    l.ind <- tklabel(popup, text="   the indicators (if present)")#
+    Entry5 <- tclVar("From")#
+    Entry6 <- tclVar("To")#
+    e.ind1 <- tkentry(popup,width="6", textvariable=Entry5)#
+    e.ind2 <- tkentry(popup,width="6", textvariable=Entry6)   #
+    tkgrid(l.ind, e.ind1, e.ind2)#
+    tkgrid(tklabel(popup, text = "       "))#
+    tkgrid.configure(heading2, l.actor, l.partner, l.ind, sticky="w")#
+    OK.but <- tkbutton(popup, text = "        OK        ", command = onOK)#
+    Cancel.but <- tkbutton(popup, text = "    Cancel     ", command = function() {tkdestroy(popup)})#
+    tkgrid(OK.but, Cancel.but)    #
+    tkgrid(tklabel(popup, text = "    "))#
+    tkfocus(popup)#
+    }#
+Change <- function(){#
+  outfam <- as.character(tclvalue(Entry9))#
+  outact <- as.character(tclvalue(Entry10))#
+  outpar <- as.character(tclvalue(Entry11))#
+  outrel <- as.character(tclvalue(Entry12))#
+  style <<- new.env(parent=globalenv())#
+  style$familyeffect <<- outfam#
+  style$actor <<- outact#
+  style$partner <<- outpar#
+  style$relationship <<- outrel#
+  tkconfigure(change.but, text = "Outputformat confirmed")#
+}#
 #
-## OLD PARAMETERS, NOT CURRENTLY USED#
-# @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)#
-# @param self Should self-ratings be included in the analysis (if present in the data set)?#
-# @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)#
-#
-#' @references#
-#' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414#
-#
-fSRM <-#
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {#
-	dots <- list(...)#
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))#
-	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE#
-	self <- FALSE#
-	# save the function call for use in refitting#
-	call <- match.call(expand.dots = TRUE)#
-	# Parse the formula#
-	lhs <- strsplit(gsub(" ","",as.character(formula)[2], fixed=TRUE), "/", fixed=TRUE)[[1]]#
-	rhs <- strsplit(gsub(" ","",as.character(formula)[3], fixed=TRUE),"\\*|\\|", perl=TRUE)[[1]]#
-	# Retrieve the variable names from the formula#
-	var.id <- lhs#
-	actor.id <- rhs[1]#
-	partner.id <- rhs[2]#
-	group.id <- NULL#
-	if (length(rhs)>=3) {#
-		group.id <- rhs[3]#
-	} else {#
-		stop("For SRM with roles a group id has to be defined in the formula (after the | operator).")#
-	}#
-	# Restructure data format from long to wide#
-	fam0 <- list()#
-	for (v in c(var.id, add.variable)) {#
-		fam0[[v]] <- dcast(data[, c(var.id, actor.id, partner.id, group.id, add.variable)], formula(paste(group.id, "~", actor.id, "+", partner.id)), value.var=v)#
-		colnames(fam0[[v]])[-1] <- paste(colnames(fam0[[v]])[-1], v, sep="_")#
-	}#
-	fam <- merge.rec(fam0, by=group.id)#
-	# add group variable (for group comparison)#
-	if (!is.null(group)) {#
-		g2 <- ddply(data, group.id, function(x) x[1, group])#
-		colnames(g2) <- c(group.id, group)#
-		fam <- merge(fam, g2, by=group.id)#
-	}#
-	# remove all-NA columns#
-	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))#
-	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}#
-	fam <- na.omit(fam)#
-	included <- fam[, group.id]#
-	roles <- sort(unique(data[, actor.id]))#
-	# define defaults for drop#
-	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))#
-	if (drop == "default" & length(roles) == 3 & syntax=="") {#
-		message("Three-member families: Dropping family factor per default.")#
-		drop <- "family"#
-	}#
-	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}#
-	# Do some sanity checks#
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}#
-	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {#
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")#
-	}#
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")#
-	# if no syntax is directly provided:#
-	if (syntax == "") {#
-		if (!is.null(group)) {#
-			groupnames <- as.character(unique(fam$group))#
-		} else {#
-			groupnames <- NULL#
-		}#
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)#
-		syntax <- paste(syntax0, add, sep="\n")#
-	} else {#
-		print("Model syntax is directly specified; skipping buildfSRMSyntax")#
-	}#
-	# suppress some types of lavaan warning#
-	withCallingHandlers({	#
-		m <- lavaan(#
-				model		= syntax, #
-				data		= fam,#
-				std.ov		= FALSE,#
-				orthogonal	= TRUE,#
-				fixed.x 	= FALSE,#
-				int.ov.free	= TRUE,#
-				int.lv.free = FALSE,#
-				auto.fix.first = FALSE,#
-				auto.fix.single = TRUE,#
-				auto.var 	= TRUE,#
-				auto.cov.lv.x = TRUE,#
-				auto.cov.y 	= TRUE, #
-				group		= group, ...)#
-		},	  # end of "withCallingHandlers"#
-#
-		# suppress two types of warning#
-		  warning=function(w) {#
-		   W <- as.character(w)#
-		   if (#
-			   grepl("some estimated variances are negative", w$message) |#
-			   grepl("covariance matrix of latent variables is not positive definite", w$message)#
- 			  ) {invokeRestart("muffleWarning")}#
-	})#
-	suppressWarnings(#
-		SS <- standardizedSolution(m, type="std.all")#
-	)#
-	res <- list(#
-		fit		= m,#
-		SS		= SS,#
-		syntax	= syntax,#
-		roles	= roles,#
-		actor.id 	= actor.id,#
-		partner.id 	= partner.id,#
-		group.id 	= group.id,#
-		var.id	= var.id,#
-		drop	= drop,#
-		means	= means,#
-		diff	= diff,#
-		group	= group,#
-		groupnames = groupnames,#
-		IGSIM	= IGSIM,#
-		self	= self,#
-		call	= call,#
-		data	= fam)#
-	attr(res, "class") <- "fSRM"#
-	# ---------------------------------------------------------------------#
-	# After fitting: check, if some variances should be set to zero#
-	if (setZero %in% c("negative", "nonsig")) {#
-		T <- varComp(res, group=1)#
-		if (setZero == "negative") {#
-			to.zero <- T$component[which(T$variance < 0)]#
-		}#
-		if (setZero == "nonsig") {#
-			to.zero <- T$component[which(T$p.value > .05)]#
-			if (length(to.zero) > 0) {#
-				warning("Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significant variances to zero!")#
-			}#
-		}#
-		if (length(to.zero) > 0) {#
-			cat(paste0("Following variances are ", setZero, " and are constrained to be zero:\n", paste(to.zero, collapse="\n"), "\n\nNow reestimating model..."))#
-			add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",#
-			paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))#
-			res2 <- update(res, add=add, setZero="none")#
-			return(res2)#
-		} else {#
-			return(res)#
-		}#
-	} else {#
-		return(res)#
-	}#
+  tt <- tktoplevel()#
+  tktitle(tt) <- "Inserting and transforming your data"#
+  label.read <- tklabel(tt,text="Read in your datafile")#
+  button.CSV <- tkbutton(tt, text = "Select CSV file", command = getCSV)#
+  button.TXT <- tkbutton(tt, text = "Select TXT file", command = getTXT)#
+  button.SPSS <- tkbutton(tt, text = "Select SPSS File", command = getSPSS)#
+  tkgrid(tklabel(tt, text="                #
+                 "))#
+  tkgrid(label.read)#
+  tkgrid(button.CSV)#
+  tkgrid(button.TXT) #
+  tkgrid(button.SPSS)#
+  tkfocus(tt) #
+  space1 <- tklabel(tt,text="                 #
+                    ")#
+  label.data <- tklabel(tt,text="Do you want to transform your data from wide to long format? ")#
+  launchpopup.button <- tkbutton(tt, text = "Transform my data", command = launchDialog)#
+  space2 <- tklabel(tt,text="                 ")#
+  tkgrid(space1)#
+  tkgrid(label.data)#
+  tkgrid(launchpopup.button)#
+  tkgrid(space2)#
+    ### Everything for the output format:#
+    l.output <- tklabel(tt,text="Which SRM labels do you prefer in the output? ")#
+    tkgrid( tklabel(tt,text="                 "))#
+    tkgrid(l.output, columnspan=3)#
+    tkgrid(tklabel(tt,text="                 "))#
+    o.fam <- tklabel(tt, text="Family effect?")#
+    o.actor <- tklabel(tt, text="Actor/Perceiver effect?")#
+    o.partner <- tklabel(tt, text="Partner/Target effect?")#
+    o.rel <- tklabel(tt, text="Relationship effect?")#
+    Entry9 <- tclVar("FE")#
+    Entry10 <- tclVar("A")#
+    Entry11 <- tclVar("P")#
+    Entry12 <- tclVar("R")#
+    o.famE <- tkentry(tt,width="15", textvariable=Entry9)#
+    o.actE <- tkentry(tt,width="15", textvariable=Entry10)#
+    o.parE <- tkentry(tt,width="15", textvariable=Entry11)#
+    o.relE <- tkentry(tt,width="15", textvariable=Entry12)#
+    tkgrid(o.fam, o.famE)#
+    tkgrid(o.actor, o.actE)#
+    tkgrid(o.partner, o.parE)#
+    tkgrid(o.rel, o.relE)#
+    tkgrid.configure(o.fam, o.actor, o.partner, o.rel, sticky="w")#
+    change.but <- tkbutton(tt, text = "   Confirm output format   ", command=Change)#
+    tkgrid(change.but)#
+    tkfocus(tt)#
+    tkgrid.configure(label.read, label.data, l.output, sticky="w")#
+    tkgrid( tklabel(tt,text="                 #
+                    "))#
+    tkgrid(tkbutton(tt, text = "                            OK                             ", command= function(){tkdestroy(tt)}))#
+    tkgrid( tklabel(tt,text="                   #
+                    "))#
+font2 <- tkfont.create(family="times",size=8,slant="italic")#
+heading13 <- tklabel(tt, text="Please deal with missing data in an appropriate way before using these functions.", font = font2)#
+tkgrid(heading13)#
+tkgrid.configure(heading13, sticky="e")#
 }
-options(error=recover)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+fSRM.prep = ReadTransform()
+fSRM.prep
+fSRM.prep = ReadTransform()
+fSRM.prep
+ls()
+MyData
+setwd('/Users/Felix/Documents/LMU/Research/9 - Sonstiges/MM Bayes Wagenmakers')
+source("BF_internal.R")
+source("BF_internal.R")
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+#
+sourceDir("../R")#
+library(lavaan)#
+library(plyr)#
+library(reshape2)#
+library(ggplot2)#
+#
+# alternatively: load from GitHub#
+#library(devtools)#
+#install_github("fSRM", "felice303")#
+#library(fSRM)
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
 f4.d <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep.g, means=TRUE, group="group", diff=TRUE, setZero="negative")
 f4.d
-res <- f4.d
-res
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-T <- varComp(res, group=1)
-T
-T <- varComp(res, group=2)
-T
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::check()
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
 devtools::document()#
@@ -2273,11 +370,6 @@ devtools::check()
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
 devtools::install()
-library(RSA)
-?RSA
-data(motcon)#
-r.m <- RSA(postVA~ePow*iPow, motcon)
-getPar(t.m)
-options(error=NULL)
-getPar(r.m)
-summary(r.m$LM)
+3000*50
+3*50
+150/60
