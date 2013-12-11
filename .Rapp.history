@@ -1,3 +1,326 @@
+setwd('/Users/Felix/Documents/LMU/Research/9 - Sonstiges/MM RandomWalk')
+n <- 10000000#
+bits <- ((sample(2, n, replace=TRUE)-1)*2)-1#
+CS <- cumsum(bits)#
+#
+boundary <- 5#
+sensitive <- "first"#
+#
+profit <- 0#
+pointer <- 1#
+bits2 <- bits	# CS2 flips with every rule change#
+CS2 <- CS#
+hits <- c()#
+repeat {#
+	if (sensitive=="first") {	# die "1" ist ein Gewinn#
+		hit <- which(abs(CS2) > boundary)[1]#
+		if (is.na(hit)) {#
+			break;#
+		}#
+		hits <- c(hits, hit)#
+		if (CS2[hit] > 0) sensitive <- "lower"#
+		if (CS2[hit] < 0) sensitive <- "upper"#
+		pointer <- hit#
+		# ab jetzt gilt die neue Regel: umpolen#
+		bits2 <- -bits2#
+		CS2[hit:length(CS2)] <- CS2[hit-1] + cumsum(bits2[pointer:length(bits2)])#
+	}#
+	if (sensitive=="upper") {	# die "1" ist ein Gewinn#
+		hit <- which(CS2[pointer:length(CS2)] > boundary)[1] + pointer - 1#
+		if (is.na(hit)) {#
+			break;#
+		}#
+		hits <- c(hits, hit)#
+		sensitive <- "lower"#
+		pointer <- hit#
+		# ab jetzt gilt die neue Regel: umpolen#
+		bits2 <- -bits2#
+		CS2[hit:length(CS2)] <- CS2[hit-1] + cumsum(bits2[pointer:length(bits2)])#
+	}#
+	if (sensitive=="lower") {	# die "-1" ist ein Gewinn#
+		hit <- which(CS2[pointer:length(CS2)] < -boundary)[1] + pointer - 1#
+		if (is.na(hit)) {#
+			break;#
+		}#
+		hits <- c(hits, hit)#
+		sensitive <- "upper"#
+		pointer <- hit#
+		# ab jetzt gilt die neue Regel: umpolen#
+		bits2 <- -bits2#
+		CS2[hit:length(CS2)] <- CS2[hit-1] + cumsum(bits2[pointer:length(bits2)])#
+	}#
+}#
+print("Mean of random process:")#
+CS[length(CS)]/length(CS)#
+t.test(bits, mu=0)#
+#
+print("Mean of profit:")#
+CS2[length(CS2)]/length(CS2)#
+#
+firstdiff <- function(x) {#
+   shifted <- c(0,x[1:(length(x)-1)])#
+   x-shifted#
+   }#
+bits2 <- firstdiff(CS2)#
+t.test(bits2, mu=0)
+n <- 10000000#
+bits <- ((sample(2, n, replace=TRUE)-1)*2)-1#
+CS <- cumsum(bits)#
+#
+boundary <- 5#
+sensitive <- "first"#
+#
+profit <- 0#
+pointer <- 1#
+bits2 <- bits	# CS2 flips with every rule change#
+CS2 <- CS#
+hits <- c()#
+repeat {#
+	if (sensitive=="first") {	# die "1" ist ein Gewinn#
+		hit <- which(abs(CS2) > boundary)[1]#
+		if (is.na(hit)) {#
+			break;#
+		}#
+		hits <- c(hits, hit)#
+		if (CS2[hit] > 0) sensitive <- "lower"#
+		if (CS2[hit] < 0) sensitive <- "upper"#
+		pointer <- hit#
+		# ab jetzt gilt die neue Regel: umpolen#
+		bits2 <- -bits2#
+		CS2[hit:length(CS2)] <- CS2[hit-1] + cumsum(bits2[pointer:length(bits2)])#
+	}#
+	if (sensitive=="upper") {	# die "1" ist ein Gewinn#
+		hit <- which(CS2[pointer:length(CS2)] > boundary)[1] + pointer - 1#
+		if (is.na(hit)) {#
+			break;#
+		}#
+		hits <- c(hits, hit)#
+		sensitive <- "lower"#
+		pointer <- hit#
+		# ab jetzt gilt die neue Regel: umpolen#
+		bits2 <- -bits2#
+		CS2[hit:length(CS2)] <- CS2[hit-1] + cumsum(bits2[pointer:length(bits2)])#
+	}#
+	if (sensitive=="lower") {	# die "-1" ist ein Gewinn#
+		hit <- which(CS2[pointer:length(CS2)] < -boundary)[1] + pointer - 1#
+		if (is.na(hit)) {#
+			break;#
+		}#
+		hits <- c(hits, hit)#
+		sensitive <- "upper"#
+		pointer <- hit#
+		# ab jetzt gilt die neue Regel: umpolen#
+		bits2 <- -bits2#
+		CS2[hit:length(CS2)] <- CS2[hit-1] + cumsum(bits2[pointer:length(bits2)])#
+	}#
+}#
+print("Mean of random process:")#
+CS[length(CS)]/length(CS)#
+t.test(bits, mu=0)#
+#
+print("Mean of profit:")#
+CS2[length(CS2)]/length(CS2)#
+#
+firstdiff <- function(x) {#
+   shifted <- c(0,x[1:(length(x)-1)])#
+   x-shifted#
+   }#
+bits2 <- firstdiff(CS2)#
+t.test(bits2, mu=0)
+Start-up:#
+library("ProjectTemplate")#
+setwd("/Users/Felix/Documents/LMU/Research/1 - Konkret in Arbeit/BirkDiary")#
+#
+sourceDir <- function(path, trace = TRUE, ...) {#
+   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
+      if(trace) cat(nm,":")           #
+      source(file.path(path, nm), ...)#
+      if(trace) cat("\n")#
+   }#
+}#
+sourceDir("helpers")#
+#
+load.project()
+9120+228
+9348*1.5
+9120/9
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/data')
+dat <- read.csv("Eicherlsheim2011.csv")
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/data')
+dat <- read.csv("Eichelsheim2011.csv")
+dat
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/data')
+dat <- read.csv2("Eichelsheim2011.csv")
+dat
+str(dat)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/data')
+dat <- read.table("Eichelsheim2011.csv")
+dat
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::document()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::check()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::install()
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Eichelsheim')
+data(negInt)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Eichelsheim')
+str(negInt)
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Eichelsheim')
+E1 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=negInt)
+E1
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Eichelsheim')
+E2 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=negInt, group="group")
+E2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
+' @S3method print fSRM#
+#
+print.fSRM <-#
+function(x, digits=3, ...) {#
+	# Print model summary for all groups#
+	## The model for 4 members must have 31 free parameters and 47 df!#
+	cat("----------------\n")#
+	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")#
+	cat("\nModel summary:\n----------------\n")#
+	show(x$fit)#
+	cat("\nModel Fit:\n----------------\n")#
+	FIT <- fitmeasures(x$fit)#
+	cat(paste("Chi2 (df=", FIT["df"], ") = ", round(FIT["chisq"], digits), ", p = ", round(FIT["pvalue"], digits), "\n", sep=""))#
+	cat(paste("CFI = ", round(FIT["cfi"], digits), "\n", sep=""))#
+	cat(paste("TLI / NNFI = ", round(FIT["tli"], digits), "\n", sep=""))#
+	cat(paste("RMSEA = ", round(FIT["rmsea"], digits), " [", round(FIT["rmsea.ci.lower"], digits), ";", round(FIT["rmsea.ci.upper"], digits), "]", "; Test of close fit: p(data | true value == .05) = ", round(FIT["rmsea.pvalue"], digits), "\n", sep=""))#
+	if (is.null(x$group)) {#
+		print.singlegroup(x, group=1, digits=digits)#
+	} else {#
+		# print stats for each group#
+		for (g in 1:length(x$groupnames)) {#
+			cat("\n\n#####################################\n")#
+			cat(paste0("Statistics for group", g, "\n"))#
+			cat("#####################################\n")#
+			print.singlegroup(x, group=g, digits=digits)#
+		}#
+		if (x$means == TRUE) {#
+			cat("\n\n#####################################\n")#
+			cat(paste0("Difference of means between groups (", x$groupnames[1], "-", x$groupnames[2], ")\n"))#
+			cat("#####################################\n")#
+			MD <- getCor(x, label=".meanDiff.", group=0)#
+			colnames(MD)[5] <- "diff"#
+			print(MD[, c(2, 5, 4, 6:9)])#
+			cat("\n\n#####################################\n")#
+			cat(paste0("Difference of variances between groups (", x$groupnames[1], "-", x$groupnames[2], ")\n"))#
+			cat("#####################################\n")#
+			MD <- getCor(x, label=".varDiff.", group=0)#
+			colnames(MD)[5] <- "diff"#
+			print(MD[, c(2, 5, 4, 6:9)])#
+		}#
+	}#
+}#
+print.singlegroup <-#
+function(x, group=1, digits=3) {#
+	eff <- as.data.frame(parameterEstimates(x$fit))#
+	eff$f <- paste(eff$lhs, eff$op, eff$rhs)#
+	# SS = standardized solution: get correlation for that#
+	SS <- getCor(x, ops=c("~~", "~"), group=group)#
+#
+	cat("\n\nVariance decomposition:\n----------------\n")#
+	T <- varComp(x, group=group)#
+	T[, -1] <- round(T[, -1], digits)#
+	print(T)#
+	cat("\n\nRelative variance decomposition:\n----------------\n")#
+	print(round(percTable(x, group=group)$stand))#
+	if (!x$drop %in% c("actor", "partner", "GR")) {#
+		cat("\n\nGeneralized reciprocity (actor-partner covariances):\n----------------\n")#
+		GR <- getGR(x, group=group)#
+		print(GR, row.names=TRUE)#
+	}#
+	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	DR <- getDR(x, group=group)#
+	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")#
+	print(DR, row.names=TRUE)#
+	if (length(x$IGSIM) > 0) {#
+		cat("\n\nIntragenerational similarity:\n----------------\n")#
+		igsim <- SS[grepl("IGSIM", SS$label), ][, -2]#
+		print(igsim)#
+	}#
+	if (x$self == TRUE) {#
+		AS <- data.frame()#
+		for (t in x$roles) {#
+			if (x$selfmode == "cor") {F <- paste(style$actor, ".", t, " ~~ ", style$self, ".", t, sep="")}#
+			if (x$selfmode == "kq") {F <- paste(style$self, ".", t, " ~ ", style$actor, ".", t, sep="")}#
+			AS0 <- SS[SS$f == F, ]#
+			AS0$comment <- ""#
+#
+			# get Variance of components --> if that is < min.p, correlation is not reliable!#
+			SD1 <- SS[SS$f == paste(style$partner, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+			SD2 <- SS[SS$f == paste(style$self, ".", t, " ~~ ", style$self, ".", t, sep=""), ]#
+			if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+			if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+#
+			if (SD1["pvalue"] > x$min.p | SD2["pvalue"] > x$min.p) {#
+				AS0$COR <- NA_real_#
+				AS0$comment <- paste("One of the variance components has p <", x$min.p)#
+			}#
+			if (AS0$pvalue > x$min.p) {#
+				AS0$COR <- NA_real_#
+				AS0$comment <- paste("Covariance estimate has p <", x$min.p)#
+			}#
+#
+			AS <- rbind(AS, AS0)#
+		}#
+		cat("\n\nAssumed similarity: Mean r =", round(meanNA(AS$COR), digits),"(out of bound estimates set to zero)\n----------------\n")#
+		print(AS,row.names=TRUE)#
+		SO <- data.frame()#
+		for (t in x$roles) {#
+			if (x$selfmode == "cor") {F <- paste(style$partner, ".", t, " ~~ ", style$self, ".", t, sep="")}#
+			if (x$selfmode == "kq") {F <- paste(style$self, ".", t, " ~ ", style$partner, ".", t, sep="")}#
+			SO0 <- SS[SS$f == F, ]#
+			SO0$comment <- ""#
+#
+			# get Variance of components --> if that is < min.p, correlation is not reliable!#
+			SD1 <- SS[SS$f == paste(style$partner, ".", t, " ~~ ", style$partner, ".", t, sep=""), ]#
+			SD2 <- SS[SS$f == paste(style$self, ".", t, " ~~ ", style$self, ".", t, sep=""), ]#
+			if (is.na(SD1$pvalue)) SD1$pvalue <- 1#
+			if (is.na(SD2$pvalue)) SD2$pvalue <- 1#
+#
+			if (SD1["pvalue"] > x$min.p | SD2["pvalue"] > x$min.p) {#
+				SO0$COR <- NA_real_#
+				SO0$comment <- paste("One of the variance components has p <", x$min.p)#
+			}#
+			if (SO0$pvalue > x$min.p) {#
+				SO0$COR <- NA_real_#
+				SO0$comment <- paste("Covariance estimate has p <", x$min.p)#
+			}#
+#
+			SO <- rbind(SO, SO0)#
+		}#
+		SO$COR <- as.numeric(SO$COR)#
+		cat("\n\nSelf-Other agreement: Mean r =", round(meanNA(SO$COR), digits),"(out of bound estimates set to NA)\n----------------\n")#
+		print(SO, row.names=TRUE)#
+	}#
+	if (x$means == TRUE) {#
+		cat("\n\nMean structure\n----------------\n")#
+		if (is.null(x$group)) {#
+			MS <- eff[grepl(".means.", eff$label, fixed=TRUE), c(1, 5:10)]#
+		} else {#
+			MS <- eff[grepl(paste0(".means", x$groupnames[group], "."), eff$label, fixed=TRUE), c(1, 6:11)]#
+		}#
+		colnames(MS) <- c("factor", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper")#
+		MS[, -1] <- round(MS[, -1], digits)#
+		rownames(MS) <- NULL#
+		print(MS)#
+	}#
+}
+E2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
+devtools::install()
+E2
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
 sourceDir <- function(path, trace = TRUE, ...) {#
    for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
@@ -17,359 +340,13 @@ library(ggplot2)#
 #library(devtools)#
 #install_github("fSRM", "felice303")#
 #library(fSRM)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-library(devtools)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-check for non-ASCII characters#
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-library(tools)#
-for (nm in list.files("R/.", pattern="\\.[r|R]", recursive=FALSE)) {#
-	cat(nm,":")    #
-   showNonASCIIfile(paste0("R/",nm))#
-	cat("\n")#
-}
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::document()
+E2
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Eichelsheim')
+E3 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=negInt, group="group", means=TRUE, delta=TRUE)#
+E3
+setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Eichelsheim')
+E3 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=negInt, group="group", means=TRUE, diff=TRUE)#
+E3
 setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
 devtools::install()
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::document()
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::install()
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::document()
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::install()
-data(attanx3)
-data(attanx4)
-data(attdep)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-data(attdep)#
-#
-# construct a 3-person data set#
-attdep3 <- attdep[attdep$perceiver.id != "y" & attdep$target.id != "y", ]
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-f3.1 <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep3)#
-f3.1
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-attdep.g <- attdep#
-attdep.g$group <- ifelse(attdep.g$family.id <= 104, "A", "B")
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-f4.d <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep.g, means=TRUE, group="group", diff=TRUE)#
-f4.d
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-f4.d <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep.g, means=TRUE, group="group", diff=TRUE, setZero="negative")#
-f4.d
-syntax(f4.d)
-model(f4.d)
-f4.d$syntax
-cat(f4.d$syntax)
-?import
-import
-import()
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-ReadTransform <- function() {#
-#### Read in the dataset #####
-  require(tcltk)#
-  getSPSS <- function() {#
-    name <- tclvalue(tkgetOpenFile(#
-      filetypes = "{{SPSS Files} {.sav}} {{All files} *}"))#
-    if (name == "") return;#
-    require(foreign)   #
-    MyData <- read.spss(name, use.value.label = TRUE, to.data.frame = TRUE)#
-    assign("MyData", MyData, envir = .GlobalEnv)#
-    # tkdestroy(tt) # zodat automatisch het venster weggaat#
-    cat("Datafile is loaded\n")#
-    tkconfigure(button.SPSS, text = "Data inserted")#
-  }#
-  getCSV <- function() {#
-    name <- tclvalue(tkgetOpenFile(#
-      filetypes = "{{CSV Files} {.csv}} {{All files} *}"))#
-    if (name == "") return;#
-    MyData <- read.csv(name)#
-    assign("MyData", MyData, envir = .GlobalEnv)#
-    # tkdestroy(tt)#
-    cat("Datafile is loaded\n")#
-    tkconfigure(button.CSV, text = "Data inserted")#
-  }#
-  getTXT <- function() {#
-    name <- tclvalue(tkgetOpenFile(#
-      filetypes = "{{TXT Files} {.txt}} {{All files} *}"))#
-    if (name == "") return;#
-    MyData <- read.table(name, header = T)#
-    assign("MyData", MyData, envir = .GlobalEnv)#
-    # tkdestroy(tt)#
-    cat("Datafile is loaded\n")#
-    tkconfigure(button.TXT, text = "Data inserted")#
-  }#
-#### Transformation of the dataset #####
-  launchDialog <- function() {#
-    onOK <- function() {#
-      #Define the variables where the position of the characters will be inserted (actor, partner, indicator, group)#
-      var <- as.character(tclvalue(Entry0))#
-      group <- as.character(tclvalue(Entrygr))#
-      fam <- as.character(tclvalue(EntryID))#
-      act_from <- as.character(tclvalue(Entry1))#
-      act_to <- as.character(tclvalue(Entry2))#
-      part_from <- as.character(tclvalue(Entry3))#
-      part_to <- as.character(tclvalue(Entry4))#
-      ind_from <- as.character(tclvalue(Entry5))#
-      ind_to <- as.character(tclvalue(Entry6))#
-      # Transform from wide to long format#
-      # Select only the relevant variables#
-      if (var == "") {#
-        tkmessageBox(title="Warning", message = "Please insert the columnnumbers containing the dyadic measurements of interest (i.e. the measured variables)!") }#
-      else {#
-        b <- strsplit(var,",")[[1]]#
-        ind <- grep(":",b)#
-        DVs <- c()#
-        cnt <- 1#
-        for(i in 1:length(b)){#
-          if(i %in% ind){#
-            sequ <- as.numeric(strsplit(b[i],":")[[1]])#
-            # bij A:B de : van verwijderen#
-            lengthsequ <-diff(c(sequ[1],sequ[2]))#
-            # Hoogste - laagste waarde van element dat oorspronkelijk : bevatte#
-            DVs[cnt:(cnt+lengthsequ)] <- sequ[1]:sequ[2]#
-            # DVs heeft het aantal elementen dat er tussen A en B zit (A:B), en deze worden opgevuld door de getallen die er echt tussenzitten#
-            cnt <- cnt+lengthsequ+1#
-          } else {#
-            DVs[cnt] <- as.numeric(b[i])#
-            # voeg aan deze vector gewoon dat getal toe#
-            cnt <- cnt+1#
-              }} #
-           }#
-          # Add an family ID to the basic dataset, #
-      library(reshape2)#
-      if(group != ""){#
-        if (fam != ""){#
-        SRMData <<- melt(MyData, id.vars=c(fam, group), measure.vars=c(DVs))     }#
-        else {MyData$family_ID <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars=c("family_ID",group), measure.vars=c(DVs))}   #
-     }#
-      else {#
-        if (fam != ""){#
-           SRMData <<- melt(MyData, id.vars=fam, measure.vars=c(DVs))     }#
-        else {MyData$family_ID <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars="family_ID", measure.vars=c(DVs))#
-              }   #
-        }#
-      # Substract the characters of interest from the variable names + create useful pop-up warnings when something is not inserted#
-      # Actor ID's:#
-      if (act_from == "From" |  act_from == "" | act_to == "To" | act_to == "") #
-      {tkmessageBox(title="Warning", message = "The characters of the rater are not correctly inserted")}#
-      else {SRMData$actor.id <<- substr(SRMData$variable, act_from, act_to)#
-      }#
-      # Partner ID's:#
-      if (part_from == "From" |  part_from == "" | part_to == "To" | part_to == "") #
-      {tkmessageBox(title="Warning", message = "The characters of the person being rated are not correctly inserted")}#
-      else  {SRMData$partner.id <<- substr(SRMData$variable, part_from, part_to)#
-      }    #
-      # Indicator:#
-      if (ind_from == "From" |  ind_from == "") #
-      {value <- tkmessageBox(title="No Indicators", message = "No indicators were defined. Is this correct?", icon = "info", type="yesno", default="yes")#
-       value <- tclvalue(value)#
-       if (value == "no") return()      }#
-      else#
-      {SRMData$ind <<- substr(SRMData$variable, ind_from, ind_to) }#
-      # Only return if all fields are completed (except for the indicator and group)#
-      if (act_from != "From" &  act_from != "" & act_to != "To" & act_to != "" & part_from != "From" &  part_from != "" & part_to != "To" & part_to != "")#
-      {  cat("A new datafile called 'SRMData' is ceated\n")#
-        tkdestroy(popup)#
-       tkfocus(tt)} #
-    }#
-    # Basic lay-out of the new pop-up window#
-    popup <- tktoplevel()#
-    tktitle(popup) <- "Transformation of the dataset"#
-    tkgrid(tklabel(popup, text = "       "))#
-        # Ask for family ID#
-    heading <- tklabel(popup, text="If present, enter the variable name that contains the identifications of ...                                         ")#
-    ID <- tklabel(popup, text="   the different families.           ")                                          #
-    gr <- tklabel(popup, text="   the different groups.            ")    #
-    tkgrid(tklabel(popup, text = "       "))#
-    EntryID <- tclVar("")#
-    Entrygr <- tclVar("")#
-    e.fam <- tkentry(popup,width="25", textvariable=EntryID)#
-    e.gr <- tkentry(popup,width="25", textvariable=Entrygr)#
-    tkgrid(heading, columnspan=3)#
-    tkgrid(ID, e.fam)#
-    tkgrid(gr, e.gr)#
-    tkgrid(tklabel(popup, text = "       "))#
-    tkgrid(tklabel(popup, text = "       "))#
-    tkgrid.configure(ID, gr, sticky = "e")#
-    tkgrid.configure(heading, e.fam, e.gr, sticky = "w")#
-      # Ask the position of the dyadic measurements#
-    font1 <- tkfont.create(family="times",size=9,slant="italic")#
-    ?tkfont.create#
-    Entry0 <- tclVar("")#
-    e.dyad <- tkentry(popup,width="25", textvariable=Entry0)#
-    blanco <- tklabel(popup, text="")#
-    heading0 <- tklabel(popup, text="Specify the column numbers of the dyadic measurements in your original dataset                                                  ")#
-    ex <-   tklabel(popup, text="E.g. variables 1 until 9, 11, 13 and 15 are entered as",font=font1)#
-    ex2 <-   tklabel(popup, text="1:9, 11, 13, 15",font=font1, background="white")#
-    tkgrid(heading0, columnspan=3)#
-    tkgrid(blanco, e.dyad)#
-    tkgrid(ex, ex2)#
-    tkgrid.configure(ex, blanco, sticky="e")#
-    tkgrid.configure(ex2, e.dyad, sticky="w")#
-    tkgrid(tklabel(popup, text = "       "))#
-      # Start subtracting part from variable names#
-    heading2 <- tklabel(popup, text="Based on the variable names of the dyadic measurements, define the position of the characters of ...                  ")#
-    tkgrid(heading2, columnspan=3)#
-    tkgrid(tklabel(popup, text = "       "))#
-    #Everything for inserting the characters of the actor ID:#
-    l.actor <- tklabel(popup, text="   the rater in the dyadic measurement?")#
-    Entry1 <- tclVar("From")#
-    Entry2 <- tclVar("To")#
-    e.actor1 <- tkentry(popup,width="6", textvariable=Entry1)#
-    e.actor2 <- tkentry(popup,width="6", textvariable=Entry2)#
-    tkgrid(l.actor, e.actor1, e.actor2)#
-    tkgrid(tklabel(popup, text = "       "))#
-    #Everything for inserting the characters of the partner ID:#
-    l.partner <- tklabel(popup, text="   the person being rated in the dyadic measurement?")#
-    Entry3 <- tclVar("From")#
-    Entry4 <- tclVar("To")#
-    e.partner1 <- tkentry(popup,width="6", textvariable=Entry3)#
-    e.partner2 <- tkentry(popup,width="6", textvariable=Entry4)   #
-    tkgrid(l.partner, e.partner1, e.partner2)#
-    tkgrid(tklabel(popup, text = "       "))#
-    #Everything for inserting the characters of the indicator:#
-    l.ind <- tklabel(popup, text="   the indicators (if present)")#
-    Entry5 <- tclVar("From")#
-    Entry6 <- tclVar("To")#
-    e.ind1 <- tkentry(popup,width="6", textvariable=Entry5)#
-    e.ind2 <- tkentry(popup,width="6", textvariable=Entry6)   #
-    tkgrid(l.ind, e.ind1, e.ind2)#
-    tkgrid(tklabel(popup, text = "       "))#
-    tkgrid.configure(heading2, l.actor, l.partner, l.ind, sticky="w")#
-    OK.but <- tkbutton(popup, text = "        OK        ", command = onOK)#
-    Cancel.but <- tkbutton(popup, text = "    Cancel     ", command = function() {tkdestroy(popup)})#
-    tkgrid(OK.but, Cancel.but)    #
-    tkgrid(tklabel(popup, text = "    "))#
-    tkfocus(popup)#
-    }#
-Change <- function(){#
-  outfam <- as.character(tclvalue(Entry9))#
-  outact <- as.character(tclvalue(Entry10))#
-  outpar <- as.character(tclvalue(Entry11))#
-  outrel <- as.character(tclvalue(Entry12))#
-  style <<- new.env(parent=globalenv())#
-  style$familyeffect <<- outfam#
-  style$actor <<- outact#
-  style$partner <<- outpar#
-  style$relationship <<- outrel#
-  tkconfigure(change.but, text = "Outputformat confirmed")#
-}#
-#
-  tt <- tktoplevel()#
-  tktitle(tt) <- "Inserting and transforming your data"#
-  label.read <- tklabel(tt,text="Read in your datafile")#
-  button.CSV <- tkbutton(tt, text = "Select CSV file", command = getCSV)#
-  button.TXT <- tkbutton(tt, text = "Select TXT file", command = getTXT)#
-  button.SPSS <- tkbutton(tt, text = "Select SPSS File", command = getSPSS)#
-  tkgrid(tklabel(tt, text="                #
-                 "))#
-  tkgrid(label.read)#
-  tkgrid(button.CSV)#
-  tkgrid(button.TXT) #
-  tkgrid(button.SPSS)#
-  tkfocus(tt) #
-  space1 <- tklabel(tt,text="                 #
-                    ")#
-  label.data <- tklabel(tt,text="Do you want to transform your data from wide to long format? ")#
-  launchpopup.button <- tkbutton(tt, text = "Transform my data", command = launchDialog)#
-  space2 <- tklabel(tt,text="                 ")#
-  tkgrid(space1)#
-  tkgrid(label.data)#
-  tkgrid(launchpopup.button)#
-  tkgrid(space2)#
-    ### Everything for the output format:#
-    l.output <- tklabel(tt,text="Which SRM labels do you prefer in the output? ")#
-    tkgrid( tklabel(tt,text="                 "))#
-    tkgrid(l.output, columnspan=3)#
-    tkgrid(tklabel(tt,text="                 "))#
-    o.fam <- tklabel(tt, text="Family effect?")#
-    o.actor <- tklabel(tt, text="Actor/Perceiver effect?")#
-    o.partner <- tklabel(tt, text="Partner/Target effect?")#
-    o.rel <- tklabel(tt, text="Relationship effect?")#
-    Entry9 <- tclVar("FE")#
-    Entry10 <- tclVar("A")#
-    Entry11 <- tclVar("P")#
-    Entry12 <- tclVar("R")#
-    o.famE <- tkentry(tt,width="15", textvariable=Entry9)#
-    o.actE <- tkentry(tt,width="15", textvariable=Entry10)#
-    o.parE <- tkentry(tt,width="15", textvariable=Entry11)#
-    o.relE <- tkentry(tt,width="15", textvariable=Entry12)#
-    tkgrid(o.fam, o.famE)#
-    tkgrid(o.actor, o.actE)#
-    tkgrid(o.partner, o.parE)#
-    tkgrid(o.rel, o.relE)#
-    tkgrid.configure(o.fam, o.actor, o.partner, o.rel, sticky="w")#
-    change.but <- tkbutton(tt, text = "   Confirm output format   ", command=Change)#
-    tkgrid(change.but)#
-    tkfocus(tt)#
-    tkgrid.configure(label.read, label.data, l.output, sticky="w")#
-    tkgrid( tklabel(tt,text="                 #
-                    "))#
-    tkgrid(tkbutton(tt, text = "                            OK                             ", command= function(){tkdestroy(tt)}))#
-    tkgrid( tklabel(tt,text="                   #
-                    "))#
-font2 <- tkfont.create(family="times",size=8,slant="italic")#
-heading13 <- tklabel(tt, text="Please deal with missing data in an appropriate way before using these functions.", font = font2)#
-tkgrid(heading13)#
-tkgrid.configure(heading13, sticky="e")#
-}
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/R')
-fSRM.prep = ReadTransform()
-fSRM.prep
-fSRM.prep = ReadTransform()
-fSRM.prep
-ls()
-MyData
-setwd('/Users/Felix/Documents/LMU/Research/9 - Sonstiges/MM Bayes Wagenmakers')
-source("BF_internal.R")
-source("BF_internal.R")
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-sourceDir <- function(path, trace = TRUE, ...) {#
-   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {#
-      if(trace) cat(nm,":")           #
-      source(file.path(path, nm), ...)#
-      if(trace) cat("\n")#
-   }#
-}#
-#
-sourceDir("../R")#
-library(lavaan)#
-library(plyr)#
-library(reshape2)#
-library(ggplot2)#
-#
-# alternatively: load from GitHub#
-#library(devtools)#
-#install_github("fSRM", "felice303")#
-#library(fSRM)
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst/Cook2000')
-f4.d <- fSRM(dep1 ~ perceiver.id*target.id | family.id, attdep.g, means=TRUE, group="group", diff=TRUE, setZero="negative")
-f4.d
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::document()
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::check()
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::document()#
-#
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::check()
-setwd('/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/inst')
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM")#
-devtools::install()
-3000*50
-3*50
-150/60

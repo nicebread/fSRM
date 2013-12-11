@@ -35,3 +35,4 @@ Collate:
     'attanx4-data.R'
     'attanx3-data.R'
     'import.R'
+    'negInt-data.R'

@@ -9,12 +9,6 @@
 	
 - Changes to model syntax: The user has to know how to name the variables (because in the long format they have other names than in the original wide format)
 
-- Remove the "add"-parameter from fSRM: simply provide the complete syntax in "model"
-
-- group comparisons (multi-group SEM)
-
-- instead of "fe=FALSE": drop = c("group", "actor", "partner") in case of three members
-
 - getCor function: show all (co)variances, even the negative ones
 
 - resestimation: no recursion, make another function: reestimate(x)

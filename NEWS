@@ -1,6 +1,8 @@
 # Version 0.2.6
 
 - mod() function now works with mean structure and delta method if lavaan >= 0.5.16 is installed
+- added a data set based on Eichelsheim (2011): data(negInt)
+- Fixed minor bug in print.fSRM with multiple groups
 
 # Version 0.2.5
 
