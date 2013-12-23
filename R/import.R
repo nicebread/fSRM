@@ -68,7 +68,7 @@ import <- function() {
       # Transform from wide to long format
       # Select only the relevant variables
       if (var == "") {
-        tkmessageBox(title="Warning", message = "Please insert the columnnumbers containing the dyadic measurements of interest (i.e. the measured variables)!") }
+        tkmessageBox(title="Warning", message = "Please insert the column numbers containing the dyadic measurements of interest (i.e. the measured variables)!") }
       else {
         b <- strsplit(var,",")[[1]]
         ind <- grep(":",b)
@@ -94,12 +94,12 @@ import <- function() {
       if(group != ""){
         if (fam != ""){
         SRMData <<- melt(MyData, id.vars=c(fam, group), measure.vars=c(DVs))     }
-        else {MyData$family_ID <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars=c("family_ID",group), measure.vars=c(DVs))}   
+        else {MyData$family.id <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars=c("family.id",group), measure.vars=c(DVs))}   
      }
       else {
         if (fam != ""){
            SRMData <<- melt(MyData, id.vars=fam, measure.vars=c(DVs))     }
-        else {MyData$family_ID <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars="family_ID", measure.vars=c(DVs))
+        else {MyData$family.id <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars="family.id", measure.vars=c(DVs))
               }   
         }
       
@@ -126,7 +126,7 @@ import <- function() {
       
       # Only return if all fields are completed (except for the indicator and group)
       if (act_from != "From" &  act_from != "" & act_to != "To" & act_to != "" & part_from != "From" &  part_from != "" & part_to != "To" & part_to != "")
-      {  cat("A new datafile called 'SRMData' is ceated\n")
+      {  cat("A new datafile called 'SRMData' is created\n")
         tkdestroy(popup)
        tkfocus(tt)} 
       
