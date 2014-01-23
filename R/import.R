@@ -14,6 +14,7 @@ import <- function() {
   
 #### Read in the dataset ####
   require(tcltk)
+  require(reshape2)
   getSPSS <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{SPSS Files} {.sav}} {{All files} *}"))
