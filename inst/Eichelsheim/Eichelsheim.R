@@ -3,15 +3,15 @@
 
 # The data set 
 
-data(negInt)
-str(negInt)
+data(two.groups)
+str(two.groups)
 
-E1 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=negInt)
+E1 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups)
 E1
 
-E2 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=negInt, group="group")
+E2 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group")
 E2
 
 # Beware: This model takes *really* long ...
-E3 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=negInt, group="group", means=TRUE, diff=TRUE)
+E3 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group", means=TRUE, diff=TRUE)
 E3

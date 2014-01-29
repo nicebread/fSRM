@@ -1,4 +1,4 @@
-"family.id" "perceiver.id" "target.id" "dep1" "dep2"
+"family.id" "actor.id" "partner.id" "dep1" "dep2"
 1 "c" "f" 5 5
 1 "c" "m" 5 5
 1 "c" "y" 4.66666666666667 5

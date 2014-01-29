@@ -31,5 +31,6 @@ dat3 <- dat.wide[dat.wide$actor %in% c("c", "f", "m") & dat.wide$partner %in% c(
 dat4 <- dat.wide
 
 str(dat4)
-colnames(dat4) <- c("family.id", "perceiver.id", "target.id", "dep1", "dep2")
-write.table(dat4, file="attdep.tab", row.names=FALSE, col.names=TRUE)
+colnames(dat4) <- c("family.id", "actor.id", "partner.id", "dep1", "dep2")
+two.indicators <- dat4
+#write.table(dat4, file="two.indicators.tab", row.names=FALSE, col.names=TRUE)

@@ -57,7 +57,7 @@ varComp <- function(x, group=1) {
 	res2 <- data.frame(f=rownames(res), as.data.frame(res))
 	rownames(res2) <- NULL
 	res2$f <- as.character(res2$f)
-	colnames(res2) <- c("component", "variance", "se", "z", "p.value", "ci.lower", "ci.upper")
+	colnames(res2) <- c("component", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper")
 	return(res2)
 }
 

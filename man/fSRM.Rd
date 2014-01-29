@@ -2,10 +2,9 @@
 \alias{fSRM}
 \title{Run a Social Relations Model with roles ("Family SRM")}
 \usage{
-  fSRM(formula = NULL, data, drop = "default", add = "",
-    means = FALSE, diff = FALSE, IGSIM = list(),
-    add.variable = c(), syntax = "", group = NULL,
-    setZero = "none", ...)
+fSRM(formula = NULL, data, drop = "default", add = "", means = FALSE,
+  diff = FALSE, IGSIM = list(), add.variable = c(), syntax = "",
+  group = NULL, setZero = "none", ...)
 }
 \arguments{
   \item{formula}{A formula that defines the variable names.
@@ -69,21 +68,20 @@
   non-significant variances to zero!}
 }
 \description{
-  Run a Social Relations Model with roles ("Family SRM")
+Run a Social Relations Model with roles ("Family SRM")
 }
 \details{
-  A model can be rerun with additional syntax using the
-  \code{add} function: \code{s1 <- fSRM(dep1/dep2 ~
-  actor*partner | fam, dat2)} \code{s2 <- add(s1, "Ac ~~
-  Pm")} A model can be run with new parameters using the
-  update function: \code{s1 <- fSRM(dep1/dep2 ~
-  actor*partner | fam, dat2)} \code{s2 <- update(s1,
-  diff=TRUE)}
+A model can be rerun with additional syntax using the
+\code{add} function: \code{s1 <- fSRM(dep1/dep2 ~
+actor*partner | fam, dat2)} \code{s2 <- add(s1, "Ac ~~
+Pm")} A model can be run with new parameters using the
+update function: \code{s1 <- fSRM(dep1/dep2 ~ actor*partner
+| fam, dat2)} \code{s2 <- update(s1, diff=TRUE)}
 }
 \references{
-  Kenny, D. A., & West, T. V. (2010). Similarity and
-  Agreement in Self-and Other Perception: A Meta-Analysis.
-  Personality and Social Psychology Review, 14(2), 196-213.
-  doi:10.1177/1088868309353414
+Kenny, D. A., & West, T. V. (2010). Similarity and
+Agreement in Self-and Other Perception: A Meta-Analysis.
+Personality and Social Psychology Review, 14(2), 196-213.
+doi:10.1177/1088868309353414
 }
 

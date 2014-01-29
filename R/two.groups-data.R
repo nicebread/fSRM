@@ -18,4 +18,7 @@
 #' @keywords datasets
 #' @format A data frame with 2496 rows and 4 variables (208 families with 4 members each, round-robin design)
 #' @name two.groups
+#' @examples 
+#' data(two.groups)
+#' head(two.groups)
 NULL

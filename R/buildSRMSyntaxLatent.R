@@ -229,7 +229,7 @@ SM <- ""
 if (means==TRUE & diff == FALSE) {
 	SM.prefix <- ".means."
 	SM <- ""
-	SM <- "\n## Compute structured means\n# Define labels for subsequent constraints\n"
+	SM <- "\n\n## Compute structured means\n# Define labels for subsequent constraints\n"
 	
 	SM <- paste(SM, paste(style$familyeffect, " ~ ", SM.prefix, style$familyeffect, "*1\n", sep=""))
 
@@ -248,7 +248,7 @@ if (means==TRUE & diff == FALSE) {
 	# }
 	
 	SM <- paste0(SM, "\n\n# set means of observed variables to zero\n")
-	SM <- paste0(SM, paste0(pasteNS(roles, roles, var.id), "~ 0", collapse="\n"))
+	SM <- paste0(SM, paste0(pasteNS(roles, roles, var.id), " ~ 0", collapse="\n"))
 	
 	SM <- paste0(SM, "\n\n# set constraints on means for identifiability\n")
 	

@@ -10,19 +10,21 @@
 #' 
 #' \itemize{
 #'   \item family.id An indicator for the family.
-#'   \item perceiver.id An indicator of the rater in the dyad, either "m", "f", or "y"
-#'   \item target.id An indicator for the person being rated in the dyad, either "m", "f", or "y"
+#'   \item actor.id An indicator of the rater in the dyad, either "m", "f", or "y"
+#'   \item partner.id An indicator for the person being rated in the dyad, either "m", "f", or "y"
 #'   \item anx1: First indicator of relationship specific anxiety (i.e. average of first halve of the scale).
 #'   \item anx2: Second indicator of relationship specific anxiety (i.e. average of second halve of the scale).
 #' }
 #' @source This dataset was retrieved from \url{http://davidakenny.net/kkc/c9/c9.htm} in wide format and converted to an R dataset in long format.
 #' @references Cook, W. L. (2000). Understanding attachment security in family context. \emph{Journal of Personality and Social Psychology, 78}, 285–294. doi:10.1037/0022-3514.78.2.285
-#' @references Collins, N. L., & Read, S. J. (1990, April). Adult attachment, working models, and relationship quality in dating couples. Journal of personality and social psychology,58 (4), 644-663.
+#' @references Collins, N. L., & Read, S. J. (1990). Adult attachment, working models, and relationship quality in dating couples. \emph{Journal of Personality and Social Psychology}, 58, 644-663.
 #' @docType data
 #' @keywords datasets
 #' @format A data frame with 1249 rows and 5 variables (208 families with 3 members each, round-robin design)
-#' @name attanx3
-#' @examples head(attanx3)
+#' @name three.person
+#' @examples 
+#' data(three.person)
+#' head(three.person)
 NULL
 
 

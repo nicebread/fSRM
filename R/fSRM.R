@@ -89,7 +89,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 	# define defaults for drop
 	drop <- match.arg(drop, c("nothing", "family", "GR", "actor", "partner", "default"))
 	if (drop == "default" & length(roles) == 3 & syntax=="") {
-		message("Three-member families: Dropping family factor per default.")
+		message("Three-member families: Dropping family variance per default.")
 		drop <- "family"
 	}
 	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}
@@ -102,21 +102,22 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")
 	
 	
+	if (!is.null(group)) {
+		groupnames <- as.character(unique(fam$group))
+	} else {
+		groupnames <- NULL
+	}
+	
 	# if no syntax is directly provided:
 	if (syntax == "") {
-		
-		if (!is.null(group)) {
-			groupnames <- as.character(unique(fam$group))
-		} else {
-			groupnames <- NULL
-		}
-		
 		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)
 	
 		syntax <- paste(syntax0, add, sep="\n")
 	} else {
 		print("Model syntax is directly specified; skipping buildfSRMSyntax")
 	}
+	
+	cat(syntax)
 	
 	# suppress some types of lavaan warning
 	withCallingHandlers({	
