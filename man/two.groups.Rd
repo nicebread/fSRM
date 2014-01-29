@@ -2,11 +2,11 @@
 \name{two.groups}
 \alias{two.groups}
 \title{Data set on negative interactions}
-\format{A data frame with 3276 rows and 6 variables (208 families with 4 members each, round-robin design)}
+\format{A data frame with 3276 rows and 6 variables (173 families with 4 members each, round-robin design)}
 \description{
 A simulated dataset, mimicking the study performed by Eichelsheim et al. (2011) who investigated whether there are 
 differences in patterns of negativity between families with and without an adolescent with externalizing problem 
-behavior. The problematic and nonproblematic group consist both of 120 and 153 four-person families, respectively. 
+behavior. The problematic and nonproblematic group consist of 120 and 153 four-person families, respectively. 
 This dataset contains two measures of negativity for each of the 12 relationships.
 Four roles are present: Mothers "MO", fathers "FA", the asolescent with externalizing problem behavior "C1", and the adolescent without problem behavior "C2".
 }
