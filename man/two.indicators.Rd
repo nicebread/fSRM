@@ -16,8 +16,8 @@ The variables are as follows:
 
 \itemize{ \item family.id An indicator for the family.
 \item actor.id An indicator for the perceiver, either "m",
-"f", "c", or "y" \item partner.id An indicator for the
-target, either "m", "f", "c", or "y" \item first measurement of attachment dependency.  \item dep2 second measurement of attachment dependency. }
+"f", "c", or "y". \item partner.id An indicator for the
+target, either "m", "f", "c", or "y". \item first measurement of attachment dependency.  \item dep2 second measurement of attachment dependency. }
 }
 \examples{
 data(two.indicators)
