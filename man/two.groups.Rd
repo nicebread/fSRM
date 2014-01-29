@@ -2,7 +2,7 @@
 \name{two.groups}
 \alias{two.groups}
 \title{Data set on negative interactions}
-\format{A data frame with 3276 rows and 6 variables (173 families with 4 members each, round-robin design)}
+\format{A data frame with 3276 rows and 6 variables (273 families with 4 members each, round-robin design)}
 \description{
 A simulated dataset, mimicking the study performed by Eichelsheim et al. (2011) who investigated whether there are 
 differences in patterns of negativity between families with and without an adolescent with externalizing problem 
@@ -15,8 +15,8 @@ The variables are as follows:
 \itemize{ \item family.id An indicator for the family.
 \item actor.id An indicator for the perceiver, either "MO",
 "FA", "C1", or "C2" \item partner.id An indicator for the
-target, either either "MO", "FA", "C1", or "C2" 
-\item group An indicator for the group
+target, either "MO", "FA", "C1", or "C2" 
+\item group An indicator for the group, 1 represents the problematic families and 2 the nonproblematic families
 \item neg1 First negativity measure 
 .  \item neg2 Second negativity measure. }
 }
