@@ -14,11 +14,11 @@ Four roles are present: Mothers "MO", fathers "FA", the asolescent with external
 The variables are as follows:
 \itemize{ \item family.id An indicator for the family.
 \item actor.id An indicator for the perceiver, either "MO",
-"FA", "C1", or "C2" \item partner.id An indicator for the
-target, either "MO", "FA", "C1", or "C2" 
-\item group An indicator for the group, 1 represents the problematic families and 2 the nonproblematic families
-\item neg1 First negativity measure 
-.  \item neg2 Second negativity measure. }
+"FA", "C1", or "C2". \item partner.id An indicator for the
+target, either "MO", "FA", "C1", or "C2".
+\item group An indicator for the group, 1 represents the problematic families and 2 the nonproblematic families.
+\item neg1 First negativity measure.
+\item neg2 Second negativity measure. }
 }
 \examples{
 data(two.groups)
