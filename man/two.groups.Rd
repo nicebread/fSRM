@@ -8,14 +8,14 @@ A simulated dataset, mimicking the study performed by Eichelsheim et al. (2011) 
 differences in patterns of negativity between families with and without an adolescent with externalizing problem 
 behavior. The problematic and nonproblematic group consist both of 120 and 153 four-person families, respectively. 
 This dataset contains two measures of negativity for each of the 12 relationships.
-Four roles are present: Mothers "m", fathers "f", the older child "c", and the younger child "y".
+Four roles are present: Mothers "MO", fathers "FA", the asolescent with externalizing problem behavior "C1", and the adolescent without problem behavior "C2".
 }
 \details{
 The variables are as follows:
 \itemize{ \item family.id An indicator for the family.
-\item actor.id An indicator for the perceiver, either "m",
-"f", "c", or "y" \item partner.id An indicator for the
-target, either "m", "f", "c", or "y" 
+\item actor.id An indicator for the perceiver, either "MO",
+"FA", "C1", or "C2" \item partner.id An indicator for the
+target, either either "MO", "FA", "C1", or "C2" 
 \item group An indicator for the group
 \item neg1 First negativity measure 
 .  \item neg2 Second negativity measure. }
