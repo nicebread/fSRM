@@ -4,9 +4,12 @@
 \title{Data set on attachment dependency (Cook, 2000)}
 \format{A data frame with 2496 rows and 4 variables (208 families with 4 members each, round-robin design)}
 \description{
-A dataset containing ... TODO. Four roles are present:
-Mothers "m", fathers "f", the older child "c", and the
-younger child "y".
+The classic Cook (2000) dataset consists of measurements on
+security of attachment within families. Only the variable
+measuring attachment dependency in family relationships is
+included in this dataset. Four roles are present (i.e. two parents and two children):
+mothers "m",  fathers  "f", the older
+child as "c", and the younger child "y".
 }
 \details{
 The variables are as follows:
