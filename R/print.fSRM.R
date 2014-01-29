@@ -29,7 +29,7 @@ function(x, digits=3, ...) {
 			print.singlegroup(x, group=g, digits=digits)
 		}
 		
-		if (x$means == TRUE) {
+		if (x$diff == TRUE & x$means == TRUE) {
 			cat("\n\n#####################################\n")
 			cat(paste0("Difference of means between groups (", x$groupnames[1], "-", x$groupnames[2], ")\n"))
 			cat("#####################################\n")
@@ -37,7 +37,8 @@ function(x, digits=3, ...) {
 			MD <- getCor(x, label=".meanDiff.", group=0)
 			colnames(MD)[5] <- "diff"
 			print(MD[, c(2, 5, 4, 6:9)])
-		
+		}
+		if (x$diff == TRUE) {
 			cat("\n\n#####################################\n")
 			cat(paste0("Difference of variances between groups (", x$groupnames[1], "-", x$groupnames[2], ")\n"))
 			cat("#####################################\n")

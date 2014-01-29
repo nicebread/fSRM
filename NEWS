@@ -1,6 +1,11 @@
 # Version 0.3
 
 - renamed data sets and changed some column names from the output
+- Now works with missing values:
+	- Default behavior: Families with missing values are excluded (listwise deletion)
+	- set fSRM(..., missing="fiml") for ML / FIML estimation
+- More consistent behavior of parameters "means", "diff", and "group" in fSRM. It does now that what would be expected.
+
 
 # Version 0.2.6
 

@@ -226,7 +226,7 @@ function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default
 ## ======================================================================
 
 SM <- ""
-if (means==TRUE & diff == FALSE) {
+if (means==TRUE & is.null(groupnames)) {
 	SM.prefix <- ".means."
 	SM <- ""
 	SM <- "\n\n## Compute structured means\n# Define labels for subsequent constraints\n"
@@ -248,7 +248,7 @@ if (means==TRUE & diff == FALSE) {
 	# }
 	
 	SM <- paste0(SM, "\n\n# set means of observed variables to zero\n")
-	SM <- paste0(SM, paste0(pasteNS(roles, roles, var.id), " ~ 0", collapse="\n"))
+	SM <- paste0(SM, paste0(pasteNS(roles, roles, var.id), " ~ 0*1", collapse="\n"))
 	
 	SM <- paste0(SM, "\n\n# set constraints on means for identifiability\n")
 	
@@ -272,102 +272,112 @@ if (means==TRUE & diff == FALSE) {
 
 
 DM <- ""
-if (diff==TRUE) {
+if (!is.null(groupnames)) {
+
 	if (is.null(groupnames)) stop("You must provide the names of the groups in `groupnames`.")
 	DM.prefix <- ".means"
 	DM.var <- ".var"
 	DM <- ""
 	DM <- "\n\n## deltamethod for comparing two groups\n"
-
-	# define new labels for the means
-	DM <- paste(DM, paste(style$familyeffect, " ~ c(", paste0(DM.prefix, groupnames, ".", style$familyeffect, collapse=","), ")*1\n", sep=""))
-
-	for (p in roles) {DM <- paste(DM, style$actor, ".", p, " ~ c(", paste0(DM.prefix, groupnames, ".", style$actor, ".", p, collapse=","), ")*1\n", sep="")}
-	for (p in roles) {DM <- paste(DM, style$partner, ".", p, " ~ c(", paste0(DM.prefix, groupnames, ".", style$partner, ".", p, collapse=","), ")*1\n", sep="")}
-
-	for (p in roles) {
-		for (t in roles) {
-			if (p != t) {DM <- paste(DM, style$relationship, ".", p, ".", t, " ~ c(", paste0(DM.prefix, groupnames, ".", style$relationship, ".", p, ".", t, collapse=","), ")*1\n", sep="")}
-		}
-	}
 	
-	
-	# new labels for the variances
-	DM <- paste(DM, paste("\n# Variances\n"))
-	
-	DM <- paste(DM, paste(style$familyeffect, " ~~ c(", paste0(DM.var, groupnames, ".", style$familyeffect, collapse=","), ")*", style$familyeffect, ifelse(drop=="family", paste0(" + c(0, 0)*", style$familyeffect), ""),"\n", sep=""))
-	
-	for (p in roles) {DM <- paste(DM, style$actor, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$actor, ".", p, collapse=","), ")*", style$actor, ".", p,  ifelse(drop=="actor", paste0(" + c(0, 0)*", style$actor, ".", p), ""),"\n", sep="")}
-	for (p in roles) {DM <- paste(DM, style$partner, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$partner, ".", p, collapse=","), ")*", style$partner, ".", p, ifelse(drop=="partner", paste0(" + c(0, 0)*", style$partner, ".", p), ""),"\n", sep="")}
+	if (means == TRUE) {
+		DM <- "\n\n# Structured means for two groups\n"
 
-	for (p in roles) {
-		for (t in roles) {
-			if (p != t) {DM <- paste(DM, style$relationship, ".", p, ".", t, " ~~ c(", paste0(DM.var, groupnames, ".", style$relationship, ".", p, ".", t, collapse=","), ")*", style$relationship, ".", p, ".", t, "\n", sep="")}
-		}
-	}
-	
-	DM <- paste(DM, "\n\n# set means of observed variables to zero\n")
-	DM <- paste(DM, paste(pasteNS(roles, roles, var.id), "~ 0", collapse="\n"))
-	
-	# ---------------------------------------------------------------------
-	# Constraints for identifiability
-	DM <- paste(DM, "\n\n# set constraints on means for identifiability\n")
-	
-	 DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
-	 DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
-	 
-	 for (p in roles) {
-	 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
-	 }
-	 for (p in roles) {
-	 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
-	 }
+		# define new labels for the means
+		DM <- paste(DM, paste(style$familyeffect, " ~ c(", paste0(DM.prefix, groupnames, ".", style$familyeffect, collapse=","), ")*1\n", sep=""))
 
-	 DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
-	 DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
-	 
-	 for (p in roles) {
-	 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
-	 }
-	 for (p in roles) {
-	 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
-	 }
-	 
-	 # ---------------------------------------------------------------------
-	 # Defined parameters
-	 
-	 DM <- paste(DM, "\n\n# Defined parameters for group comparison (means)\n")
+		for (p in roles) {DM <- paste(DM, style$actor, ".", p, " ~ c(", paste0(DM.prefix, groupnames, ".", style$actor, ".", p, collapse=","), ")*1\n", sep="")}
+		for (p in roles) {DM <- paste(DM, style$partner, ".", p, " ~ c(", paste0(DM.prefix, groupnames, ".", style$partner, ".", p, collapse=","), ")*1\n", sep="")}
 
-	 DM <- paste(DM, ".meanDiff.", style$familyeffect, " := ", DM.prefix, groupnames[1], ".", style$familyeffect, " - ", DM.prefix, groupnames[2], ".", style$familyeffect, "\n", sep="")
-	 
-		for (p in roles) {DM <- paste(DM, ".meanDiff.", style$actor, ".", p, " := ", DM.prefix, groupnames[1], ".", style$actor, ".", p, " - ", DM.prefix, groupnames[2], ".", style$actor, ".", p, "\n", sep="")}
-		for (p in roles) {DM <- paste(DM, ".meanDiff.", style$partner, ".", p, " := ", DM.prefix, groupnames[1], ".", style$partner, ".", p, " - ", DM.prefix, groupnames[2], ".", style$partner, ".", p, "\n", sep="")}		
-		
- 	for (p in roles) {
- 		for (t in roles) {
- 			if (p != t) {DM <- paste(DM, ".meanDiff.", style$relationship, ".", p, ".", t, " := ", DM.prefix, groupnames[1], ".", style$relationship, ".", p, ".", t, " - ", DM.prefix, groupnames[2], ".", style$relationship, ".", p, ".", t, "\n", sep="")}
- 		}
- 	}
-
-
-	 DM <- paste(DM, "\n\n# Defined parameters for group comparison (variances)\n")
-
-	 if (drop != "family") {
-		 DM <- paste(DM, ".varDiff.", style$familyeffect, " := ", DM.var, groupnames[1], ".", style$familyeffect, " - ", DM.var, groupnames[2], ".", style$familyeffect, "\n", sep="")
-	 }
- 
- 	if (drop != "actor") {
-		for (p in roles) {DM <- paste(DM, ".varDiff.", style$actor, ".", p, " := ", DM.var, groupnames[1], ".", style$actor, ".", p, " - ", DM.var, groupnames[2], ".", style$actor, ".", p, "\n", sep="")}
-	}
-	if (drop != "partner") {
-		for (p in roles) {DM <- paste(DM, ".varDiff.", style$partner, ".", p, " := ", DM.var, groupnames[1], ".", style$partner, ".", p, " - ", DM.var, groupnames[2], ".", style$partner, ".", p, "\n", sep="")}		
-	}
-	
 		for (p in roles) {
 			for (t in roles) {
-				if (p != t) {DM <- paste(DM, ".varDiff.", style$relationship, ".", p, ".", t, " := ", DM.var, groupnames[1], ".", style$relationship, ".", p, ".", t, " - ", DM.var, groupnames[2], ".", style$relationship, ".", p, ".", t, "\n", sep="")}
+				if (p != t) {DM <- paste(DM, style$relationship, ".", p, ".", t, " ~ c(", paste0(DM.prefix, groupnames, ".", style$relationship, ".", p, ".", t, collapse=","), ")*1\n", sep="")}
 			}
 		}
+	
+		DM <- paste(DM, "\n\n# set means of observed variables to zero\n")
+		DM <- paste(DM, paste(pasteNS(roles, roles, var.id), "~ 0*1", collapse="\n"))
+	
+		# ---------------------------------------------------------------------
+		# Constraints for identifiability
+		DM <- paste(DM, "\n\n# set constraints on means for identifiability\n")
+	
+		 DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+		 DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	 
+		 for (p in roles) {
+		 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
+		 }
+		 for (p in roles) {
+		 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[1], ".", style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
+		 }
+
+		 DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+		 DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	 
+		 for (p in roles) {
+		 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
+		 }
+		 for (p in roles) {
+		 	DM <- paste(DM, paste(paste(DM.prefix, groupnames[2], ".", style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
+		 }
+	 
+		 # ---------------------------------------------------------------------
+		 # Defined parameters
+	 
+		 DM <- paste(DM, "\n\n# Defined parameters for group comparison (means)\n")
+
+		 DM <- paste(DM, ".meanDiff.", style$familyeffect, " := ", DM.prefix, groupnames[1], ".", style$familyeffect, " - ", DM.prefix, groupnames[2], ".", style$familyeffect, "\n", sep="")
+	 
+			for (p in roles) {DM <- paste(DM, ".meanDiff.", style$actor, ".", p, " := ", DM.prefix, groupnames[1], ".", style$actor, ".", p, " - ", DM.prefix, groupnames[2], ".", style$actor, ".", p, "\n", sep="")}
+			for (p in roles) {DM <- paste(DM, ".meanDiff.", style$partner, ".", p, " := ", DM.prefix, groupnames[1], ".", style$partner, ".", p, " - ", DM.prefix, groupnames[2], ".", style$partner, ".", p, "\n", sep="")}		
+		
+	 	for (p in roles) {
+	 		for (t in roles) {
+	 			if (p != t) {DM <- paste(DM, ".meanDiff.", style$relationship, ".", p, ".", t, " := ", DM.prefix, groupnames[1], ".", style$relationship, ".", p, ".", t, " - ", DM.prefix, groupnames[2], ".", style$relationship, ".", p, ".", t, "\n", sep="")}
+	 		}
+	 	}
+	} # of "if means == TRUE"
+	
+	
+	if (diff == TRUE) {
+		# ---------------------------------------------------------------------
+		# Comparison of variances and means
+
+		# new labels for the variances
+		DM <- paste(DM, paste("\n# Variances\n"))
+	
+		DM <- paste(DM, paste(style$familyeffect, " ~~ c(", paste0(DM.var, groupnames, ".", style$familyeffect, collapse=","), ")*", style$familyeffect, ifelse(drop=="family", paste0(" + c(0, 0)*", style$familyeffect), ""),"\n", sep=""))
+	
+		for (p in roles) {DM <- paste(DM, style$actor, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$actor, ".", p, collapse=","), ")*", style$actor, ".", p,  ifelse(drop=="actor", paste0(" + c(0, 0)*", style$actor, ".", p), ""),"\n", sep="")}
+		for (p in roles) {DM <- paste(DM, style$partner, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$partner, ".", p, collapse=","), ")*", style$partner, ".", p, ifelse(drop=="partner", paste0(" + c(0, 0)*", style$partner, ".", p), ""),"\n", sep="")}
+
+		for (p in roles) {
+			for (t in roles) {
+				if (p != t) {DM <- paste(DM, style$relationship, ".", p, ".", t, " ~~ c(", paste0(DM.var, groupnames, ".", style$relationship, ".", p, ".", t, collapse=","), ")*", style$relationship, ".", p, ".", t, "\n", sep="")}
+			}
+		}
+	
+
+		 DM <- paste(DM, "\n\n# Defined parameters for group comparison (variances)\n")
+
+		 if (drop != "family") {
+			 DM <- paste(DM, ".varDiff.", style$familyeffect, " := ", DM.var, groupnames[1], ".", style$familyeffect, " - ", DM.var, groupnames[2], ".", style$familyeffect, "\n", sep="")
+		 }
+ 
+	 	if (drop != "actor") {
+			for (p in roles) {DM <- paste(DM, ".varDiff.", style$actor, ".", p, " := ", DM.var, groupnames[1], ".", style$actor, ".", p, " - ", DM.var, groupnames[2], ".", style$actor, ".", p, "\n", sep="")}
+		}
+		if (drop != "partner") {
+			for (p in roles) {DM <- paste(DM, ".varDiff.", style$partner, ".", p, " := ", DM.var, groupnames[1], ".", style$partner, ".", p, " - ", DM.var, groupnames[2], ".", style$partner, ".", p, "\n", sep="")}		
+		}
+	
+			for (p in roles) {
+				for (t in roles) {
+					if (p != t) {DM <- paste(DM, ".varDiff.", style$relationship, ".", p, ".", t, " := ", DM.var, groupnames[1], ".", style$relationship, ".", p, ".", t, " - ", DM.var, groupnames[2], ".", style$relationship, ".", p, ".", t, "\n", sep="")}
+				}
+			}
+	}
 	
 }
 

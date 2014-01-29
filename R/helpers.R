@@ -40,6 +40,7 @@ syntax <- function(x){
 	clipboard <- pipe("pbcopy", open="w")
 	write(x$syntax, clipboard)
 	close(clipboard)
+	invisible(x$syntax)
 }
 
 

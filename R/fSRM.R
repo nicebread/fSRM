@@ -23,7 +23,7 @@
 #' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}
 #' @param means Should the structured means of the SRM factors be calculated?
 #' @param group Variable name indicating group membership
-#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}.
+#' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}. If \code{diff = TRUE} and \code{means = FALSE}, only variances are compared between groups. If \code{diff = TRUE} and \code{means = TRUE}, variances and means are compared between groups.
 #' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significant variances to zero!
 
 ## OLD PARAMETERS, NOT CURRENTLY USED
@@ -81,7 +81,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 	# remove all-NA columns
 	NAcol <- which(apply(fam, 2, function(x) sum(is.na(x))) == nrow(fam))
 	if(length(NAcol)>0)	{fam <- fam[, -NAcol]}
-	fam <- na.omit(fam)
+	#fam <- na.omit(fam)
 	included <- fam[, group.id]
 	
 	roles <- sort(unique(data[, actor.id]))
@@ -117,7 +117,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 		print("Model syntax is directly specified; skipping buildfSRMSyntax")
 	}
 	
-	cat(syntax)
+	#cat(syntax)
 	
 	# suppress some types of lavaan warning
 	withCallingHandlers({	

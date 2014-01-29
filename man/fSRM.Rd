@@ -57,7 +57,10 @@ fSRM(formula = NULL, data, drop = "default", add = "", means = FALSE,
 
   \item{diff}{Compare groups with the delta method? You
   need to specify a group identifier in parameter
-  \code{group}.}
+  \code{group}. If \code{diff = TRUE} and \code{means =
+  FALSE}, only variances are compared between groups. If
+  \code{diff = TRUE} and \code{means = TRUE}, variances and
+  means are compared between groups.}
 
   \item{setZero}{Should misbehaving variances be set to
   zero? If "negative", all negative variances are
