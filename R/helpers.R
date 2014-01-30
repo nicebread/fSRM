@@ -29,7 +29,7 @@ getCor <- function(x, ops="~~", g="", label="", group=1) {
 	SS3 <- data.frame(component=N, label=SS2$label, round(SS2[, c("est", "se", "z", "pvalue", "ci.lower", "ci.upper", "std.lv")], 3))
 	SS3$component <- as.character(SS3$component)
 	colnames(SS3) <- c("component", "label", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper", "r")
-	return(SS3[, c(1, 2, 9, 6, 3:5, 7:8)])
+	return(SS3[, c(1, 2, 3:8, 9)])
 }
 
 
