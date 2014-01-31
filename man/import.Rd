@@ -36,7 +36,7 @@ the SRM components by clicking on 'Confirm output format'
 or specify alternative labels.
 }
 \examples{
-# The result is saved in a variable called \\code{SRMData}. Also the original dataset is saved as \\code{MyData}
+# The result is saved in a variable called \\code{SRMData}. The original dataset is saved as \\code{MyData}
 import()
 }
 

@@ -4,20 +4,19 @@
 \title{Data set on attachment dependency (Cook, 2000)}
 \format{A data frame with 2496 rows and 4 variables (208 families with 4 members each, round-robin design)}
 \description{
-The classic Cook (2000) dataset consists of measurements on
-security of attachment within families. Only the variable
-measuring attachment dependency in family relationships is
-included in this dataset. Four roles are present (i.e. two parents and two children):
-mothers "m",  fathers  "f", the older
-child as "c", and the younger child "y".
+A dataset containing ... TODO. Four roles are present:
+Mothers "m", fathers "f", the older child "c", and the
+younger child "y".
 }
 \details{
 The variables are as follows:
 
 \itemize{ \item family.id An indicator for the family.
 \item actor.id An indicator for the perceiver, either "m",
-"f", "c", or "y". \item partner.id An indicator for the
-target, either "m", "f", "c", or "y". \item first measurement of attachment dependency.  \item dep2 second measurement of attachment dependency. }
+"f", "c", or "y" \item partner.id An indicator for the
+target, either "m", "f", "c", or "y" \item dep1 TODO:
+Describe dependency measure.  \item dep2 TODO: Describe
+dependency measure. }
 }
 \examples{
 data(two.indicators)
