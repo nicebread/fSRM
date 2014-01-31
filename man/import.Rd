@@ -36,11 +36,7 @@ the SRM components by clicking on 'Confirm output format'
 or specify alternative labels.
 }
 \examples{
-<<<<<<< HEAD
-# The result is saved in a variable called \\code{SRMData}. The original dataset is saved as \\code{MyData}
-=======
-The result is saved in a variable called \code{SRMData}, this is the dataset in long format. The original dataset is saved as \code{MyData}, which is in wide format.
->>>>>>> 2b6f9a94d145f37926ac98101412442a5f7352d4
+# The result is saved in a variable called \\code{SRMData}, this is the dataset in long format. The original dataset is saved as \\code{MyData}, which is in wide format.
 import()
 }
 

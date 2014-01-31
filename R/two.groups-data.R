@@ -17,7 +17,7 @@
 #' \item neg2 Second negativity measure.
 #' }
 #'
-#' @references Eichelsheim, V. I., Buist, K. L., Dekovic, M., Cook, W. L., Manders, W., Branje, S. J. T., et al. (2011). Negativity in problematic and nonproblematic families: a multigroup social relations model analysis with structured means. \emph{Journal of Family Psychology}, 25, 152-6. DOI: 10.1037/a0022450.
+#' @references Eichelsheim, V. I., Buist, K. L., Dekovic, M., Cook, W. L., Manders, W., Branje, S. J. T., et al. (2011). Negativity in problematic and nonproblematic families: A multigroup social relations model analysis with structured means. \emph{Journal of Family Psychology}, 25, 152-6. DOI: 10.1037/a0022450.
 
 #' @docType data
 #' @keywords datasets

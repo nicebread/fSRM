@@ -16,7 +16,7 @@
 #'   \item anx2: Second indicator of relationship specific anxiety (i.e. average of second halve of the scale).
 #' }
 #' @source This dataset was retrieved from \url{http://davidakenny.net/kkc/c9/c9.htm} in wide format and converted to an R dataset in long format.
-#' @references Cook, W. L. (2000). Understanding attachment security in family context. \emph{Journal of Personality and Social Psychology, 78}, 285–294. doi:10.1037/0022-3514.78.2.285
+#' @references Cook, W. L. (2000). Understanding attachment security in family context. \emph{Journal of Personality and Social Psychology, 78}, 285-294. doi:10.1037/0022-3514.78.2.285
 #' @references Collins, N. L., & Read, S. J. (1990). Adult attachment, working models, and relationship quality in dating couples. \emph{Journal of Personality and Social Psychology}, 58, 644-663.
 #' @docType data
 #' @keywords datasets

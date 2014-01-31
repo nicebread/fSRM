@@ -36,7 +36,7 @@ head(four.person)
 \references{
 Cook, W. L. (2000). Understanding attachment security in
 family context. \emph{Journal of Personality and Social
-Psychology, 78}, 285–294. doi:10.1037/0022-3514.78.2.285
+Psychology, 78}, 285-294. doi:10.1037/0022-3514.78.2.285
 
 Collins, N. L., & Read, S. J. (1990, April). Adult
 attachment, working models, and relationship quality in
