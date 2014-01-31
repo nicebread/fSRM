@@ -14,6 +14,7 @@
 #'   \item actor.id An indicator for the perceiver, either "m", "f", "c", or "y". 
 #'   \item partner.id An indicator for the target, either "m", "f", "c", or "y". 
 #'   \item dep1 first measurement of attachment dependency. 
+#'   \item dep2 second measurement of attachment dependency. 
 #' }
 #' 
 #' @references Cook, W. L. (2000). Understanding attachment security in family context. \emph{Journal of Personality and Social Psychology, 78}, 285–294. doi:10.1037/0022-3514.78.2.285
