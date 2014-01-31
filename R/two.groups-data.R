@@ -8,7 +8,7 @@
 #'
 #' The variables are as follows:
 #'
-#' \itemize{
+#' \itemize{	
 #' \item family.id An indicator for the family.
 #' \item actor.id An indicator for the perceiver, either "MO", "FA", "C1", or "C2".
 #' \item partner.id An indicator for the target, either "MO", "FA", "C1", or "C2".
