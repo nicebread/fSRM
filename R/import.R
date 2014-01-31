@@ -15,7 +15,7 @@
 #' At the bottom section of the main window the user can agree with the default labels of the SRM components by clicking on 'Confirm output format' or specify alternative labels.
 
 #' @examples
-#' # The result is saved in a variable called \code{SRMData}. The original dataset is saved as \code{MyData}
+#' # The result is saved in a variable called \code{SRMData}, this is the dataset in long format. The original dataset is saved as \code{MyData}, which is in wide format.
 #' import()
 import <- function() {
   
