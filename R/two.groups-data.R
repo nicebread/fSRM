@@ -1,5 +1,5 @@
 #' Data set on negative interactions
-#'
+
 #' A simulated dataset, mimicking the study performed by Eichelsheim et al. (2011) who investigated whether there are
 #' differences in patterns of negativity between families with and without an adolescent with externalizing problem
 #' behavior. The problematic and nonproblematic group consist of 120 and 153 four-person families, respectively.
@@ -9,7 +9,6 @@
 #' The variables are as follows:
 #'
 #' \itemize{
-
 #' \item family.id An indicator for the family.
 #' \item actor.id An indicator for the perceiver, either "MO", "FA", "C1", or "C2".
 #' \item partner.id An indicator for the target, either "MO", "FA", "C1", or "C2".
