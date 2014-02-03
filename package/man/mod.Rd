@@ -2,7 +2,7 @@
 \alias{mod}
 \title{Get modification indices for a fSRM object}
 \usage{
-mod(x, minMI = 10)
+  mod(x, minMI = 10)
 }
 \arguments{
   \item{x}{A fSRM object.}
@@ -11,6 +11,6 @@ mod(x, minMI = 10)
   printed.}
 }
 \description{
-Get modification indices for a fSRM object.
+  Get modification indices for a fSRM object.
 }
 

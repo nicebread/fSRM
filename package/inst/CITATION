@@ -1,0 +1,24 @@
+citHeader("To cite package 'fSRM' in publications use:")
+
+## R >= 2.8.0 passes package metadata to citation().
+if(!exists("meta") || is.null(meta)) meta <- packageDescription("fSRM")
+year <- sub("-.*", "", meta$Date)
+#note <- sprintf("R package version %s", meta$Version)
+title.bibtex <- paste("{fSRM}: An {R} package for {S}ocial {R}elations {M}odels with roles (version ",meta$Version,")", sep="")
+title <- paste("fSRM: An R package for Social Relations Models with roles (version ",meta$Version,").", sep="")
+
+    
+citEntry(entry = "Manual",
+  title = title.bibtex,
+  author = personList(	as.person("Felix D. Schönbrodt"),
+  			as.person("Lara Stas"),
+			as.person("Tom Loeys")),
+  year = year,
+  url = "http://cran.r-project.org/web/packages/fSRM/index.html",
+
+  textVersion =
+  paste("Schönbrodt, F.D., Stas, L., Loeys, T.",
+       sprintf("(%s).", year),
+       title,
+        "Retrieved from http://cran.r-project.org/web/packages/fSRM/index.html")
+)

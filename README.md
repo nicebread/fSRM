@@ -6,6 +6,6 @@ The package computes Social Relations Analysis with roles ("Family SRM"), using 
 
 The current development version can be installed by:
 
-	install.packages(c("devtools", "lavaan", "plyr"), dependencies=TRUE)
+    install.packages(c("devtools", "lavaan", "plyr"), dependencies=TRUE)
     library(devtools)
     install_github("fSRM", username="nicebread")

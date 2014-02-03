@@ -2,7 +2,7 @@
 \alias{update.fSRM}
 \title{Rerun a fSRM model with new parameters}
 \usage{
-\method{update}{fSRM}(object, evaluate = TRUE, ...)
+  \method{update}{fSRM} (object, evaluate = TRUE, ...)
 }
 \arguments{
   \item{object}{A fSRM object.}
@@ -12,6 +12,6 @@
   \item{...}{Other parameters (currently not used)}
 }
 \description{
-Rerun a fSRM model with new parameters
+  Rerun a fSRM model with new parameters
 }
 

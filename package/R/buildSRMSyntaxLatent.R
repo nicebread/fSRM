@@ -461,11 +461,3 @@ if (diff == FALSE) {
 	SRM <- paste(SRM, DM)
 	return(SRM)
 }
-
-
-# cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("dep1", "dep2")))
-# cat(buildSRMSyntaxLatent(c("m", "f", "o", "y"), c("dep1", "dep2"), means=TRUE, err="no"))
-# cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))
-# cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1", "dep2"), means=TRUE, fe=FALSE))
-
-#cat(buildSRMSyntaxLatent(c("m", "f", "c"), c("dep1"), fe=FALSE, self=TRUE))

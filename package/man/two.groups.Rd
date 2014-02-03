@@ -9,29 +9,29 @@ This dataset contains two measures of negativity for each of the 12 relationship
 Four roles are present: Mothers "MO", fathers "FA", the asolescent with externalizing problem behavior "C1", and the adolescent without problem behavior "C2".}
 \format{A data frame with 3276 rows and 6 variables (273 families with 4 members each, round-robin design)}
 \description{
-The variables are as follows:
+  The variables are as follows:
 }
 \details{
-\itemize{ \item family.id An indicator for the family.
-\item actor.id An indicator for the perceiver, either "MO",
-"FA", "C1", or "C2". \item partner.id An indicator for the
-target, either "MO", "FA", "C1", or "C2". \item group An
-indicator for the group, 1 represents the problematic
-families and 2 the nonproblematic families. \item neg1
-First negativity measure. \item neg2 Second negativity
-measure. }
+  \itemize{ \item family.id An indicator for the family.
+  \item actor.id An indicator for the perceiver, either
+  "MO", "FA", "C1", or "C2". \item partner.id An indicator
+  for the target, either "MO", "FA", "C1", or "C2". \item
+  group An indicator for the group, 1 represents the
+  problematic families and 2 the nonproblematic families.
+  \item neg1 First negativity measure. \item neg2 Second
+  negativity measure. }
 }
 \examples{
 data(two.groups)
 head(two.groups)
 }
 \references{
-Eichelsheim, V. I., Buist, K. L., Dekovic, M., Cook, W. L.,
-Manders, W., Branje, S. J. T., et al. (2011). Negativity in
-problematic and nonproblematic families: A multigroup
-social relations model analysis with structured means.
-\emph{Journal of Family Psychology}, 25, 152-6. DOI:
-10.1037/a0022450.
+  Eichelsheim, V. I., Buist, K. L., Dekovic, M., Cook, W.
+  L., Manders, W., Branje, S. J. T., et al. (2011).
+  Negativity in problematic and nonproblematic families: A
+  multigroup social relations model analysis with
+  structured means. \emph{Journal of Family Psychology},
+  25, 152-6. DOI: 10.1037/a0022450.
 }
 \keyword{datasets}
 

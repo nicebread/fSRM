@@ -4,6 +4,7 @@
 #' Test actor and partner means for equality, using a Wald test.
 #'
 #' @export
+#' @import lavaan
 #' @param x A fSRM object-
 #' @param digits Digits to which the printed results are rounded
 

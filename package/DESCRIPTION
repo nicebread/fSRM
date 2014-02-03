@@ -19,3 +19,21 @@ Suggests:
     foreign,
     tcltk
 License: GPL (>=2)
+Collate:
+    '0-skinning.R'
+    'anova.fSRM.R'
+    'buildSRMSyntaxLatent.R'
+    'equalMeans.R'
+    'fSRM.R'
+    'four.person-data.R'
+    'generics.R'
+    'helpers.R'
+    'import.R'
+    'merge.rec.R'
+    'mod.r'
+    'percTable.R'
+    'print.fSRM.R'
+    'three.person-data.R'
+    'two.groups-data.R'
+    'two.indicators-data.R'
+    'varComp.R'

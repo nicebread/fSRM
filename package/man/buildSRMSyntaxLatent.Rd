@@ -2,9 +2,10 @@
 \alias{buildSRMSyntaxLatent}
 \title{Build lavaan syntax for a Social Relations Model with roles ("Family SRM")}
 \usage{
-buildSRMSyntaxLatent(roles, var.id, self = FALSE, IGSIM = list(),
-  drop = "default", err = "default", means = FALSE, diff = FALSE,
-  groupnames = NULL, add.variable = c(), selfmode = "cor", ...)
+  buildSRMSyntaxLatent(roles, var.id, self = FALSE,
+    IGSIM = list(), drop = "default", err = "default",
+    means = FALSE, diff = FALSE, groupnames = NULL,
+    add.variable = c(), selfmode = "cor", ...)
 }
 \arguments{
   \item{roles}{A vector with all role labels.}
@@ -61,17 +62,17 @@ buildSRMSyntaxLatent(roles, var.id, self = FALSE, IGSIM = list(),
   (i.e., the values of the group column in the data set)}
 }
 \description{
-Build lavaan syntax for a Social Relations Model with roles
-("Family SRM"). This function is called by the fSRM
-function, but can be also
+  Build lavaan syntax for a Social Relations Model with
+  roles ("Family SRM"). This function is called by the fSRM
+  function, but can be also
 }
 \details{
-None.
+  None.
 }
 \references{
-Kenny, D. A., & West, T. V. (2010). Similarity and
-Agreement in Self-and Other Perception: A Meta-Analysis.
-Personality and Social Psychology Review, 14(2), 196-213.
-doi:10.1177/1088868309353414
+  Kenny, D. A., & West, T. V. (2010). Similarity and
+  Agreement in Self-and Other Perception: A Meta-Analysis.
+  Personality and Social Psychology Review, 14(2), 196-213.
+  doi:10.1177/1088868309353414
 }
 

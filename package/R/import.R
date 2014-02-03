@@ -15,8 +15,10 @@
 #' At the bottom section of the main window the user can agree with the default labels of the SRM components by clicking on 'Confirm output format' or specify alternative labels.
 
 #' @examples
-#' # The result is saved in a variable called \code{SRMData}, this is the dataset in long format. The original dataset is saved as \code{MyData}, which is in wide format.
+#' # The result is saved in a variable called \code{SRMData}, this is the dataset in long format.
+#' # The original dataset is saved as \code{MyData}, which is in wide format.
 #' import()
+
 import <- function() {
   
 #### Read in the dataset ####
@@ -26,8 +28,8 @@ import <- function() {
       filetypes = "{{SPSS Files} {.sav}} {{All files} *}"))
     if (name == "") return;
     require(foreign)
-    MyData <- read.spss(name, use.value.labels = TRUE, to.data.frame = TRUE)
-    assign("MyData", MyData, envir = .GlobalEnv)
+    style$MyData <- read.spss(name, use.value.labels = TRUE, to.data.frame = TRUE)
+    #assign("MyData", MyData, envir = .GlobalEnv)
     # tkdestroy(tt) # zodat automatisch het venster weggaat
     cat("Datafile is loaded\n")
     tkconfigure(button.SPSS, text = "Data inserted")
@@ -37,8 +39,8 @@ import <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{CSV Files} {.csv}} {{All files} *}"))
     if (name == "") return;
-    MyData <- read.csv(name)
-    assign("MyData", MyData, envir = .GlobalEnv)
+    style$MyData <- read.csv(name)
+    #assign("MyData", MyData, envir = .GlobalEnv)
     # tkdestroy(tt)
     cat("Datafile is loaded\n")
     tkconfigure(button.CSV, text = "Data inserted")
@@ -48,8 +50,8 @@ import <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{TXT Files} {.txt}} {{All files} *}"))
     if (name == "") return;
-    MyData <- read.table(name, header = T)
-    assign("MyData", MyData, envir = .GlobalEnv)
+    style$MyData <- read.table(name, header = T)
+    #assign("MyData", MyData, envir = .GlobalEnv)
     # tkdestroy(tt)
     cat("Datafile is loaded\n")
     tkconfigure(button.TXT, text = "Data inserted")
@@ -94,51 +96,63 @@ import <- function() {
             DVs[cnt] <- as.numeric(b[i])
             # voeg aan deze vector gewoon dat getal toe
             cnt <- cnt+1
-              }}
-           }
+              }
+		  }
+        }
       
           # Add an family ID to the basic dataset,
-      if(group != ""){
-        if (fam != ""){
-        SRMData <<- melt(MyData, id.vars=c(fam, group), measure.vars=c(DVs)) }
-        else {MyData$family.id <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars=c("family.id",group), measure.vars=c(DVs))}
-     }
-      else {
-        if (fam != ""){
-           SRMData <<- melt(MyData, id.vars=fam, measure.vars=c(DVs)) }
-        else {MyData$family.id <<- 1:nrow(MyData) ; SRMData <<- melt(MyData, id.vars="family.id", measure.vars=c(DVs))
-              }
+      if (group != "") {
+		  if (fam != "") {
+		  style$SRMData <- melt(style$MyData, id.vars=c(fam, group), measure.vars=c(DVs)) 
+		  } else {
+			  style$MyData$family.id <- 1:nrow(style$MyData)
+			  style$SRMData <- melt(style$MyData, id.vars=c("family.id",group), measure.vars=c(DVs))
+		  }
+		} else {
+        	if (fam != "") {
+				style$SRMData <- melt(style$MyData, id.vars=fam, measure.vars=c(DVs)) 
+			} else {
+			  style$MyData$family.id <- 1:nrow(style$MyData)
+			  style$SRMData <- melt(style$MyData, id.vars="family.id", measure.vars=c(DVs))
+            }
         }
       
           
       # Substract the characters of interest from the variable names + create useful pop-up warnings when something is not inserted
       # Actor ID's:
-      if (act_from == "From" | act_from == "" | act_to == "To" | act_to == "")
-      {tkmessageBox(title="Warning", message = "The characters of the rater are not correctly inserted")}
-      else {SRMData$actor.id <<- substr(SRMData$variable, act_from, act_to)
-      }
+      if (act_from == "From" | act_from == "" | act_to == "To" | act_to == "") {
+		  tkmessageBox(title="Warning", message = "The characters of the rater are not correctly inserted")
+	  } else {
+		  style$SRMData$actor.id <- substr(style$SRMData$variable, act_from, act_to)
+	  }
+	  
       # Partner ID's:
-      if (part_from == "From" | part_from == "" | part_to == "To" | part_to == "")
-      {tkmessageBox(title="Warning", message = "The characters of the person being rated are not correctly inserted")}
-      else {SRMData$partner.id <<- substr(SRMData$variable, part_from, part_to)
-      }
+      if (part_from == "From" | part_from == "" | part_to == "To" | part_to == "") {
+		  tkmessageBox(title="Warning", message = "The characters of the person being rated are not correctly inserted")
+	  } else {
+		  style$SRMData$partner.id <- substr(style$SRMData$variable, part_from, part_to)
+	  }
+	  
       # Indicator:
-      if (ind_from == "From" | ind_from == "")
-      {value <- tkmessageBox(title="No Indicators", message = "No indicators were defined. Is this correct?", icon = "info", type="yesno", default="yes")
-       value <- tclvalue(value)
-       if (value == "no") return() }
-      else
-      {SRMData$ind <<- substr(SRMData$variable, ind_from, ind_to) }
+      if (ind_from == "From" | ind_from == "") {
+		  value <- tkmessageBox(title="No Indicators", message = "No indicators were defined. Is this correct?", icon = "info", type="yesno", default="yes")
+		  value <- tclvalue(value)
+		  if (value == "no") return() 
+	  } else {
+		  style$SRMData$ind <- substr(style$SRMData$variable, ind_from, ind_to) 
+	  }
                
       
       # Only return if all fields are completed (except for the indicator and group)
-      if (act_from != "From" & act_from != "" & act_to != "To" & act_to != "" & part_from != "From" & part_from != "" & part_to != "To" & part_to != "")
-      { cat("A new datafile called 'SRMData' is created\n")
-        tkdestroy(popup)
-       tkfocus(tt)}
+      if (act_from != "From" & act_from != "" & act_to != "To" & act_to != "" & part_from != "From" & part_from != "" & part_to != "To" & part_to != "") { 
+		  cat("A new datafile called 'SRMData' is created\n")
+		  tkdestroy(popup)
+		  tkfocus(tt)
+	  }
       
     }
-    # Basic lay-out of the new pop-up window
+    
+	# Basic lay-out of the new pop-up window
     popup <- tktoplevel()
     tktitle(popup) <- "Transformation of the dataset"
     tkgrid(tklabel(popup, text = " "))
@@ -160,7 +174,7 @@ import <- function() {
     tkgrid.configure(heading, e.fam, e.gr, sticky = "w")
       # Ask the position of the dyadic measurements
     font1 <- tkfont.create(family="times",size=9,slant="italic")
-    ?tkfont.create
+
     Entry0 <- tclVar("")
     e.dyad <- tkentry(popup,width="25", textvariable=Entry0)
     blanco <- tklabel(popup, text="")
@@ -214,20 +228,22 @@ import <- function() {
     tkgrid(OK.but, Cancel.but)
     tkgrid(tklabel(popup, text = " "))
     tkfocus(popup)
-    }
+  }
   
-Change <- function(){
-  outfam <- as.character(tclvalue(Entry9))
-  outact <- as.character(tclvalue(Entry10))
-  outpar <- as.character(tclvalue(Entry11))
-  outrel <- as.character(tclvalue(Entry12))
-  style <<- new.env(parent=globalenv())
-  style$familyeffect <<- outfam
-  style$actor <<- outact
-  style$partner <<- outpar
-  style$relationship <<- outrel
-  tkconfigure(change.but, text = "Outputformat confirmed")
-}
+	Change <- function() {
+		outfam <- as.character(tclvalue(Entry9))
+		outact <- as.character(tclvalue(Entry10))
+		outpar <- as.character(tclvalue(Entry11))
+		outrel <- as.character(tclvalue(Entry12))
+		#style <- new.env(parent=globalenv())
+		style$familyeffect <- outfam
+		style$actor <- outact
+		style$partner <- outpar
+		style$relationship <- outrel
+		tkconfigure(change.but, text = "Outputformat confirmed")
+	}
+
+
 
   tt <- tktoplevel()
   tktitle(tt) <- "Inserting and transforming your data"
@@ -251,6 +267,7 @@ Change <- function(){
   tkgrid(label.data)
   tkgrid(launchpopup.button)
   tkgrid(space2)
+  
     ### Everything for the output format:
     l.output <- tklabel(tt,text="Which SRM labels do you prefer in the output? ")
     tkgrid( tklabel(tt,text=" "))
@@ -279,11 +296,22 @@ Change <- function(){
     tkgrid.configure(label.read, label.data, l.output, sticky="w")
     tkgrid( tklabel(tt,text="
 "))
-    tkgrid(tkbutton(tt, text = " OK ", command= function(){tkdestroy(tt)}))
+    tkgrid(tkbutton(tt, text = " OK ", command= function() {
+		# this is the final OK - after that: return the data object
+		tkdestroy(tt)
+		return(style$SRMData)
+	}))
     tkgrid( tklabel(tt,text="
 "))
-font2 <- tkfont.create(family="times",size=8,slant="italic")
-heading13 <- tklabel(tt, text="Please deal with missing data in an appropriate way before using these functions.", font = font2)
-tkgrid(heading13)
-tkgrid.configure(heading13, sticky="e")
+
+	# Print a warning about missing values ...
+	font2 <- tkfont.create(family="times",size=8,slant="italic")
+	heading13 <- tklabel(tt, text="Please deal with missing data in an appropriate way before using these functions.", font = font2)
+	tkgrid(heading13)
+	tkgrid.configure(heading13, sticky="e")
+}
+
+import2 <- function() {
+	res <- tclvalue(import())
+	return(res)
 }
