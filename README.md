@@ -8,4 +8,4 @@ The current development version can be installed by:
 
     install.packages(c("devtools", "lavaan", "plyr"), dependencies=TRUE)
     library(devtools)
-    install_github("fSRM", username="nicebread")
+    install_github("fSRM", username="nicebread", subdir="package")
