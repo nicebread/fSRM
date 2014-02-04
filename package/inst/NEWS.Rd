@@ -4,6 +4,16 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
+\section{Version 0.3.2}{
+
+\subsection{Changes}{
+	\itemize{
+		\item Fixed a bug in print.fSRM (Differences of variances between groups were printed incorrectly)
+		\item Included examples in the fSRM help file.
+	}
+}
+}
+
 
 \section{Version 0.3.1}{
 

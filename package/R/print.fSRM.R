@@ -34,18 +34,20 @@ function(x, digits=3, ...) {
 			cat(paste0("Difference of means between groups (", x$groupnames[1], "-", x$groupnames[2], ")\n"))
 			cat("#####################################\n")
 		
-			MD <- getCor(x, label=".meanDiff.", group=0)
-			colnames(MD)[5] <- "diff"
-			print(MD[, c(2, 5, 4, 6:9)])
+			MD <- getCor(x, label=".meanDiff.", group=0)[, -1]
+			colnames(MD)[1] <- "component"
+			colnames(MD)[2] <- "diff"
+			print(MD[, 1:7])
 		}
 		if (x$diff == TRUE) {
 			cat("\n\n#####################################\n")
 			cat(paste0("Difference of variances between groups (", x$groupnames[1], "-", x$groupnames[2], ")\n"))
 			cat("#####################################\n")
 		
-			MD <- getCor(x, label=".varDiff.", group=0)
-			colnames(MD)[5] <- "diff"
-			print(MD[, c(2, 5, 4, 6:9)])
+			VD <- getCor(x, label=".varDiff.", group=0)[, -1]
+			colnames(VD)[1] <- "component"
+			colnames(VD)[2] <- "diff"
+			print(VD[, 1:7])
 		}
 	}
 }

@@ -6,7 +6,7 @@ sourceDir <- function(path, trace = TRUE, ...) {
    }
 }
 
-sourceDir("../R")
+sourceDir("../package/R")
 library(lavaan)
 library(plyr)
 library(reshape2)

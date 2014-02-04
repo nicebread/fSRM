@@ -119,12 +119,12 @@ two.indicators.g$group <- ifelse(two.indicators.g$family.id <= 104, "A", "B")
 f4.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators.g, group="group", means=TRUE)
 f4.d
 
-f4.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators.g, group="group", diff=TRUE)
-f4.d
+f4.d2 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators.g, group="group", diff=TRUE)
+f4.d2
 
 
-f4.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators.g, group="group", means=TRUE, diff=TRUE)
-f4.d
+f4.d3 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators.g, group="group", means=TRUE, diff=TRUE)
+f4.d3
 
 
 
