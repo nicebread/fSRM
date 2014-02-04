@@ -4,7 +4,11 @@ The package computes Social Relations Analysis with roles ("Family SRM"), using 
 
 ## Installation
 
-The current development version can be installed by:
+The stable version can be installed from [CRAN](http://cran.r-project.org/web/packages/fSRM/index.html):
+
+    install.packages("fSRM")
+
+The current development version can be installed from this repository:
 
     install.packages(c("devtools", "lavaan", "plyr"), dependencies=TRUE)
     library(devtools)

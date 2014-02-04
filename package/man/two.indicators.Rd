@@ -10,24 +10,24 @@ mothers "m", fathers "f", the older
 child as "c", and the younger child "y".}
 \format{A data frame with 2496 rows and 4 variables (208 families with 4 members each, round-robin design)}
 \description{
-  The variables are as follows:
+The variables are as follows:
 }
 \details{
-  \itemize{ \item family.id An indicator for the family.
-  \item actor.id An indicator for the perceiver, either
-  "m", "f", "c", or "y".  \item partner.id An indicator for
-  the target, either "m", "f", "c", or "y".  \item dep1
-  first measurement of attachment dependency.  \item dep2
-  second measurement of attachment dependency. }
+\itemize{ \item family.id An indicator for the family.
+\item actor.id An indicator for the perceiver, either "m",
+"f", "c", or "y".  \item partner.id An indicator for the
+target, either "m", "f", "c", or "y".  \item dep1 first
+measurement of attachment dependency.  \item dep2 second
+measurement of attachment dependency. }
 }
 \examples{
 data(two.indicators)
 head(two.indicators)
 }
 \references{
-  Cook, W. L. (2000). Understanding attachment security in
-  family context. \emph{Journal of Personality and Social
-  Psychology, 78}, 285-294. doi:10.1037/0022-3514.78.2.285
+Cook, W. L. (2000). Understanding attachment security in
+family context. \emph{Journal of Personality and Social
+Psychology, 78}, 285-294. doi:10.1037/0022-3514.78.2.285
 }
 \keyword{datasets}
 
