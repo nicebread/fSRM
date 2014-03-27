@@ -1,4 +1,5 @@
 #' @title Easily inserting and transforming a dataset in fSRM
+#' @aliases import2
 #' @description
 #' This GUI can be used for inserting csv, txt and sav-files in R by means of a pop-up window.
 #' Next, it it allows the user to easily transform a dataset into the required
@@ -14,6 +15,9 @@
 #' Finally, define the position of the characters of the rater, the person being rated and the indicator (if present) in the previously selected dyadic measurements.
 #' At the bottom section of the main window the user can agree with the default labels of the SRM components by clicking on 'Confirm output format' or specify alternative labels.
 
+#' @return
+#' The resulting data frame is returned in the variable style$SRMData
+
 #' @examples
 #' # The result is saved in a variable called \code{SRMData}, this is the dataset in long format.
 #' # The original dataset is saved as \code{MyData}, which is in wide format.
@@ -21,8 +25,9 @@
 
 import <- function() {
   
-#### Read in the dataset ####
-  require(tcltk)
+  #### Read in the dataset ####
+  library(tcltk)
+  library(tcltk2)
   getSPSS <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{SPSS Files} {.sav}} {{All files} *}"))
@@ -59,10 +64,10 @@ import <- function() {
   
   
   
-#### Transformation of the dataset ####
+  #### Transformation of the dataset ####
   launchDialog <- function() {
     onOK <- function() {
-      #Define the variables where the position of the characters will be inserted (actor, partner, indicator, group)
+      #Define the variables where the position of the characters will be inserted (actor, partner, indicator, group,..)
       var <- as.character(tclvalue(Entry0))
       group <- as.character(tclvalue(Entrygr))
       fam <- as.character(tclvalue(EntryID))
@@ -72,7 +77,7 @@ import <- function() {
       part_to <- as.character(tclvalue(Entry4))
       ind_from <- as.character(tclvalue(Entry5))
       ind_to <- as.character(tclvalue(Entry6))
-           
+      
       
       # Transform from wide to long format
       # Select only the relevant variables
@@ -96,75 +101,83 @@ import <- function() {
             DVs[cnt] <- as.numeric(b[i])
             # voeg aan deze vector gewoon dat getal toe
             cnt <- cnt+1
-              }
-		  }
+          }
         }
+      }
       
-          # Add an family ID to the basic dataset,
+      # Add an family ID to the basic dataset,
       if (group != "") {
-		  if (fam != "") {
-		  style$SRMData <- melt(style$MyData, id.vars=c(fam, group), measure.vars=c(DVs)) 
-		  } else {
-			  style$MyData$family.id <- 1:nrow(style$MyData)
-			  style$SRMData <- melt(style$MyData, id.vars=c("family.id",group), measure.vars=c(DVs))
-		  }
-		} else {
-        	if (fam != "") {
-				style$SRMData <- melt(style$MyData, id.vars=fam, measure.vars=c(DVs)) 
-			} else {
-			  style$MyData$family.id <- 1:nrow(style$MyData)
-			  style$SRMData <- melt(style$MyData, id.vars="family.id", measure.vars=c(DVs))
-            }
+        if (fam != "") {
+          style$SRMData <- melt(style$MyData, id.vars=c(fam, group), measure.vars=c(DVs))       
+          tclSetValue("fam", as.character(style$SRMData[,1]))     
+          tclSetValue("group", as.character(style$SRMData[,2]))
+          } else {
+          style$MyData$family.id <- 1:nrow(style$MyData)
+          style$SRMData <- melt(style$MyData, id.vars=c("family.id",group), measure.vars=c(DVs))
+          tclSetValue("fam", as.character(style$MyData$family.id))     
+          tclSetValue("group", as.character(style$SRMData[,2]))
+           }
+      } else {
+          if (fam != "") {
+          style$SRMData <- melt(style$MyData, id.vars=fam, measure.vars=c(DVs)) 
+          tclSetValue("fam", as.character(style$SRMData[,1]))  
+          tclSetValue("group", as.character( ))
+          } else {
+          style$MyData$family.id <- 1:nrow(style$MyData)
+          style$SRMData <- melt(style$MyData, id.vars="family.id", measure.vars=c(DVs))
+          tclSetValue("fam", as.character(style$MyData$family.id))     
+          tclSetValue("group", as.character( ))
         }
+      }
       
-          
+      
       # Substract the characters of interest from the variable names + create useful pop-up warnings when something is not inserted
       # Actor ID's:
       if (act_from == "From" | act_from == "" | act_to == "To" | act_to == "") {
-		  tkmessageBox(title="Warning", message = "The characters of the rater are not correctly inserted")
-	  } else {
-		  style$SRMData$actor.id <- substr(style$SRMData$variable, act_from, act_to)
-	  }
-	  
+        tkmessageBox(title="Warning", message = "The characters of the rater are not correctly inserted")
+      } else {
+        style$SRMData$actor.id <- substr(style$SRMData$variable, act_from, act_to)
+      }
+      
       # Partner ID's:
       if (part_from == "From" | part_from == "" | part_to == "To" | part_to == "") {
-		  tkmessageBox(title="Warning", message = "The characters of the person being rated are not correctly inserted")
-	  } else {
-		  style$SRMData$partner.id <- substr(style$SRMData$variable, part_from, part_to)
-	  }
-	  
+        tkmessageBox(title="Warning", message = "The characters of the person being rated are not correctly inserted")
+      } else {
+        style$SRMData$partner.id <- substr(style$SRMData$variable, part_from, part_to)
+      }
+      
       # Indicator:
       if (ind_from == "From" | ind_from == "") {
-		  value <- tkmessageBox(title="No Indicators", message = "No indicators were defined. Is this correct?", icon = "info", type="yesno", default="yes")
-		  value <- tclvalue(value)
-		  if (value == "no") return() 
-	  } else {
-		  style$SRMData$ind <- substr(style$SRMData$variable, ind_from, ind_to) 
-	  }
-               
+        value <- tkmessageBox(title="No Indicators", message = "No indicators were defined. Is this correct?", icon = "info", type="yesno", default="yes")
+        value <- tclvalue(value)
+        if (value == "no") return() 
+      } else {
+        style$SRMData$ind <- substr(style$SRMData$variable, ind_from, ind_to) 
+      }
+      
       
       # Only return if all fields are completed (except for the indicator and group)
       if (act_from != "From" & act_from != "" & act_to != "To" & act_to != "" & part_from != "From" & part_from != "" & part_to != "To" & part_to != "") { 
-		  cat("A new datafile called 'SRMData' is created\n")
-		  tkdestroy(popup)
-		  tkfocus(tt)
-	  }
+        cat("A new datafile called 'SRMData' is created\n")
+        tkdestroy(popup)
+        tkfocus(tt)
+      }
       
     }
     
-	# Basic lay-out of the new pop-up window
+    # Basic lay-out of the new pop-up window
     popup <- tktoplevel()
     tktitle(popup) <- "Transformation of the dataset"
     tkgrid(tklabel(popup, text = " "))
-        # Ask for family ID
+    # Ask for family ID
     heading <- tklabel(popup, text="If present, enter the variable name that contains the identifications of ... ")
     ID <- tklabel(popup, text=" the different families. ")
     gr <- tklabel(popup, text=" the different groups. ")
     tkgrid(tklabel(popup, text = " "))
     EntryID <- tclVar("")
     Entrygr <- tclVar("")
-    e.fam <- tkentry(popup,width="25", textvariable=EntryID)
-    e.gr <- tkentry(popup,width="25", textvariable=Entrygr)
+    e.fam <- tkentry(popup,width="25", textvariable=EntryID, background="white")
+    e.gr <- tkentry(popup,width="25", textvariable=Entrygr, background="white")
     tkgrid(heading, columnspan=3)
     tkgrid(ID, e.fam)
     tkgrid(gr, e.gr)
@@ -172,11 +185,11 @@ import <- function() {
     tkgrid(tklabel(popup, text = " "))
     tkgrid.configure(ID, gr, sticky = "e")
     tkgrid.configure(heading, e.fam, e.gr, sticky = "w")
-      # Ask the position of the dyadic measurements
+    # Ask the position of the dyadic measurements
     font1 <- tkfont.create(family="times",size=9,slant="italic")
-
+    
     Entry0 <- tclVar("")
-    e.dyad <- tkentry(popup,width="25", textvariable=Entry0)
+    e.dyad <- tkentry(popup,width="25", textvariable=Entry0, background="white")
     blanco <- tklabel(popup, text="")
     heading0 <- tklabel(popup, text="Specify the column numbers of the dyadic measurements in your original dataset ")
     ex <- tklabel(popup, text="E.g. variables 1 until 9, 11, 13 and 15 are entered as",font=font1)
@@ -188,7 +201,7 @@ import <- function() {
     tkgrid.configure(ex2, e.dyad, sticky="w")
     tkgrid(tklabel(popup, text = " "))
     
-      # Start subtracting part from variable names
+    # Start subtracting part from variable names
     heading2 <- tklabel(popup, text="Based on the variable names of the dyadic measurements, define the position of the characters of ... ")
     tkgrid(heading2, columnspan=3)
     tkgrid(tklabel(popup, text = " "))
@@ -197,17 +210,17 @@ import <- function() {
     l.actor <- tklabel(popup, text=" the rater in the dyadic measurement?")
     Entry1 <- tclVar("From")
     Entry2 <- tclVar("To")
-    e.actor1 <- tkentry(popup,width="6", textvariable=Entry1)
-    e.actor2 <- tkentry(popup,width="6", textvariable=Entry2)
+    e.actor1 <- tkentry(popup,width="6", textvariable=Entry1, background="white")
+    e.actor2 <- tkentry(popup,width="6", textvariable=Entry2, background="white")
     tkgrid(l.actor, e.actor1, e.actor2)
     tkgrid(tklabel(popup, text = " "))
-     
+    
     #Everything for inserting the characters of the partner ID:
     l.partner <- tklabel(popup, text=" the person being rated in the dyadic measurement?")
     Entry3 <- tclVar("From")
     Entry4 <- tclVar("To")
-    e.partner1 <- tkentry(popup,width="6", textvariable=Entry3)
-    e.partner2 <- tkentry(popup,width="6", textvariable=Entry4)
+    e.partner1 <- tkentry(popup,width="6", textvariable=Entry3, background="white")
+    e.partner2 <- tkentry(popup,width="6", textvariable=Entry4, background="white")
     tkgrid(l.partner, e.partner1, e.partner2)
     tkgrid(tklabel(popup, text = " "))
     
@@ -215,12 +228,12 @@ import <- function() {
     l.ind <- tklabel(popup, text=" the indicators (if present)")
     Entry5 <- tclVar("From")
     Entry6 <- tclVar("To")
-    e.ind1 <- tkentry(popup,width="6", textvariable=Entry5)
-    e.ind2 <- tkentry(popup,width="6", textvariable=Entry6)
+    e.ind1 <- tkentry(popup,width="6", textvariable=Entry5, background="white")
+    e.ind2 <- tkentry(popup,width="6", textvariable=Entry6, background="white")
     tkgrid(l.ind, e.ind1, e.ind2)
     tkgrid(tklabel(popup, text = " "))
     
-  
+    
     tkgrid.configure(heading2, l.actor, l.partner, l.ind, sticky="w")
     
     OK.but <- tkbutton(popup, text = " OK ", command = onOK)
@@ -230,21 +243,21 @@ import <- function() {
     tkfocus(popup)
   }
   
-	Change <- function() {
-		outfam <- as.character(tclvalue(Entry9))
-		outact <- as.character(tclvalue(Entry10))
-		outpar <- as.character(tclvalue(Entry11))
-		outrel <- as.character(tclvalue(Entry12))
-		#style <- new.env(parent=globalenv())
-		style$familyeffect <- outfam
-		style$actor <- outact
-		style$partner <- outpar
-		style$relationship <- outrel
-		tkconfigure(change.but, text = "Outputformat confirmed")
-	}
-
-
-
+  Change <- function() {
+    outfam <- as.character(tclvalue(Entry9))
+    outact <- as.character(tclvalue(Entry10))
+    outpar <- as.character(tclvalue(Entry11))
+    outrel <- as.character(tclvalue(Entry12))
+    #style <- new.env(parent=globalenv())
+    style$familyeffect <- outfam
+    style$actor <- outact
+    style$partner <- outpar
+    style$relationship <- outrel
+    tkconfigure(change.but, text = "Outputformat confirmed")
+  }
+  
+  
+  
   tt <- tktoplevel()
   tktitle(tt) <- "Inserting and transforming your data"
   label.read <- tklabel(tt,text="Read in your datafile")
@@ -252,14 +265,14 @@ import <- function() {
   button.TXT <- tkbutton(tt, text = "Select TXT file", command = getTXT)
   button.SPSS <- tkbutton(tt, text = "Select SPSS File", command = getSPSS)
   tkgrid(tklabel(tt, text="
-"))
+                 "))
   tkgrid(label.read)
   tkgrid(button.CSV)
   tkgrid(button.TXT)
   tkgrid(button.SPSS)
   tkfocus(tt)
   space1 <- tklabel(tt,text="
-")
+                    ")
   label.data <- tklabel(tt,text="Do you want to transform your data from wide to long format? ")
   launchpopup.button <- tkbutton(tt, text = "Transform my data", command = launchDialog)
   space2 <- tklabel(tt,text=" ")
@@ -268,50 +281,76 @@ import <- function() {
   tkgrid(launchpopup.button)
   tkgrid(space2)
   
-    ### Everything for the output format:
-    l.output <- tklabel(tt,text="Which SRM labels do you prefer in the output? ")
-    tkgrid( tklabel(tt,text=" "))
-    tkgrid(l.output, columnspan=3)
-    tkgrid(tklabel(tt,text=" "))
-    o.fam <- tklabel(tt, text="Family effect?")
-    o.actor <- tklabel(tt, text="Actor/Perceiver effect?")
-    o.partner <- tklabel(tt, text="Partner/Target effect?")
-    o.rel <- tklabel(tt, text="Relationship effect?")
-    Entry9 <- tclVar("FE")
-    Entry10 <- tclVar("A")
-    Entry11 <- tclVar("P")
-    Entry12 <- tclVar("R")
-    o.famE <- tkentry(tt,width="15", textvariable=Entry9)
-    o.actE <- tkentry(tt,width="15", textvariable=Entry10)
-    o.parE <- tkentry(tt,width="15", textvariable=Entry11)
-    o.relE <- tkentry(tt,width="15", textvariable=Entry12)
-    tkgrid(o.fam, o.famE)
-    tkgrid(o.actor, o.actE)
-    tkgrid(o.partner, o.parE)
-    tkgrid(o.rel, o.relE)
-    tkgrid.configure(o.fam, o.actor, o.partner, o.rel, sticky="w")
-    change.but <- tkbutton(tt, text = " Confirm output format ", command=Change)
-    tkgrid(change.but)
-    tkfocus(tt)
-    tkgrid.configure(label.read, label.data, l.output, sticky="w")
-    tkgrid( tklabel(tt,text="
-"))
-    tkgrid(tkbutton(tt, text = " OK ", command= function() {
-		# this is the final OK - after that: return the data object
-		tkdestroy(tt)
-		return(style$SRMData)
-	}))
-    tkgrid( tklabel(tt,text="
-"))
-
-	# Print a warning about missing values ...
-	font2 <- tkfont.create(family="times",size=8,slant="italic")
-	heading13 <- tklabel(tt, text="Please deal with missing data in an appropriate way before using these functions.", font = font2)
-	tkgrid(heading13)
-	tkgrid.configure(heading13, sticky="e")
+  ### Everything for the output format:
+  l.output <- tklabel(tt,text="Which SRM labels do you prefer in the output? ")
+  tkgrid( tklabel(tt,text=" "))
+  tkgrid(l.output, columnspan=3)
+  tkgrid(tklabel(tt,text=" "))
+  o.fam <- tklabel(tt, text="Family effect?")
+  o.actor <- tklabel(tt, text="Actor/Perceiver effect?")
+  o.partner <- tklabel(tt, text="Partner/Target effect?")
+  o.rel <- tklabel(tt, text="Relationship effect?")
+  Entry9 <- tclVar("FE")
+  Entry10 <- tclVar("A")
+  Entry11 <- tclVar("P")
+  Entry12 <- tclVar("R")
+  o.famE <- tkentry(tt,width="15", textvariable=Entry9, background="white")
+  o.actE <- tkentry(tt,width="15", textvariable=Entry10, background="white")
+  o.parE <- tkentry(tt,width="15", textvariable=Entry11, background="white")
+  o.relE <- tkentry(tt,width="15", textvariable=Entry12, background="white")
+  tkgrid(o.fam, o.famE)
+  tkgrid(o.actor, o.actE)
+  tkgrid(o.partner, o.parE)
+  tkgrid(o.rel, o.relE)
+  tkgrid.configure(o.fam, o.actor, o.partner, o.rel, sticky="w")
+  change.but <- tkbutton(tt, text = " Confirm output format ", command=Change)
+  tkgrid(change.but)
+  tkfocus(tt)
+  tkgrid.configure(label.read, label.data, l.output, sticky="w")
+  tkgrid( tklabel(tt,text="
+                  "))
+  tkgrid(tkbutton(tt, text = " OK ", command= function() {
+    # this is the final OK - after that: return the data object
+    tkdestroy(tt)
+    tclSetValue("DV", as.character(style$SRMData$variable))
+    tclSetValue("value", as.character(style$SRMData$value))
+    tclSetValue("actor", as.character(style$SRMData$actor.id))
+    tclSetValue("partner", as.character(style$SRMData$partner.id))
+    tclSetValue("ind", as.character(style$SRMData$ind))
+        
+  }))
+  tkgrid( tklabel(tt,text="
+                  "))
+  # Print a warning about missing values ...
+  font2 <- tkfont.create(family="times",size=8,slant="italic")
+  heading13 <- tklabel(tt, text="Please deal with missing data in an appropriate way before using these functions.", font = font2)
+  tkgrid(heading13)
+  tkgrid.configure(heading13, sticky="e")
 }
 
+
+#' @export
 import2 <- function() {
-	res <- tclvalue(import())
-	return(res)
+	library(tcltk2)
+	a <- tclGetValue("fam")
+	  family.id <- as.numeric(strsplit(a,"[ ]")[[1]])
+	b <- tclGetValue("DV")
+	  variable <- strsplit(b,"[ ]")[[1]]
+	c <- tclGetValue("value")
+	  value <- as.numeric(strsplit(c,"[ ]")[[1]])
+	d <- tclGetValue("actor")
+	  actor.id <- strsplit(d,"[ ]")[[1]]
+	e <- tclGetValue("partner")
+	  partner.id <- strsplit(e,"[ ]")[[1]]
+	f <- tclGetValue("ind")
+	  ind <-  strsplit(f,"[ ]")[[1]]
+
+	if  (tclGetValue("group") != "") {
+	  g <- tclGetValue("group")
+	  group <-  as.numeric(strsplit(g,"[ ]")[[1]])
+	  SRMData <- as.data.frame(cbind(family.id, group, variable, value, actor.id, partner.id, ind))
+	  } else {
+	  	SRMData <- as.data.frame(cbind(family.id, variable, value, actor.id, partner.id, ind))
+	  }
+	  return(SRMData)
 }

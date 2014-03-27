@@ -17,5 +17,6 @@ Depends:
     reshape2
 Suggests:
     foreign,
-    tcltk
+    tcltk,
+    tcltk2
 License: GPL (>=2)

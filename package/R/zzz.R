@@ -1,3 +1,7 @@
+.onLoad <- function(libname = find.package("fSRM"), pkgname = "fSRM") {	
+	
+}
+
 # Define skinning variables in a new environment
 #------------------------------------
 style <- new.env(parent=globalenv())
