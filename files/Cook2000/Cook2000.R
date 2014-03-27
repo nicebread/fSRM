@@ -73,6 +73,10 @@ f3.2.m
 f4.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 f4.1.m
 
+f4.1.m.pw <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE, pairwise=TRUE)
+f4.1.m.pw
+
+
 # 4 persons, 2 indicators, mean structure
 f4.2.m <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 f4.2.m

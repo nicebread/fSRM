@@ -154,7 +154,11 @@ function(x, group=1, digits=3) {
 	}
 	
 	if (x$means == TRUE) {
-		cat("\n\nMean structure\n----------------\n")
+		if (x$pairwise==TRUE) {
+			cat("\n\nMean structure: Indices starting with 'C.' are pairwise comparisons between roles\n----------------\n")
+		} else {
+			cat("\n\nMean structure\n----------------\n")
+		}
 		if (is.null(x$group)) {
 			MS <- eff[grepl(".means.", eff$label, fixed=TRUE), c(1, 5:10)]
 		} else {

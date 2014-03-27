@@ -4,6 +4,16 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
+\section{Version 0.3.3}{
+
+\subsection{Changes}{
+	\itemize{
+		\item Re-included the \code{import} function, and added the \code{getImport} function. These functions can be used to import and transform a data set in wide format.
+		\item Added parameter \code{pairwise} to the \code{fSRM} function (you also have to set \code{means=TRUE} that it becomes active). This provides all pairwise comparisons of actor and partner means between roles (e.g., is the actor mean of mothers higher than that of fathers?)
+	}
+}
+}
+
 \section{Version 0.3.2}{
 
 \subsection{Changes}{

@@ -25,6 +25,7 @@
 #' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
 #' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}
 #' @param means Should the structured means of the SRM factors be calculated?
+#' @param pairwise Compute pairwise comparison of actor and partner means between all roles? Only works when \code{means} is also set to TRUE.
 #' @param group Variable name indicating group membership
 #' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}. If \code{diff = TRUE} and \code{means = FALSE}, only variances are compared between groups. If \code{diff = TRUE} and \code{means = TRUE}, variances and means are compared between groups.
 #' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significant variances to zero!
@@ -109,7 +110,7 @@
 #' }
 
 fSRM <-
-function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {
+function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, setZero="none", ...) {
 	
 	dots <- list(...)
 	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))
@@ -184,7 +185,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 	
 	# if no syntax is directly provided:
 	if (syntax == "") {
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)
+		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, pairwise=pairwise, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)
 	
 		syntax <- paste(syntax0, add, sep="\n")
 	} else {
@@ -235,6 +236,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, diff=FALSE, IG
 		var.id	= var.id,
 		drop	= drop,
 		means	= means,
+		pairwise = pairwise,
 		diff	= diff,
 		group	= group,
 		groupnames = groupnames,

@@ -4,7 +4,8 @@
 \usage{
 buildSRMSyntaxLatent(roles, var.id, self = FALSE, IGSIM = list(),
   drop = "default", err = "default", means = FALSE, diff = FALSE,
-  groupnames = NULL, add.variable = c(), selfmode = "cor", ...)
+  pairwise = FALSE, groupnames = NULL, add.variable = c(),
+  selfmode = "cor", ...)
 }
 \arguments{
   \item{roles}{A vector with all role labels.}
@@ -56,6 +57,10 @@ buildSRMSyntaxLatent(roles, var.id, self = FALSE, IGSIM = list(),
   factors be calculated?}
 
   \item{diff}{Compare groups with the delta method?}
+
+  \item{pairwise}{Compute pairwise comparison of actor and
+  partner means between all roles? Only works when
+  \code{means} is also set to TRUE}
 
   \item{groupnames}{Vector with the names of the groups
   (i.e., the values of the group column in the data set)}

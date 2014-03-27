@@ -18,6 +18,7 @@
 #' @param ... Additional arguments (not documented yet)
 #' @param means Should the structured means of the SRM factors be calculated?
 #' @param diff Compare groups with the delta method?
+#' @param pairwise Compute pairwise comparison of actor and partner means between all roles? Only works when \code{means} is also set to TRUE
 #' @param groupnames Vector with the names of the groups (i.e., the values of the group column in the data set)
 
 #' @references
@@ -25,7 +26,7 @@
 
 
 buildSRMSyntaxLatent <-
-function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", ...) {
+function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, pairwise=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", ...) {
 	
 	# define defaults for parameters
 	err <- match.arg(err, c("no", "all", "default"))
@@ -242,11 +243,6 @@ if (means==TRUE & is.null(groupnames)) {
 		}
 	}
 	
-	# if (drop == "family") {
-	# 	SM <- paste(SM, "\n\n# For three person families: set variance of family effect to zero\n")
-	# 	SM <- paste(SM, style$familyeffect, "~~ 0*", style$familyeffect)
-	# }
-	
 	SM <- paste0(SM, "\n\n# set means of observed variables to zero\n")
 	SM <- paste0(SM, paste0(pasteNS(roles, roles, var.id), " ~ 0*1", collapse="\n"))
 	
@@ -262,6 +258,34 @@ if (means==TRUE & is.null(groupnames)) {
 	 	SM <- paste0(SM, paste(paste(SM.prefix, style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
 	 }
 	
+	 # pairwise comparisons
+	 # #actor effects
+# 	 C.means.A.mf := .means.A.m - .means.A.f
+# 	 C.means.A.my := .means.A.m - .means.A.y
+# 	 C.means.A.mc := .means.A.m - .means.A.c
+# 	 C.means.A.fy := .means.A.f - .means.A.y
+# 	 C.means.A.fc := .means.A.f - .means.A.c
+# 	 C.means.A.yc := .means.A.y - .means.A.c
+# 	 # partner effects
+# 	 C.means.P.mf := .means.P.m - .means.P.f
+# 	 C.means.P.my := .means.P.m - .means.P.y
+# 	 C.means.P.mc := .means.P.m - .means.P.c
+# 	 C.means.P.fy := .means.P.f - .means.P.y
+# 	 C.means.P.fc := .means.P.f - .means.P.c
+# 	 C.means.P.yc := .means.P.y - .means.P.c
+
+	if (pairwise==TRUE) {
+		SM <- paste(SM, "\n## pairwise comparisons of actor and partner effects\n")
+		for (p in roles) {
+			for (t in roles) {
+				if (which(p == roles) < which(t==roles)) {
+					SM <- paste(SM, "C", SM.prefix, style$actor, ".", p, ".", t, " := ", SM.prefix, style$actor, ".", p, " - ", SM.prefix, style$actor, ".", t, "\n", sep="")
+					SM <- paste(SM, "C", SM.prefix, style$partner, ".", p, ".", t, " := ", SM.prefix, style$partner, ".", p, " - ", SM.prefix, style$partner, ".", t, "\n", sep="")
+				}
+			}
+		}
+	}
+
 }
 
 

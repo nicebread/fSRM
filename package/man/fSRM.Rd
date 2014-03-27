@@ -3,8 +3,8 @@
 \title{Run a Social Relations Model with roles ("Family SRM")}
 \usage{
 fSRM(formula = NULL, data, drop = "default", add = "", means = FALSE,
-  diff = FALSE, IGSIM = list(), add.variable = c(), syntax = "",
-  group = NULL, setZero = "none", ...)
+  pairwise = FALSE, diff = FALSE, IGSIM = list(), add.variable = c(),
+  syntax = "", group = NULL, setZero = "none", ...)
 }
 \arguments{
   \item{formula}{A formula that defines the variable names.
@@ -52,6 +52,10 @@ fSRM(formula = NULL, data, drop = "default", add = "", means = FALSE,
 
   \item{means}{Should the structured means of the SRM
   factors be calculated?}
+
+  \item{pairwise}{Compute pairwise comparison of actor and
+  partner means between all roles? Only works when
+  \code{means} is also set to TRUE.}
 
   \item{group}{Variable name indicating group membership}
 
