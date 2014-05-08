@@ -4,7 +4,7 @@
 \usage{
 fSRM(formula = NULL, data, drop = "default", add = "", means = FALSE,
   pairwise = FALSE, diff = FALSE, IGSIM = list(), add.variable = c(),
-  syntax = "", group = NULL, setZero = "none", ...)
+  syntax = "", group = NULL, ..., setZero = "none")
 }
 \arguments{
   \item{formula}{A formula that defines the variable names.

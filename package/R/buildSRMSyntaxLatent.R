@@ -226,6 +226,10 @@ function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default
 # TODO: Check: should self ratings be included somehow?
 ## ======================================================================
 
+if (pairwise==TRUE & means==FALSE) {
+	warning("You requested pairwise comparisons of the means with `pairwise=TRUE`. You also have to set `means=TRUE` to get this comparison.")
+}
+
 SM <- ""
 if (means==TRUE & is.null(groupnames)) {
 	SM.prefix <- ".means."

@@ -162,7 +162,7 @@ import <- function() {
       
       # Only return if all fields are completed (except for the indicator and group)
       if (act_from != "From" & act_from != "" & act_to != "To" & act_to != "" & part_from != "From" & part_from != "" & part_to != "To" & part_to != "") { 
-        cat("A new datafile called 'SRMData' is created\n")
+        cat("Data file created. Access it with dat <- getImport()\n")
         tkdestroy(popup)
         tkfocus(tt)
       }
@@ -257,7 +257,7 @@ import <- function() {
     style$actor <- outact
     style$partner <- outpar
     style$relationship <- outrel
-    tkconfigure(change.but, text = "Outputformat confirmed")
+    tkconfigure(change.but, text = "Output format confirmed")
   }
   
   

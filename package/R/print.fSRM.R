@@ -82,7 +82,8 @@ function(x, group=1, digits=3) {
 	
 	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(GR$COR), digits),"(out of bounds estimates set to NA)\n----------------\n")
 	DR <- getDR(x, group=group)
-	cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")
+	#cat("\n\nDyadic reciprocity (relationship covariances): Mean r =", round(meanNA(DR$r), digits),"(out of bounds estimates set to NA)\n----------------\n")
+	cat("\n\nDyadic reciprocity (relationship covariances):\n----------------\n")
 	print(DR, row.names=TRUE)
 	
 	if (length(x$IGSIM) > 0) {
@@ -119,7 +120,8 @@ function(x, group=1, digits=3) {
 
 			AS <- rbind(AS, AS0)
 		}
-		cat("\n\nAssumed similarity: Mean r =", round(meanNA(AS$COR), digits),"(out of bound estimates set to zero)\n----------------\n")
+		#cat("\n\nAssumed similarity: Mean r =", round(meanNA(AS$COR), digits),"(out of bound estimates set to zero)\n----------------\n")
+		cat("\n\nAssumed similarity:\n----------------\n")
 		print(AS,row.names=TRUE)
 		
 		SO <- data.frame()
@@ -149,7 +151,8 @@ function(x, group=1, digits=3) {
 			SO <- rbind(SO, SO0)
 		}
 		SO$COR <- as.numeric(SO$COR)
-		cat("\n\nSelf-Other agreement: Mean r =", round(meanNA(SO$COR), digits),"(out of bound estimates set to NA)\n----------------\n")
+		#cat("\n\nSelf-Other agreement: Mean r =", round(meanNA(SO$COR), digits),"(out of bound estimates set to NA)\n----------------\n")
+		cat("\n\nSelf-Other agreement:\n----------------\n")
 		print(SO, row.names=TRUE)
 	}
 	

@@ -15,6 +15,8 @@ two.indicators3 <- two.indicators[two.indicators$actor.id != "y" & two.indicator
 f3.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3)
 f3.1
 
+f3.1.b <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3, se="boot")
+
 # Test: drop something else...
 f3.1.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3, drop="actor")
 f3.1.d
@@ -45,6 +47,10 @@ f3.2.d
 # 4 persons, 1 indicator
 f4.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators)
 f4.1
+
+f4.1.b <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, se="boot")
+f4.1.b
+
 
 # Test: drop something in 4-members
 f4.1.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, drop="actor")
