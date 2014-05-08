@@ -252,11 +252,13 @@ import <- function() {
     outact <- as.character(tclvalue(Entry10))
     outpar <- as.character(tclvalue(Entry11))
     outrel <- as.character(tclvalue(Entry12))
-    #style <- new.env(parent=globalenv())
-    style$familyeffect <- outfam
-    style$actor <- outact
-    style$partner <- outpar
-    style$relationship <- outrel
+
+	assign("actor", outact, envir=style)
+	assign("partner", outpar, envir=style)
+	assign("familyeffect", outfam, envir=style)
+	assign("relationship", outrel, envir=style)
+	
+	print("Changed output format!")
     tkconfigure(change.but, text = "Output format confirmed")
   }
   
