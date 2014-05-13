@@ -29,6 +29,8 @@ getCor <- function(x, ops="~~", g="", label="", group=1) {
 	SS3 <- data.frame(component=N, label=SS2$label, round(SS2[, c("est", "se", "z", "pvalue", "ci.lower", "ci.upper", "std.lv")], 3))
 	SS3$component <- as.character(SS3$component)
 	colnames(SS3) <- c("component", "label", "estimate", "se", "z", "p.value", "ci.lower", "ci.upper", "r")
+	
+	SS3$r[SS3$r > 1 | SS3$r < -1] <- NA
 	return(SS3[, c(1, 2, 3:8, 9)])
 }
 

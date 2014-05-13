@@ -9,6 +9,7 @@
 \subsection{Changes}{
 	\itemize{
 		\item Bootstrapping standard errors now properly works (set \code{se="boot"} in the \code{fSRM} function.)
+		\item Out-of-bound estimates of correlations are set to NA in the output.
 	}
 }
 }
