@@ -29,6 +29,8 @@
 
 import <- function() {
   
+  if (!require(tcltk) | !require(tcltk2)) stop("You have to install the tcltk and the tcltk2 package to use the import() function! --> install.packages(c('tcltk', 'tcltk2'))")
+  
   #### Read in the dataset ####
   library(tcltk)
   library(tcltk2)
