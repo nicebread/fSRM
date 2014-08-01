@@ -137,13 +137,6 @@ f4.d3 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators.g, group="g
 f4.d3
 
 
-
-
-# This does not work yet ...
-f4.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators.g, means=TRUE, group="group", diff=TRUE, setZero="negative")
-f4.d
-
-
 f4.d2 <- update(f4.d, drop="family")
 
 two.indicators3.g <- two.indicators

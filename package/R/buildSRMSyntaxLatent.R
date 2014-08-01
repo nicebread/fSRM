@@ -15,6 +15,7 @@
 #' @param self Should self-ratings be included in the analysis (if present in the data set)?
 #' @param selfmode Defines the style how the selfratings are combined with the latent actor and partner effects. If \code{selfmode="cor"} they are correlated (as in REFERENCE), if \code{selfmode="kq"} the k and q paths are calculated (see Kenny & West, 2010)
 #' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
+#' @param noNegVar Should variance estimates be constrained to be positive?
 #' @param ... Additional arguments (not documented yet)
 #' @param means Should the structured means of the SRM factors be calculated?
 #' @param diff Compare groups with the delta method?
@@ -26,7 +27,7 @@
 
 
 buildSRMSyntaxLatent <-
-function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, pairwise=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", ...) {
+function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, pairwise=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", noNegVar=TRUE, ...) {
 	
 	# define defaults for parameters
 	err <- match.arg(err, c("no", "all", "default"))
@@ -414,19 +415,29 @@ if (!is.null(groupnames)) {
 
 
 ## ======================================================================
-## Label variances for easy retrieval
+## Constrain variances to be positive
 ## ======================================================================
 
-LAB <- "# Define labels for variances\n"
+NONEG <- "\n\n# Constraint: Variances must be positive\n"
 VAR.prefix <- ".VAR."
-LAB <- paste(LAB, paste(style$familyeffect, " ~ ", VAR.prefix, style$familyeffect, "*", style$familyeffect, "\n", sep=""))
+NONEG <- paste(NONEG, paste(style$familyeffect, " ~~ ", VAR.prefix, style$familyeffect, "*", style$familyeffect, "\n", sep=""))
+NONEG <- paste0(NONEG, VAR.prefix, style$familyeffect, " > 0\n")
 
-for (p in roles) {LAB <- paste(LAB, style$actor, ".", p, " ~ ", VAR.prefix, style$actor, ".", p, "*", style$actor, ".", p, "\n", sep="")}
-for (p in roles) {LAB <- paste(LAB, style$partner, ".", p, " ~ ", VAR.prefix, style$partner, ".", p, "*", style$partner, ".", p, "\n", sep="")}
+for (p in roles) {
+	NONEG <- paste(NONEG, style$actor, ".", p, " ~~ ", VAR.prefix, style$actor, ".", p, "*", style$actor, ".", p, "\n", sep="")
+	NONEG <- paste0(NONEG, VAR.prefix, style$actor, ".", p, " > 0\n")
+}
+for (p in roles) {
+	NONEG <- paste(NONEG, style$partner, ".", p, " ~~ ", VAR.prefix, style$partner, ".", p, "*", style$partner, ".", p, "\n", sep="")
+	NONEG <- paste0(NONEG, VAR.prefix, style$partner, ".", p, " > 0\n")
+}
 
 for (p in roles) {
 	for (t in roles) {
-		if (p != t) {LAB <- paste(LAB, style$relationship, ".", p, ".", t, " ~ ", VAR.prefix, style$relationship, ".", p, ".", t, "*", style$relationship, ".", p, ".", t, "\n", sep="")}
+		if (p != t) {
+			NONEG <- paste(NONEG, style$relationship, ".", p, ".", t, " ~~ ", VAR.prefix, style$relationship, ".", p, ".", t, "*", style$relationship, ".", p, ".", t, "\n", sep="")
+			NONEG <- paste0(NONEG, VAR.prefix, style$relationship, ".", p, ".", t, " > 0\n")
+		}
 	}
 }
 
@@ -487,5 +498,6 @@ if (diff == FALSE) {
 	if (addv!="") SRM <- paste(SRM, addv)
 	SRM <- paste(SRM, SM)
 	SRM <- paste(SRM, DM)
+	if (noNegVar == TRUE) SRM <- paste(SRM, NONEG)
 	return(SRM)
 }

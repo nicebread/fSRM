@@ -4,6 +4,15 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
+\section{Version 0.4}{
+
+\subsection{Changes}{
+	\itemize{
+		\item Removed \code{setZero} option from \code{fSRM}. Replaced it with the option \code{noNegVar}. If this is TRUE, all variances are constrained to be > 0.
+	}
+}
+}
+
 \section{Version 0.3.5}{
 
 \subsection{Changes}{

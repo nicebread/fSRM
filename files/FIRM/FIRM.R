@@ -1,5 +1,24 @@
 load("FIRMdemo.RData")
-head(RRdat4)
+
+# ---------------------------------------------------------------------
+#  Dominance: negative family variance
+
+dom1 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+dom1
+cat(dom1$syntax)
+
+dom2 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), noNegVar=FALSE)
+dom2
+cat(dom2$syntax)
+
+
+# No negative variances: both fits are identical
+pow1 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4)
+pow2 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, noNegVar=FALSE)
+
+
+
+
 
 #------------------------------------------------------------
 # ----  Base models for target effects (without self-ratings)
@@ -11,13 +30,6 @@ pow1 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4)
 pow1 <- fSRM(RR_UMS1_2 ~ role.p*role.t | gid, RRdat4)
 
 
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative")
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="nonsig")
-
-n1 <- fSRM(RR_UMS2_7/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, setZero="negative", mean=TRUE)
-
-
-
 pow2 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), means=TRUE)
 
 pow1$fit
@@ -27,9 +39,19 @@ summary(pow2$fit)
 # POWER: include self rating
 pow1 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), self=TRUE)
 
-# Dominance
-dom <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), means=TRUE)
+# Dominance: negative family variance
+dom <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+cat(dom$syntax)
+
+dom <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), noNegVar=FALSE)
+cat(dom$syntax)
+
+
 summary(dom$fit)
+
+
+
+
 
 emo <- fSRM(RR_emoSupp1 ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), means=TRUE)
 summary(emo$fit)

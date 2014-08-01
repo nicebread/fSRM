@@ -28,7 +28,7 @@
 #' @param pairwise Compute pairwise comparison of actor and partner means between all roles? Only works when \code{means} is also set to TRUE.
 #' @param group Variable name indicating group membership
 #' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}. If \code{diff = TRUE} and \code{means = FALSE}, only variances are compared between groups. If \code{diff = TRUE} and \code{means = TRUE}, variances and means are compared between groups.
-#' @param setZero Should misbehaving variances be set to zero? If "negative", all negative variances are constrained to zero. If "nonsig", all nonsignificant variances are constrained to zero. Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significant variances to zero!
+#' @param noNegVar Should variance estimates be constrained to be positive?
 
 ## OLD PARAMETERS, NOT CURRENTLY USED
 # @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
@@ -110,10 +110,9 @@
 #' }
 
 fSRM <-
-function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, ..., setZero="none") {
+function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, noNegVar=TRUE, ...) {
 	
 	dots <- list(...)
-	setZero <- match.arg(setZero, c("none", "negative", "nonsig"))
 	
 	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE
 	self <- FALSE
@@ -185,7 +184,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 	
 	# if no syntax is directly provided:
 	if (syntax == "") {
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, pairwise=pairwise, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable)
+		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, pairwise=pairwise, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable, noNegVar=noNegVar)
 	
 		syntax <- paste(syntax0, add, sep="\n")
 	} else {
@@ -247,40 +246,6 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 		data	= fam)
 	
 	attr(res, "class") <- "fSRM"
-	
-	# ---------------------------------------------------------------------
-	# After fitting: check, if some variances should be set to zero
-	
-	# TODO: Implement for multiple groups.
-	# FE ~~ c(.varA.FE,.varB.FE)*FE + c(0, NA)*FE
-	
-	
-	if (setZero %in% c("negative", "nonsig")) {
-		if (!is.null(group)) {
-			warning("Automatically setting negative variances to zero does not work yet for multiple groups! Negative variances are *not* set to zero!")
-			return(res)
-		}
-		T <- varComp(res, group=1)
-		if (setZero == "negative") {
-			to.zero <- T$component[which(T$variance < 0)]
-		}
-		if (setZero == "nonsig") {
-			to.zero <- T$component[which(T$p.value > .05)]
-			if (length(to.zero) > 0) {
-				warning("Please note: The purpose of this function is to reproduce published results; usually it is *not* recommended to set non-significant variances to zero!")
-			}
-		}
-		if (length(to.zero) > 0) {
-			cat(paste0("Following variances are ", setZero, " and are constrained to be zero:\n", paste(to.zero, collapse="\n"), "\n\nNow reestimating model..."))
-			add <- paste0("\n\n# Set ", setZero, " variances to zero:\n",
-			paste(gsub(" ~~ ", " ~~ 0*", to.zero, fixed=TRUE), collapse="\n"))
-		
-			res2 <- update(res, add=add, setZero="none")
-			return(res2)
-		} else {
-			return(res)
-		}
-	} else {
-		return(res)
-	}
+
+	return(res)
 }
