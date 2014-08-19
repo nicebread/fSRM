@@ -55,7 +55,12 @@ A model can be run with new parameters using the update function:
 data(two.indicators)
 # 4 persons, 1 indicator
 f4.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators)
-f4.1
+f4.1		# by default, one-sided p-values and CIs are printed for variances
+print(f4.1, var.onesided=FALSE)	# Show two-sided p-values and CIs for variances
+plot(f4.1)	# plot relative variances
+plot(f4.1, bw=TRUE)
+plot(f4.1, bw=TRUE, onlyStable=TRUE)
+plot(f4.1, means=TRUE)	# plot mean structure
 
 # 4 persons, 2 indicators
 f4.2 <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators)

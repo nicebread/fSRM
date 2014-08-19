@@ -124,7 +124,8 @@ plot.fSRM <- function(x, ..., mean=FALSE, bw=FALSE, onlyStable=FALSE) {
 			}
 		}
 	
-		p1 <- ggplot(relvar.long, aes_string(x="dyad", y="value", fill="variable", order = -as.numeric("variable"))) + geom_bar(stat="identity") + xlab("Dyad") + scale_y_continuous(labels=percent) + scale_fill_manual("Component", values=colors)
+		relvar.long$ord <- -as.numeric(relvar.long$variable)
+		p1 <- ggplot(relvar.long, aes_string(x="dyad", y="value", fill="variable", order = "ord")) + geom_bar(stat="identity") + xlab("Dyad") + scale_y_continuous(labels=percent) + scale_fill_manual("Component", values=colors)
 	
 		if (bw==TRUE) p1 <- p1 + theme_bw()
 		if (onlyStable==FALSE) {

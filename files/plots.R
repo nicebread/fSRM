@@ -17,6 +17,7 @@ stop()
   est_act <- MS[2:5,1:2]
   est_par <- MS[6:9,1:2]
   est_rel <- MS[10:21,1:2]
+  
 
 # Create axis & labels
   l_actor <- rep(c('C1','C2', 'F', 'M'), each=3)

@@ -43,6 +43,8 @@
 
 #' You can test for a very restricted model by constraining the roles to be equal ("Do roles matter at all?"). Therefore, compare a model with free roles (\code{m1 <- fSRM(..., means=TRUE, rolesEqual = FALSE)}) with a model with equal roles (\code{m2 <- fSRM(..., means=TRUE, rolesEqual=TRUE)}) using \code{anova(m1$fit, m2$fit)} (Thanks to David Kenny for the suggestion).
 
+#' For plotting relative variances and mean structure, see \code{\link{plot.fSRM}}.
+
 #' @references
 #' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
@@ -52,7 +54,12 @@
 
 #' # 4 persons, 1 indicator
 #' f4.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators)
-#' f4.1
+#' f4.1		# by default, one-sided p-values and CIs are printed for variances
+#' print(f4.1, var.onesided=FALSE)	# Show two-sided p-values and CIs for variances
+#' plot(f4.1)	# plot relative variances
+#' plot(f4.1, bw=TRUE)
+#' plot(f4.1, bw=TRUE, onlyStable=TRUE)
+#' plot(f4.1, means=TRUE)	# plot mean structure
 #' 
 #' # 4 persons, 2 indicators
 #' f4.2 <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators)
