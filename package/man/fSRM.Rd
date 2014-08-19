@@ -5,7 +5,8 @@
 \usage{
 fSRM(formula = NULL, data, drop = "default", add = "", means = FALSE,
   pairwise = FALSE, diff = FALSE, IGSIM = list(), add.variable = c(),
-  syntax = "", group = NULL, noNegVar = TRUE, ...)
+  syntax = "", group = NULL, noNegVar = TRUE, rolesEqual = FALSE,
+  missing = NA, ...)
 }
 \arguments{
 \item{formula}{A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.}
@@ -33,6 +34,10 @@ fSRM(formula = NULL, data, drop = "default", add = "", means = FALSE,
 \item{diff}{Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}. If \code{diff = TRUE} and \code{means = FALSE}, only variances are compared between groups. If \code{diff = TRUE} and \code{means = TRUE}, variances and means are compared between groups.}
 
 \item{noNegVar}{Should variance estimates be constrained to be positive?}
+
+\item{missing}{Handling of missing values. By default (\code{NA}), Full Information Maximum Likelihood (FIML) is employed in case of missing values. If families with missing values should be excluded, use \code{missing = "listwise"}}
+
+\item{rolesEqual}{Maximal constraints: Do roles matter at all? If this parameter is set to TRUE, it is a model with no mean difference, the actor variances equal, partner variances equal, relationship variances equal, and the respective reciprocities equal (Thanks to a suggestion of David Kenny). Model comparisons via \code{anova} can show whether roles matter at all.}
 }
 \description{
 Run a Social Relations Model with roles ("Family SRM")
@@ -46,7 +51,6 @@ A model can be run with new parameters using the update function:
 \code{s2 <- update(s1, diff=TRUE)}
 }
 \examples{
-\dontrun{
 # Example from Dyadic Data Analysis
 data(two.indicators)
 # 4 persons, 1 indicator
@@ -61,6 +65,7 @@ f4.2
 f4.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 f4.1.m
 
+\dontrun{
 # 4 persons, 2 indicators, mean structure
 f4.2.m <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 f4.2.m

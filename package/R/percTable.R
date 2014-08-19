@@ -40,8 +40,8 @@ function(x, group=1) {
 		}
 	}
 	
-	res2 <- round((res[, 1:5] / res[, 6])*100)
+	res2 <- (res[, 1:5] / res[, 6])
 	res2 <- data.frame(addmargins(res2, margin=1, FUN=mean))
-	res2$explained <- 100-res2$Error
+	res2$Explained <- 1 - res2$Error
 	return(list(raw=res, stand=res2))
 }

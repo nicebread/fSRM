@@ -1,5 +1,6 @@
 #' @title Run a Social Relations Model with roles ("Family SRM")
 #' @aliases fSRM
+#' @aliases print.fSRM
 #'
 #' @description
 #' Run a Social Relations Model with roles ("Family SRM")
@@ -29,6 +30,8 @@
 #' @param group Variable name indicating group membership
 #' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}. If \code{diff = TRUE} and \code{means = FALSE}, only variances are compared between groups. If \code{diff = TRUE} and \code{means = TRUE}, variances and means are compared between groups.
 #' @param noNegVar Should variance estimates be constrained to be positive?
+#' @param missing Handling of missing values. By default (\code{NA}), Full Information Maximum Likelihood (FIML) is employed in case of missing values. If families with missing values should be excluded, use \code{missing = "listwise"}
+#' @param rolesEqual Maximal constraints: Do roles matter at all? If this parameter is set to TRUE, it is a model with no mean difference, the actor variances equal, partner variances equal, relationship variances equal, and the respective reciprocities equal (Thanks to a suggestion of David Kenny). Model comparisons via \code{anova} can show whether roles matter at all.
 
 ## OLD PARAMETERS, NOT CURRENTLY USED
 # @param err Defines the type of correlations between error terms. err = 1: Correlate same items BETWEEN ALL RATERS (e.g., Dyadic Data Analysis, Kenny, Kashy, & Cook, 2000); err = 2: Correlate same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
@@ -38,11 +41,12 @@
 #' @details
 #' The \code{fSRM} function relies on the \code{lavaan} package for computation: A syntax for the SRM with roles is generated and then passed to the \code{lavaan} function. Hence, many options of the \code{lavaan} function can be used out-of-the-box (additional parameters are passed to the \code{lavaan} function through the \code{...} operator). For example, one can deal with missing values. The default behavior is to exclude families with missing values (listwise deletion). Set \code{fSRM(..., missing="fiml")} for ML / FIML estimation. Or, you can request bootstrapped standard errors with \code{fSRM(..., se="boot")}.
 
+#' You can test for a very restricted model by constraining the roles to be equal ("Do roles matter at all?"). Therefore, compare a model with free roles (\code{m1 <- fSRM(..., means=TRUE, rolesEqual = FALSE)}) with a model with equal roles (\code{m2 <- fSRM(..., means=TRUE, rolesEqual=TRUE)}) using \code{anova(m1$fit, m2$fit)} (Thanks to David Kenny for the suggestion).
+
 #' @references
 #' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
 #' @examples
-#' \dontrun{
 #' # Example from Dyadic Data Analysis
 #' data(two.indicators)
 
@@ -58,6 +62,7 @@
 #' f4.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 #' f4.1.m
 #' 
+#' \dontrun{
 #' # 4 persons, 2 indicators, mean structure
 #' f4.2.m <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 #' f4.2.m
@@ -110,9 +115,12 @@
 #' }
 
 fSRM <-
-function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, noNegVar=TRUE, ...) {
+function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, noNegVar=TRUE, rolesEqual=FALSE, missing=NA, ...) {
 	
 	dots <- list(...)
+	
+	if (rolesEqual==TRUE & means==FALSE)
+		stop("For the parameter `rolesEqual == TRUE` you also have to set `means=TRUE`.")
 	
 	# TODO: Re-introduce self-ratings? Preliminarily, fix it to FALSE
 	self <- FALSE
@@ -158,6 +166,16 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 	#fam <- na.omit(fam)
 	included <- fam[, group.id]
 	
+	# set defaults for missing option
+	if (is.na(missing)) {
+		if (any(is.na(fam))) {
+			missing <- "fiml"
+			warning("There are missing values in your data set. Model is computed with option `missing = 'fiml'`. This is only valid if the data are missing completely at random (MCAR) or missing at random (MAR)! If you want to exclude families with missing values, use `missing = 'listwise'`")
+		} else {
+			missing <- "listwise"
+		}
+	}
+	
 	roles <- sort(unique(data[, actor.id]))
 	
 	# define defaults for drop
@@ -173,7 +191,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {
 		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")
 	}
-	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group`variable.")
+	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group` variable.")
 	
 	
 	if (!is.null(group)) {
@@ -184,7 +202,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 	
 	# if no syntax is directly provided:
 	if (syntax == "") {
-		syntax0 <- buildSRMSyntaxLatent(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, pairwise=pairwise, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable, noNegVar=noNegVar)
+		syntax0 <- buildSRMSyntax(roles, var.id, drop=drop, err="default", IGSIM=IGSIM, means=means, pairwise=pairwise, diff=diff, groupnames=groupnames, self=self, add.variable=add.variable, noNegVar=noNegVar, rolesEqual=rolesEqual)
 	
 		syntax <- paste(syntax0, add, sep="\n")
 	} else {
@@ -208,7 +226,8 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 				auto.var 	= TRUE,
 				auto.cov.lv.x = TRUE,
 				auto.cov.y 	= TRUE, 
-				group		= group, ...)
+				group		= group, 
+				missing		= missing, ...)
 		},	  # end of "withCallingHandlers"
 
 		# suppress two types of warning

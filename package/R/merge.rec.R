@@ -4,8 +4,7 @@
 
 # recursive merge of multiple data frames
 # Snippet taken from the reshape package of Hadley Wickham, under the MIT license
-merge.rec <-
-function(.list, ...){
+merge.rec <- function(.list, ...){
 	if(length(.list)==1) return(.list[[1]])
 	Recall(c(list(merge(.list[[1]], .list[[2]], ...)), .list[-(1:2)]), ...)
 }

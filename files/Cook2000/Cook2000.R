@@ -14,6 +14,8 @@ two.indicators3 <- two.indicators[two.indicators$actor.id != "y" & two.indicator
 # 3 persons, 1 indicator
 f3.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3)
 f3.1
+plot(f3.1)
+plot(f3.1, bw=TRUE)
 
 f3.1.b <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3, se="boot")
 
@@ -31,6 +33,8 @@ f3.1.d
 # 3 persons, 2 indicators
 f3.2 <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators3)
 f3.2
+plot(f3.2)
+plot(f3.1, onlyStable=TRUE)
 
 # Test: drop something else...
 f3.2.d <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators3, drop="actor")
@@ -146,6 +150,15 @@ f3.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3.g, means=TR
 f3.d
 
 
+f3.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3.g, means=TRUE, group="group", drop="family")
+f3.d
+
+f3.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3.g, diff=TRUE, group="group", drop="actor")
+f3.d
+
+f3.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3.g, drop="family", group="group")
+f3.d
+
 
 ## ======================================================================
 ## Test missing values
@@ -163,5 +176,27 @@ two.indicators3_MCAR$dep1[sample(1:nrow(two.indicators3_MCAR), 50)] <- NA
 f3.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3_MCAR)
 f3.1.m
 
-f3.1.m2 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3_MCAR, missing="fiml")
+f3.1.m2 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3_MCAR, missing="listwise")
 f3.1.m2
+
+
+
+## ======================================================================
+## test: do roles matter at all?
+## ======================================================================
+
+freeroles <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
+freeroles
+
+equalroles <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE, rolesEqual=TRUE)
+equalroles
+
+anova(freeroles$fit, equalroles$fit)
+
+
+data(three.person)
+freeroles <- fSRM(anx1 ~ actor.id*partner.id | family.id, data=three.person, drop="actor", means=TRUE)
+freeroles
+
+equalroles <- fSRM(anx1 ~ actor.id*partner.id | family.id, data=three.person, drop="actor", rolesEqual=TRUE, means=TRUE)
+equalroles

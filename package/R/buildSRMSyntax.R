@@ -1,8 +1,7 @@
 #' @title Build lavaan syntax for a Social Relations Model with roles ("Family SRM")
-#'
 #' @description
-#' Build lavaan syntax for a Social Relations Model with roles ("Family SRM"). This function is called by the fSRM function, but can be also 
-#'
+#' Build lavaan syntax for a Social Relations Model with roles ("Family SRM"). This function is called by the fSRM function, but can be also called directly to build an appropriate lavaan syntax.
+#
 #' @details
 #' None.
 #'
@@ -21,13 +20,14 @@
 #' @param diff Compare groups with the delta method?
 #' @param pairwise Compute pairwise comparison of actor and partner means between all roles? Only works when \code{means} is also set to TRUE
 #' @param groupnames Vector with the names of the groups (i.e., the values of the group column in the data set)
+#' @param rolesEqual Maximal constraints: Do roles matter at all? If this parameter is set to TRUE, it is a model with no mean difference, the actor variances equal, partner variances equal, relationship variances equal, and the respective reciprocities equal (Thanks to a suggestion of David Kenny). Model comparisons via \code{anova} can show whether roles matter at all.
 
 #' @references
 #' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
 
-buildSRMSyntaxLatent <-
-function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, pairwise=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", noNegVar=TRUE, ...) {
+buildSRMSyntax <-
+function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, pairwise=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", noNegVar=TRUE, rolesEqual=FALSE, ...) {
 	
 	# define defaults for parameters
 	err <- match.arg(err, c("no", "all", "default"))
@@ -85,14 +85,14 @@ function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default
 
 	# generalized reciprocity
 	GR <- "# Generalized reciprocity:\n"
-	for (p in roles) {GR <- paste(GR, style$actor, ".", p, " ~~ ", style$partner, ".", p, "\n", sep="")}
+	for (p in roles) {GR <- paste(GR, style$actor, ".", p, " ~~ GR.", p, "*", style$partner, ".", p, "\n", sep="")}
 
 	# dyadic reciprocity
 	DR <- "# Dyadic reciprocity:\n"
 	for (p in 1:length(roles)) {
 		for (t in 1:length(roles)) {
 			if ((p < t) & (roles[p] != roles[t])) {
-				DR <- paste(DR, style$relationship, ".", roles[p], ".", roles[t], " ~~ ", style$relationship, ".", roles[t], ".", roles[p], "\n", sep="")
+				DR <- paste(DR, style$relationship, ".", roles[p], ".", roles[t], " ~~ DR.", roles[p], ".", roles[t], "*", style$relationship, ".", roles[t], ".", roles[p], "\n", sep="")
 			}
 		}
 	}
@@ -132,37 +132,35 @@ function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default
 		}
 	}
 	
-	# TODO: The old within-error correlations - I think we could delete that
-	# if (length(var.id) > 1 & err == "within") {
-# 		# ERR2: Correlate for same items WITHIN RATERS (e.g., Branje et al., 2003, Eichelsheim)
-# 		# define correlations between error terms
-# 		ERR <- "# Method covariance: Correlations among error terms of one item within actors:\n"
-# 		count <- 1
-# 	
-# 	
-# 		for (v in 1:length(var.id)) {
-# 			for (p in 1:length(roles)) {
-# 				for (t1 in 1:length(roles)) {
-# 					for (t2 in 1:length(roles)) {
-# 						if (self == FALSE) {
-# 							if (p != t1 & p != t2 & t1 < t2) {
-# 								ERR <- paste(ERR, pasteNS(roles[p], roles[t1], var.id[v]), " ~~ ERR", count, "*", pasteNS(roles[p], roles[t2], var.id[v]), "\n", sep="")
-# 								count <- count + 1
-# 							}
-# 						} else {
-# 							if (t1 < t2) {
-# 								ERR <- paste(ERR, paste(roles[p], roles[t1], var.id[v], sep="_"), " ~~ ERR", count, "*", paste(roles[p], roles[t2], var.id[v], sep="_"), "\n", sep="")
-# 								count <- count + 1
-# 							}
-# 						}
-# 					}
-# 				}
-# 			}
-# 		}
-# 	}
+	
+	
+	
+	
+	
+	# ---------------------------------------------------------------------
+	# Label all variances - but only if no group comparisons are present (in this case, they are labeled a different way)
+	if (diff == FALSE) {
+		VARLAB <- "\n\n# Variance labels\n"
+		VAR.prefix <- ".VAR."
+		VARLAB <- paste(VARLAB, paste(style$familyeffect, " ~~ ", VAR.prefix, style$familyeffect, "*", style$familyeffect, "\n", sep=""))
 
+		for (p in roles) {
+			VARLAB <- paste(VARLAB, style$actor, ".", p, " ~~ ", VAR.prefix, style$actor, ".", p, "*", style$actor, ".", p, "\n", sep="")
+		}
+		for (p in roles) {
+			VARLAB <- paste(VARLAB, style$partner, ".", p, " ~~ ", VAR.prefix, style$partner, ".", p, "*", style$partner, ".", p, "\n", sep="")
+		}
 
-
+		for (p in roles) {
+			for (t in roles) {
+				if (p != t) {
+					VARLAB <- paste(VARLAB, style$relationship, ".", p, ".", t, " ~~ ", VAR.prefix, style$relationship, ".", p, ".", t, "*", style$relationship, ".", p, ".", t, "\n", sep="")
+				}
+			}
+		}
+	}
+	
+	
 
 
 	# intragenerational similarity
@@ -232,8 +230,8 @@ if (pairwise==TRUE & means==FALSE) {
 }
 
 SM <- ""
+SM.prefix <- ".means."
 if (means==TRUE & is.null(groupnames)) {
-	SM.prefix <- ".means."
 	SM <- ""
 	SM <- "\n\n## Compute structured means\n# Define labels for subsequent constraints\n"
 	
@@ -250,34 +248,21 @@ if (means==TRUE & is.null(groupnames)) {
 	
 	SM <- paste0(SM, "\n\n# set means of observed variables to zero\n")
 	SM <- paste0(SM, paste0(pasteNS(roles, roles, var.id), " ~ 0*1", collapse="\n"))
-	
+
 	SM <- paste0(SM, "\n\n# set constraints on means for identifiability\n")
 	
-	 SM <- paste0(SM, paste(paste(SM.prefix, style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
-	 SM <- paste0(SM, paste(paste(SM.prefix, style$partner, ".", roles, sep="", collapse=" + "), "== 0\n"))
-	 
-	 for (p in roles) {
-	 	SM <- paste0(SM, paste(paste(SM.prefix, style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
-	 }
-	 for (p in roles) {
-	 	SM <- paste0(SM, paste(paste(SM.prefix, style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
-	 }
+	SM <- paste0(SM, paste(paste(SM.prefix, style$actor, ".", roles, sep="", collapse=" + "), "== 0\n"))
+	SM <- paste0(SM, paste(paste(SM.prefix, style$partner, ".", roles, sep="", collapse=" + "), "== 0\n"))
+
+	for (p in roles) {
+		SM <- paste0(SM, paste(paste(SM.prefix, style$relationship, ".", p, ".", roles[roles != p], sep="", collapse=" + "), "== 0\n"))
+	}
+	for (p in roles) {
+		SM <- paste0(SM, paste(paste(SM.prefix, style$relationship, ".", roles[roles != p], ".", p, sep="", collapse=" + "), "== 0\n"))
+	}
 	
-	 # pairwise comparisons
-	 # #actor effects
-# 	 C.means.A.mf := .means.A.m - .means.A.f
-# 	 C.means.A.my := .means.A.m - .means.A.y
-# 	 C.means.A.mc := .means.A.m - .means.A.c
-# 	 C.means.A.fy := .means.A.f - .means.A.y
-# 	 C.means.A.fc := .means.A.f - .means.A.c
-# 	 C.means.A.yc := .means.A.y - .means.A.c
-# 	 # partner effects
-# 	 C.means.P.mf := .means.P.m - .means.P.f
-# 	 C.means.P.my := .means.P.m - .means.P.y
-# 	 C.means.P.mc := .means.P.m - .means.P.c
-# 	 C.means.P.fy := .means.P.f - .means.P.y
-# 	 C.means.P.fc := .means.P.f - .means.P.c
-# 	 C.means.P.yc := .means.P.y - .means.P.c
+
+
 
 	if (pairwise==TRUE) {
 		SM <- paste(SM, "\n## pairwise comparisons of actor and partner effects\n")
@@ -370,6 +355,7 @@ if (!is.null(groupnames)) {
 	
 	
 	if (diff == TRUE) {
+		
 		# ---------------------------------------------------------------------
 		# Comparison of variances and means
 
@@ -418,33 +404,56 @@ if (!is.null(groupnames)) {
 ## Constrain variances to be positive
 ## ======================================================================
 
-NONEG <- "\n\n# Constraint: Variances must be positive\n"
-VAR.prefix <- ".VAR."
-NONEG <- paste(NONEG, paste(style$familyeffect, " ~~ ", VAR.prefix, style$familyeffect, "*", style$familyeffect, "\n", sep=""))
-NONEG <- paste0(NONEG, VAR.prefix, style$familyeffect, " > 0\n")
+if (diff == FALSE) {
+	NONEG <- "\n\n# Constraint: Variances must be positive\n"
+	NONEG <- paste0(NONEG, VAR.prefix, style$familyeffect, " > 0\n")
 
-for (p in roles) {
-	NONEG <- paste(NONEG, style$actor, ".", p, " ~~ ", VAR.prefix, style$actor, ".", p, "*", style$actor, ".", p, "\n", sep="")
-	NONEG <- paste0(NONEG, VAR.prefix, style$actor, ".", p, " > 0\n")
-}
-for (p in roles) {
-	NONEG <- paste(NONEG, style$partner, ".", p, " ~~ ", VAR.prefix, style$partner, ".", p, "*", style$partner, ".", p, "\n", sep="")
-	NONEG <- paste0(NONEG, VAR.prefix, style$partner, ".", p, " > 0\n")
-}
+	for (p in roles) {
+		NONEG <- paste0(NONEG, VAR.prefix, style$actor, ".", p, " > 0\n")
+	}
+	for (p in roles) {
+		NONEG <- paste0(NONEG, VAR.prefix, style$partner, ".", p, " > 0\n")
+	}
 
-for (p in roles) {
-	for (t in roles) {
-		if (p != t) {
-			NONEG <- paste(NONEG, style$relationship, ".", p, ".", t, " ~~ ", VAR.prefix, style$relationship, ".", p, ".", t, "*", style$relationship, ".", p, ".", t, "\n", sep="")
-			NONEG <- paste0(NONEG, VAR.prefix, style$relationship, ".", p, ".", t, " > 0\n")
+	for (p in roles) {
+		for (t in roles) {
+			if (p != t) {
+				NONEG <- paste0(NONEG, VAR.prefix, style$relationship, ".", p, ".", t, " > 0\n")
+			}
+		}
+	}
+} 
+
+
+if (diff == TRUE) {
+	NONEG <- "\n\n# Constraint: Variances in both groups must be positive\n"
+	for (g in groupnames) {
+		if (drop != "family") NONEG <- paste0(NONEG, DM.var, g, ".", style$familyeffect, " > 0\n")
+
+		if (drop != "actor") {
+			for (p in roles) {
+				NONEG <- paste0(NONEG, DM.var, g, ".", style$actor, ".", p, " > 0\n")
+			}
+		}
+		if (drop != "partner") {
+			for (p in roles) {
+				NONEG <- paste0(NONEG, DM.var, g, ".", style$partner, ".", p, " > 0\n")
+			}
+		}
+
+		for (p in roles) {
+			for (t in roles) {
+				if (p != t) {
+					NONEG <- paste0(NONEG, DM.var, g, ".", style$relationship, ".", p, ".", t, " > 0\n")
+				}
+			}
 		}
 	}
 }
 
-
 ## ======================================================================
 ## Set variance of dropped factors to zero
-## Dropping has to be different when diff = TRUE
+## Dropping has to be different when diff = TRUE --> this is handled in the diff-section
 ## ======================================================================
 
 DROP <- ""
@@ -452,25 +461,126 @@ DROP <- ""
 if (diff == FALSE) {
 	if (!drop %in% c("nothing", "GR")) DROP <- "# Dropping factors:\n##################\n"
 	if (drop == "family") {
-		DROP <- paste(DROP, paste0(style$familyeffect, " ~~ 0*", style$familyeffect, "\n"))
+		DROP <- paste(DROP, paste0(VAR.prefix, style$familyeffect, " == 0", "\n"))
 	}
 	if (drop == "actor") {
+		# variances
 		for (p in roles) {
-			DROP <- paste(DROP, style$actor, ".", p, " ~~ 0*", style$actor, ".", p, "\n", sep="")
+			DROP <- paste(DROP, VAR.prefix, style$actor, ".", p, " == 0", "\n", sep="")
 		}
+		# covariances
 		for (p in roles) {
 			DROP <- paste(DROP, style$actor, ".", p, " ~~ 0*", style$partner, ".", p, "\n", sep="")
 		}
 	}
 	if (drop == "partner") {
+		# variances
 		for (p in roles) {
-			DROP <- paste(DROP, style$partner, ".", p, " ~~ 0*", style$partner, ".", p, "\n", sep="")
+			DROP <- paste(DROP, VAR.prefix, style$partner, ".", p, " == 0", "\n", sep="")
 		}
+		# covariances
 		for (p in roles) {
 			DROP <- paste(DROP, style$actor, ".", p, " ~~ 0*", style$partner, ".", p, "\n", sep="")
 		}
 	}
 }
+
+
+
+## ======================================================================
+## Maximal constraints: Do roles matter at all?
+## ======================================================================
+
+MAX <- "\n\n## Maximal constraints: do roles matter at all?"
+
+MAX <- paste0(MAX, "\n# Role constraints: Equal means within actors, partners, and relationships\n")
+for (p in roles) {
+	for (t in roles) {
+		if (which(p == roles) < which(t==roles)) {
+			MAX <- paste(MAX, SM.prefix, style$actor, ".", p, " == ", SM.prefix, style$actor, ".", t, "\n", sep="")
+			MAX <- paste(MAX, SM.prefix, style$partner, ".", p, " == ", SM.prefix, style$partner, ".", t, "\n", sep="")
+		}
+	}
+}
+# First: create a vector with all relationship means
+R0 <- c()
+for (p in roles) {
+	for (t in roles) {
+		if (p != t) {
+			R0 <- c(R0, paste0(SM.prefix, style$relationship, ".", p, ".", t))
+		}
+	}
+}
+REL0 <- "\n"
+for (p in R0) {
+	for (t in R0) {
+		if (which(p==R0) < which(t==R0)) {
+			REL0 <- paste0(REL0, paste0(p, " == ", t, "\n"))
+		}
+	}
+}
+MAX <- paste0(MAX, REL0)
+
+
+
+MAX <- paste0(MAX, "\n# Role constraints: Equal variances within actors, partners, and relationships\n")
+for (p in roles) {
+	for (t in roles) {
+		if (which(p == roles) < which(t==roles)) {
+			if (drop != "actor") MAX <- paste(MAX, VAR.prefix, style$actor, ".", p, " == ", VAR.prefix, style$actor, ".", t, "\n", sep="")
+			if (drop != "partner") MAX <- paste(MAX, VAR.prefix, style$partner, ".", p, " == ", VAR.prefix, style$partner, ".", t, "\n", sep="")
+		}
+	}
+}
+
+
+# Relationship effects
+R <- c()
+for (p in roles) {
+	for (t in roles) {
+		if (p != t) {
+			R <- c(R, paste0(style$relationship, ".", p, ".", t))
+		}
+	}
+}
+REL <- "\n"
+for (p in R) {
+	for (t in R) {
+		if (which(p==R) < which(t==R)) {
+			REL <- paste0(REL, paste0(VAR.prefix, p, " == ", VAR.prefix, t, "\n"))
+		}
+	}
+}
+MAX <- paste0(MAX, REL)
+
+MAX <- paste0(MAX, "\n# Role constraints: Equal generalized reciprocities\n")
+for (p in roles) {
+	for (t in roles) {
+		if (which(p == roles) < which(t==roles)) {
+			if (!drop %in% c("actor", "partner")) MAX <- paste(MAX, "GR.", p, " == ", "GR.", t, "\n", sep="")
+		}
+	}
+}
+
+MAX <- paste0(MAX, "\n# Role constraints: Equal dyadic reciprocities\n")
+R2 <- c()
+for (p in 1:length(roles)) {
+	for (t in 1:length(roles)) {
+		if ((p < t) & (roles[p] != roles[t])) {
+			R2 <- c(R2, paste0("DR.", roles[p], ".", roles[t]))
+		}
+	}
+}
+REL2 <- "\n"
+for (p in R2) {
+	for (t in R2) {
+		if (which(p==R2) < which(t==R2)) {
+			REL2 <- paste0(REL2, paste0(p, " == ", t, "\n"))
+		}
+	}
+}
+MAX <- paste0(MAX, REL2)
+
 
 ## ======================================================================
 ## Put everything together
@@ -486,18 +596,24 @@ if (diff == FALSE) {
 	SRM <- paste(SRM, PE, sep="\n")
 	SRM <- paste(SRM, RE, sep="\n")
 	
+	if (diff == FALSE) SRM <- paste(SRM, VARLAB, sep="\n")
+	
 	if (!drop %in% c("actor", "partner", "GR"))
 		SRM <- paste(SRM, GR, sep="\n")
 	
 	SRM <- paste(SRM, DR, sep="\n")
 	if (length(IGSIM) > 0) {SRM <- paste(SRM, igsim, sep="\n")}
-	SRM <- paste(SRM, DROP, sep="\n")
 	SRM <- paste(SRM, ERR, sep="\n")
 			
 	if (self == TRUE) {SRM <- paste(SRM, SELF, sep="\n")}
 	if (addv!="") SRM <- paste(SRM, addv)
 	SRM <- paste(SRM, SM)
 	SRM <- paste(SRM, DM)
+	
+	SRM <- paste(SRM, DROP, sep="\n")
+	
 	if (noNegVar == TRUE) SRM <- paste(SRM, NONEG)
+	if (rolesEqual == TRUE) SRM <- paste(SRM, MAX)
+	#cat(SRM)
 	return(SRM)
 }

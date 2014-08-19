@@ -1,7 +1,7 @@
 # Gives a structured table of all (co)variances
 
-varComp <- function(x, group=1) {
-	eff <- as.data.frame(parameterEstimates(x$fit))
+varComp <- function(x, group=1, conf.level=.95) {
+	eff <- as.data.frame(parameterEstimates(x$fit, level=conf.level))
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	res <- matrix(NA, ncol=6, nrow=ifelse(x$drop!="family", 1, 0) + ifelse(x$self==TRUE, length(x$roles), 0) + length(x$roles)*2 + length(x$roles)*(length(x$roles)-1))
 	

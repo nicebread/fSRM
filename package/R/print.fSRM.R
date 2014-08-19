@@ -1,13 +1,20 @@
 #' @S3method print fSRM
 
 print.fSRM <-
-function(x, digits=3, ...) {
+function(x, digits=3, ..., var.onesided=TRUE) {
 	
 	# Print model summary for all groups
 	
 	## The model for 4 members must have 31 free parameters and 47 df!
 	cat("----------------\n")
-	cat(paste("SRM with roles (latent) (Roles: ", paste(x$roles, collapse=", "), sep=""), "; DVs = ", x$var.id, ") :\n----------------\n")
+	cat(paste("SRM with roles (Roles: ", paste(x$roles, collapse=", "), "); DVs = ", x$var.id, "\n", sep=""))
+	if (var.onesided==TRUE) {
+		cat("CIs and p-values for variances are 95% (one-sided) and for covariances 95% (two-sided)\n----------------\n")
+	} else {
+		cat("All CIs and p-values are 95% (two-sided)\n----------------\n")
+	}
+	
+	
 	cat("\nModel summary:\n----------------\n")
 	show(x$fit)
 	cat("\nModel Fit:\n----------------\n")
@@ -19,14 +26,14 @@ function(x, digits=3, ...) {
 	
 	
 	if (is.null(x$group)) {
-		print.singlegroup(x, group=1, digits=digits)
+		print.singlegroup(x, group=1, digits=digits, var.onesided=var.onesided)
 	} else {
 		# print stats for each group
 		for (g in 1:length(x$groupnames)) {
 			cat("\n\n#####################################\n")
 			cat(paste0("Statistics for group", g, "\n"))
 			cat("#####################################\n")
-			print.singlegroup(x, group=g, digits=digits)
+			print.singlegroup(x, group=g, digits=digits, var.onesided=var.onesided)
 		}
 		
 		if (x$diff == TRUE & x$means == TRUE) {
@@ -58,20 +65,31 @@ function(x, digits=3, ...) {
 
 
 print.singlegroup <-
-function(x, group=1, digits=3) {
-	eff <- as.data.frame(parameterEstimates(x$fit))
+function(x, group=1, digits=3, conf.level=0.95, var.onesided=TRUE) {
+	
+	if (var.onesided == TRUE) {
+		conf.level <- 1-(1-conf.level)*2
+	}
+	
+	eff <- as.data.frame(parameterEstimates(x$fit, level=conf.level))
 	eff$f <- paste(eff$lhs, eff$op, eff$rhs)
 	
 	# SS = standardized solution: get correlation for that
 	SS <- getCor(x, ops=c("~~", "~"), group=group)
 
 	cat("\n\nVariance decomposition:\n----------------\n")
-	T <- varComp(x, group=group)
+	if (var.onesided == TRUE) {
+		cat("(In this output, p-values and CIs are for one-sided tests for variances!)\n\n")
+	}
+	T <- varComp(x, group=group, conf.level=conf.level)
+	if (var.onesided == TRUE) {
+		T$p.value <- T$p.value/2
+	}
 	T[, -1] <- round(T[, -1], digits)
 	print(T)
 	
 	cat("\n\nRelative variance decomposition:\n----------------\n")
-	print(round(percTable(x, group=group)$stand))
+	print(round(percTable(x, group=group)$stand * 100))
 	
 
 	if (!x$drop %in% c("actor", "partner", "GR")) {

@@ -5,6 +5,9 @@
 #' This graphical users interface (GUI) can be used for inserting .csv, .txt and .sav-files in R by means of a pop-up window. It also allows to transform a dataset from wide into the requiered long format for the fSRM-function. The output format for the SRM components can be confirmed or modified.
 #' 
 #' @export
+#' @import tcltk
+#' @import tcltk2
+#' @importFrom foreign read.spss
 #' @details
 #' This GUI allows the user three different things: 
 #' (i) Import a datafile in R. 
@@ -29,16 +32,14 @@
 
 import <- function() {
   
-  if (!require(tcltk) | !require(tcltk2)) stop("You have to install the tcltk and the tcltk2 package to use the import() function! --> install.packages(c('tcltk', 'tcltk2'))")
+  #if (!require(tcltk) | !require(tcltk2)) stop("You have to install the tcltk and the tcltk2 package to use the import() function! --> install.packages(c('tcltk', 'tcltk2'))")
   
   #### Read in the dataset ####
-  library(tcltk)
-  library(tcltk2)
   getSPSS <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{SPSS Files} {.sav}} {{All files} *}"))
     if (name == "") return;
-    require(foreign)
+ 
     style$MyData <- read.spss(name, use.value.labels = TRUE, to.data.frame = TRUE)
     #assign("MyData", MyData, envir = .GlobalEnv)
     # tkdestroy(tt) # zodat automatisch het venster weggaat
@@ -337,8 +338,9 @@ import <- function() {
 }
 
 #' @export
+#' @import tcltk
+#' @import tcltk2
 getImport <- function() {
-	library(tcltk2)
 	a <- tclGetValue("fam")
 	  family.id <- as.numeric(strsplit(a,"[ ]")[[1]])
 	b <- tclGetValue("DV")
