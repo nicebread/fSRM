@@ -139,9 +139,9 @@ function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default
 	
 	# ---------------------------------------------------------------------
 	# Label all variances - but only if no group comparisons are present (in this case, they are labeled a different way)
-	if (diff == FALSE) {
-		VARLAB <- "\n\n# Variance labels\n"
-		VAR.prefix <- ".VAR."
+	VARLAB <- "\n\n# Variance labels\n"
+	VAR.prefix <- ".VAR."
+	if (diff == FALSE) {		
 		VARLAB <- paste(VARLAB, paste(style$familyeffect, " ~~ ", VAR.prefix, style$familyeffect, "*", style$familyeffect, "\n", sep=""))
 
 		for (p in roles) {

@@ -13,6 +13,6 @@ E1
 E2 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group")
 E2
 
-# Compare means and differences between groups. Beware: This model takes *really* long ...
+# Compare means and differences between groups. Beware: This model takes quite long ...
 E3 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group", means=TRUE, diff=TRUE)
 E3

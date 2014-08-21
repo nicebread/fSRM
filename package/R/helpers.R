@@ -64,3 +64,43 @@ meanNA <- function(x) {
 
 
 
+## ======================================================================
+## Formatters
+## ======================================================================
+
+# simple wrapper: formats a number in f.2 format
+f2 <- function(x, digits=2, prepoint=0, skipZero=FALSE) {
+	
+	if (skipZero == TRUE) {zero <- "."} else {zero <- "0."}
+	
+	if (length(dim(x)) == 2) {
+		apply(x, 2, function(x2) {gsub("0.", zero, sprintf(paste("%",prepoint,".",digits,"f",sep=""), x2) , fixed=TRUE)})
+	} else {
+		gsub("0.", zero, sprintf(paste("%",prepoint,".",digits,"f",sep=""), x) , fixed=TRUE)
+	}
+}
+
+# converts p values in stars
+p2star <- function(val) {
+	
+	res <- val
+	
+	for (i in 1:length(val)) {
+		res[i] <- ""
+		if (is.na(val[i])) next();
+		if (val[i] <= 0.1) res[i] <- "\U2020"
+		if (val[i] <= 0.05) res[i] <- "*"
+		if (val[i] <= 0.01) res[i] <- "**"
+		if (val[i] <= 0.001) res[i] <- "***"
+	}
+	
+	return(res)
+}
+
+# nicely formats a p-value
+p0 <- function(x, digits=3) {
+	if (is.na(x)) return("NA")
+	if (x >= .001) return(paste0("p = ", f2(x, digits, skipZero=TRUE)))
+	if (x <  .001) return("p < .001")	
+}
+p <- Vectorize(p0)

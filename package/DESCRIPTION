@@ -12,7 +12,7 @@ Description: The package computes Social Relations Analysis with roles ("Family
     mean structure can be computed. Means and variances can be compared between
     different groups of families and between roles.
 Depends:
-    lavaan,
+    lavaan
 Imports:
     plyr,
     reshape2,

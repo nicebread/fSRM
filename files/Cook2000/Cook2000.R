@@ -1,3 +1,4 @@
+library(fSRM)
 data(two.indicators)
 
 # construct a 3-person data set
@@ -17,7 +18,8 @@ f3.1
 plot(f3.1)
 plot(f3.1, bw=TRUE)
 
-f3.1.b <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3, se="boot")
+# Usually, you want rather 5000 bootstrap replications than 50 ...
+f3.1.b <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3, se="boot", bootstrap=50)
 
 # Test: drop something else...
 f3.1.d <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3, drop="actor")
@@ -52,7 +54,8 @@ f3.2.d
 f4.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators)
 f4.1
 
-f4.1.b <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, se="boot")
+# Usually, you want rather 5000 bootstrap replications than 500 ...
+f4.1.b <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, se="boot", bootstrap=500)
 f4.1.b
 
 
