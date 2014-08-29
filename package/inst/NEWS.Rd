@@ -8,7 +8,7 @@
 
 \subsection{Changes}{
 	\itemize{
-		\item Removed \code{setZero} option from \code{fSRM}. Replaced it with the option \code{noNegVar}. If this is TRUE, all variances are constrained to be > 0. (Older publications contrained negative variances to be exactly zero. This, however, leads to a distortion of the df).
+		\item Removed \code{setZero} option from \code{fSRM}. Replaced it with the option \code{noNegVar}. If this is TRUE, all variances are constrained to be > 0. (Older publications contrained negative variances to be exactly zero. This, however, leads to a distortion of the df). By default, this option is turned off, as negative variances should be recognized as an indicator of model misspecification.
 		\item Added \code{rolesEqual} option to \code{fSRM}: Do roles matter at all? Compare a model with free roles (\code{m1 <- fSRM(..., means=TRUE, rolesEqual = FALSE)}) and a model with equal roles (\code{m2 <- fSRM(..., means=TRUE, rolesEqual=TRUE)}) using \code{anova(m1$fit, m2$fit)}. This is a model with no mean difference, the actor variances equal, partner variances equal, relationship variances equal, and the respective reciprocities equal (Thanks to a suggestion of David Kenny).
 		\item If missing values are present, by default \code{missing = "fiml"} is set, and a warning is issued that this is only valid if the data are missing completely at random (MCAR) or missing at random (MAR). Use \code{missing = "listwise"} to exclude families with missing values.
 		\item Moved all dependencies to \code{Imports} so that no manual installation of packages is necessary for unexperienced users.

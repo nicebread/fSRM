@@ -27,7 +27,7 @@
 
 
 buildSRMSyntax <-
-function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, pairwise=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", noNegVar=TRUE, rolesEqual=FALSE, ...) {
+function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, pairwise=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", noNegVar=FALSE, rolesEqual=FALSE, ...) {
 	
 	# define defaults for parameters
 	err <- match.arg(err, c("no", "all", "default"))

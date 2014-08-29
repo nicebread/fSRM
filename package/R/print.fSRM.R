@@ -3,11 +3,12 @@
 print.fSRM <-
 function(x, digits=3, ..., var.onesided=TRUE) {
 	
-	# Print model summary for all groups
-	
+	# Print model summary, also show package version
+	if(!exists("meta") || is.null(meta)) meta <- packageDescription("fSRM")
+	cat(sprintf("fSRM version %s", meta$Version))
+	cat("\n================================\n\n")
 	## The model for 4 members must have 31 free parameters and 47 df!
-	cat("----------------\n")
-	cat(paste("SRM with roles (Roles: ", paste(x$roles, collapse=", "), "); DVs = ", x$var.id, "\n", sep=""))
+	cat(paste("SRM with roles (Roles: ", paste(x$roles, collapse=", "), "); DVs = ", paste0(x$var.id, collapse=", "), "\n", sep=""))
 	if (var.onesided==TRUE) {
 		cat("CIs and p-values for variances are 95% (one-sided) and for covariances 95% (two-sided)\n----------------\n")
 	} else {
@@ -109,6 +110,7 @@ function(x, group=1, digits=3, conf.level=0.95, var.onesided=TRUE) {
 		pval <- GR$p.value
 		GR2 <- cbind(GR[, 1:5], sig=p2star(pval), GR[, 6:8])
 		GR2$p.value <- p(pval, digits)
+		GR2$r <- f2(GR2$r, digits=digits, skipZero=TRUE)
 		print(GR2)
 	}
 	
@@ -118,14 +120,16 @@ function(x, group=1, digits=3, conf.level=0.95, var.onesided=TRUE) {
 	cat("\n\nDyadic reciprocity (relationship covariances):\n----------------\n")
 	DR2 <- cbind(DR[, 1:5], sig=p2star(DR$p.value), DR[, 6:8])
 	DR2$p.value <- p(DR2$p.value, digits)
+	DR2$r <- f2(DR2$r, digits=digits, skipZero=TRUE)
 	print(DR2)
 	
 	if (length(x$IGSIM) > 0) {
 		cat("\n\nIntragenerational similarity:\n----------------\n")
 		igsim <- SS[grepl("IGSIM", SS$label), ][, -2]
-		pval <- igsim2$p.value
+		pval <- igsim$p.value
 		igsim2 <- cbind(igsim[, 1:5], sig=p2star(pval), igsim[, 6:8])
-		igsim2$p.value <- p(igsim2$pval, digits)
+		igsim2$p.value <- p(igsim2$p.value, digits)
+		igsim2$r <- f2(igsim2$r, digits=digits, skipZero=TRUE)
 		print(igsim2)
 	}
 	
@@ -212,6 +216,7 @@ function(x, group=1, digits=3, conf.level=0.95, var.onesided=TRUE) {
 		MS[, -1] <- round(MS[, -1], digits)
 		MS2 <- cbind(MS[, 1:5], sig=p2star(pval), MS[, 6:7])		
 		MS2$p.value <- p(pval, digits)
+		
 		print(MS2)
 	}
 	

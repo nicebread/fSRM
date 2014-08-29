@@ -122,7 +122,7 @@
 #' }
 
 fSRM <-
-function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, noNegVar=TRUE, rolesEqual=FALSE, missing=NA, ...) {
+function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE, diff=FALSE, IGSIM=list(), add.variable=c(), syntax="", group=NULL, noNegVar=FALSE, rolesEqual=FALSE, missing=NA, ...) {
 	
 	dots <- list(...)
 	
