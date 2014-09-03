@@ -73,6 +73,7 @@ f4.2
 # 3 persons, 1 indicator, mean structure: family effect is allowed but automatically constrained to zero
 f3.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3, means=TRUE)
 f3.1.m
+plot(f3.1.m, means=TRUE)
 
 # Alternative approach: update the existing model with new parameters:
 f3.1.m2 <- update(f3.1, means=TRUE)
@@ -81,10 +82,13 @@ f3.1.m2
 # 3 persons, 2 indicators, mean structure
 f3.2.m <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators3, means=TRUE)
 f3.2.m
+plot(f3.2.m, means=TRUE)
 
 # 4 persons, 1 indicator, mean structure
 f4.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 f4.1.m
+plot(f4.1.m)
+plot(f4.1.m, means=TRUE)
 
 f4.1.m.pw <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE, pairwise=TRUE)
 f4.1.m.pw

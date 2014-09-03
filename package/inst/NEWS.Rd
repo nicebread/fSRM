@@ -4,7 +4,7 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
-\section{Version 0.4}{
+\section{Version 0.5}{
 
 \subsection{Changes}{
 	\itemize{
@@ -13,7 +13,7 @@
 		\item If missing values are present, by default \code{missing = "fiml"} is set, and a warning is issued that this is only valid if the data are missing completely at random (MCAR) or missing at random (MAR). Use \code{missing = "listwise"} to exclude families with missing values.
 		\item Moved all dependencies to \code{Imports} so that no manual installation of packages is necessary for unexperienced users.
 		\item By default, one-sided p values and CIs are printed for variances.
-		\item Added plotting methods for fSRM objects.
+		\item Added plotting methods for fSRM objects: \code{plot(x)} gives a plot of the relative variances; \code{plot(x, means=TRUE)} gives a plot of the mean structure decomposition.
 		\item Significance stars are printed in the output & nicer formatting of p values.
 	}
 }

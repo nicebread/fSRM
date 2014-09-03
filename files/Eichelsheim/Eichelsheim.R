@@ -16,3 +16,13 @@ E2
 # Compare means and differences between groups. Beware: This model takes quite long ...
 E3 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group", means=TRUE, diff=TRUE)
 E3
+
+
+data(two.groups)
+clinical <- subset(two.groups, group==1)
+clinical[,7] <- rowMeans(clinical[,c(5,6)])
+colnames(clinical) <- c("family.id","actor.id","partner.id","group","neg1","neg2","neg")
+clinical <- clinical[,-c(4:6)]
+
+fSRM.4.1 <- fSRM(neg ~ actor.id*partner.id | family.id, data = clinical)
+plot(fSRM.4.1)

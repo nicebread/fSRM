@@ -48,6 +48,8 @@
 #' @references
 #' Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 
+#' @seealso \code{\link{plot.fSRM}}, \code{\link{equalMeans}}, \code{\link{mod}}
+
 #' @examples
 #' # Example from Dyadic Data Analysis
 #' data(two.indicators)
@@ -58,16 +60,17 @@
 #' print(f4.1, var.onesided=FALSE)	# Show two-sided p-values and CIs for variances
 #' plot(f4.1)	# plot relative variances
 #' plot(f4.1, bw=TRUE)
-#' plot(f4.1, bw=TRUE, onlyStable=TRUE)
-#' plot(f4.1, means=TRUE)	# plot mean structure
 #' 
 #' # 4 persons, 2 indicators
 #' f4.2 <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators)
 #' f4.2
+#' plot(f4.2, bw=TRUE)
+#' plot(f4.2, bw=TRUE, onlyStable=TRUE)
 #' 
 #' # 4 persons, 1 indicator, mean structure
 #' f4.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 #' f4.1.m
+#' plot(f4.1.m, means=TRUE)		# plot mean structure
 #' 
 #' \dontrun{
 #' # 4 persons, 2 indicators, mean structure

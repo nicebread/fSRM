@@ -1,4 +1,3 @@
-stop()
 ###########################################################################
 #              plot with arrows for all the SRM components                #
 ###########################################################################
@@ -10,6 +9,7 @@ stop()
 
 # subtract the correct table from the output
   x <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data = clinical, means=T)
+  plot(x, means=TRUE)
   
   eff <- parameterEstimates(x$fit)
   MS <- eff[grepl(".means.", eff$label, fixed=TRUE), c(1, 5:10)]
@@ -26,7 +26,7 @@ stop()
   l_partner <- c('C2','F','M','C1', 'F','M','C1','C2', 'M','C1','C2','F')
   l_dyad <- c('sib', 'c1/f', 'c1/m', 'sib', 'c2/f', 'c2/m', 'c1/f','c2/f','mar','c1/f','c2/f', 'mar')
   
-  plot(0,xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='',ylim=c(-1,1),xlim=c(0,10.5))
+  plot(0,xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='',ylim=c(-2,1),xlim=c(0,10.5))
   axis(side=2,las=2, seq(-1,1, by =0.2))
   segments(x0=-0.5, x1=10.5, y0=c(0, -1), y1=c(0,-1), lty=c(2,1))
       # in the previous 3 lines 0 represents the family mean, in order to show the real value, the previous line should be (lets call it version 3)

@@ -13,10 +13,10 @@ library(devtools)
 
 
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-devtools::document(roclets=c('rd', 'collate', 'namespace'))
+devtools::document()
 
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-devtools::check(document=FALSE)
+devtools::check()
 
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
 devtools::install()

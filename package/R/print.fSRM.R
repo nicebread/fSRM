@@ -1,4 +1,5 @@
-#' @S3method print fSRM
+#' @method print fSRM
+#' @export
 
 print.fSRM <-
 function(x, digits=3, ..., var.onesided=TRUE) {

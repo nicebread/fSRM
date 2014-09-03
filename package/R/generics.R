@@ -3,7 +3,7 @@
 #' Rerun a fSRM model with new parameters
 #'
 #' @method update fSRM
-#' @S3method update fSRM
+#' @export
 
 #' @param object A fSRM object.
 #' @param evaluate Set to TRUE.
@@ -35,7 +35,7 @@ update.fSRM <- function(object, evaluate=TRUE, ...) {
 #' Predict new cases based on a fitted fSRM model
 #'
 #' @method predict fSRM
-#' @S3method predict fSRM
+#' @export
 
 #' @param object A fSRM object.
 #' @param newdata A data frame with exactly the same structure as the data frame on which the original fSRM object is based on.
@@ -58,19 +58,22 @@ predict.fSRM <- function(object, newdata, ...) {
 }
 
 
-#' @title Plot the relative variances of an fSRM-object
+#' @title Plot an fSRM-object, two types
 #' @description
-#' Plot the relative variances of an fSRM-object
+#' This function provides two types of plots:
+#' 1) Plot the relative variances of an fSRM-object (default)
+#' 2) Plot the mean decomposition for each dyad (set \code{means=TRUE})
 #'
 #' @method plot fSRM
-#' @S3method plot fSRM
+#' @export
 #' @importFrom scales percent
+#' @importFrom grid arrow
+#' @importFrom grid unit
 #' @import ggplot2
-#' @import shape
 
 #' @param x A fSRM object.
 #' @param ... Other parameters (currently not used)
-#' @param mean If FALSE, the relative variances are plotted. If TRUE, the mean structure is plotted.
+#' @param means If FALSE, the relative variances are plotted. If TRUE, the mean structure is plotted.
 #' @param bw Black/white plotting?
 #' @param onlyStable In case of variance plots: Should only the partitioning of the \emph{stable} variance (without error) be plotted?
 #' @examples
@@ -87,59 +90,17 @@ predict.fSRM <- function(object, newdata, ...) {
 #' f4.2
 #' plot(f4.2)
 #' plot(f4.2, bw=TRUE)
-plot.fSRM <- function(x, ..., mean=FALSE, bw=FALSE, onlyStable=FALSE) {
+plot.fSRM <- function(x, ..., means=FALSE, bw=FALSE, onlyStable=FALSE) {
 	
 	# plot relative percentages
-	if (mean == FALSE) {
-		relvar <- percTable(x)$stand
-		relvar <- relvar[1:(nrow(relvar)-1), c("Family", "Actor", "Partner", "Relationship", "Error")]
-		relvar$dyad <- rownames(relvar)
-		
-		if (onlyStable == TRUE) {
-			relvar$Sum <- 1 - relvar$Error
-			relvar$Error <- 0
-			for (i in 1:4) relvar[, i] <- relvar[, i]/relvar$Sum
-			relvar$Sum <- NULL
-		}
-	
-		relvar.long <- melt(relvar, id.vars="dyad")
-		relvar.long$variable <- factor(relvar.long$variable, levels=rev(c("Family", "Actor", "Partner", "Relationship", "Error")))
-		
-		if (bw==FALSE) {
-			colors <- c("#DDDDDD", "#7fc97f", "#beaed4", "#fdc086", "#386cb0")
-		} else {
-			colors <- gray(c(0.9, 0.8, 0.6, 0.4, 0.2))
-		}
-		
-		names(colors) <- rev(c("Family", "Actor", "Partner", "Relationship", "Error"))
-		
-		# remove non-present components
-		lablist <- c("Family", "Actor", "Partner", "Relationship", "Error")
-		for (i in c("Family", "Actor", "Partner", "Error")) {
-			if (all(relvar[, i] == 0)) {
-				lablist <- lablist[lablist != i] 
-				relvar.long <- relvar.long[relvar.long$variable != i, ]
-				relvar.long$variable <- factor(relvar.long$variable, levels=rev(lablist))
-				colors <- colors[which(names(colors) != i)]
-			}
-		}
-	
-		relvar.long$ord <- -as.numeric(relvar.long$variable)
-		p1 <- ggplot(relvar.long, aes_string(x="dyad", y="value", fill="variable", order = "ord")) + geom_bar(stat="identity") + xlab("Dyad") + scale_y_continuous(labels=percent) + scale_fill_manual("Component", values=colors)
-	
-		if (bw==TRUE) p1 <- p1 + theme_bw()
-		if (onlyStable==FALSE) {
-			p1 <- p1 + ylab("Percentage variance")
-		} else {
-			p1 <- p1 + ylab("Percentage stable variance")
-		}
-		
-		return(p1)
+	if (means == FALSE) {
+		p1 <- plot_relvar(x, bw=bw, onlyStable=onlyStable, ...)
 	}
-	
 	
 	# plot mean structure
-	if (mean == TRUE) {
-		
+	if (means == TRUE) {
+		p1 <- plot_meanstruc(x, ...)
 	}
+	
+	return(p1)
 }

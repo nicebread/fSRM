@@ -11,6 +11,8 @@ library(lavaan)
 library(plyr)
 library(reshape2)
 library(ggplot2)
+library(shape)
+library(grid)
 
 # alternatively: load from GitHub
 #library(devtools)
