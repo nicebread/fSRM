@@ -1,4 +1,5 @@
 # Sample .travis.yml for R projects.
+# Checking a package in a subdirectory: see http://www.rochester.edu/college/gradstudents/jolmsted/blog/2014/01/05/r-pkgs-on-travis/
 #
 # See README.md for instructions, or for more configuration options,
 # see the wiki:
