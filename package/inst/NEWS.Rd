@@ -4,6 +4,7 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
+
 \section{Version 0.5}{
 
 \subsection{Changes}{
