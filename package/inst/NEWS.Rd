@@ -5,6 +5,18 @@
 \encoding{UTF-8}
 
 
+\section{Version 0.6}{
+
+\subsection{Changes}{
+	\itemize{
+		\item Prettier output for \code{equalMeans} function.
+		\item Fixed a bug when variances where constrained to be positive in a model with group comparisons and no mean structures: In this case, only the variances of the first group were constrained. Now it's fixed: both groups are constrained.
+		\item Added new data sets: clinical, clinical.wide, two.groups, two.groups.wide
+	}
+}
+}
+
+
 \section{Version 0.5}{
 
 \subsection{Changes}{

@@ -7,10 +7,20 @@ dom1 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Fathe
 dom1
 cat(dom1$syntax)
 
-dom2 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), noNegVar=FALSE)
+dom2 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), noNegVar=TRUE)
 dom2
 cat(dom2$syntax)
 
+
+# Simulate two groups
+RRdat4$group <- as.numeric(RRdat4$gid) %% 2 + 1
+dom1 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), group="group")
+dom1
+cat(dom1$syntax)
+
+dom2 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), group="group", noNegVar=TRUE)
+dom2
+cat(dom2$syntax)
 
 # No negative variances: both fits are identical
 pow1 <- fSRM(RR_UMS2_1 ~ role.p*role.t | gid, RRdat4)

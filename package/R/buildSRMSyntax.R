@@ -29,6 +29,9 @@
 buildSRMSyntax <-
 function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default", means=FALSE, diff=FALSE, pairwise=FALSE, groupnames=NULL,  add.variable=c(), selfmode="cor", noNegVar=FALSE, rolesEqual=FALSE, ...) {
 	
+	
+	if (length(add.variable) > 0) warning("The add.variable feature is not implemented yet.")
+	
 	# define defaults for parameters
 	err <- match.arg(err, c("no", "all", "default"))
 	if (err == "default" & length(var.id) == 1) {err <- "no"}
@@ -141,7 +144,7 @@ function(roles, var.id, self=FALSE, IGSIM = list(), drop="default", err="default
 	# Label all variances - but only if no group comparisons are present (in this case, they are labeled a different way)
 	VARLAB <- "\n\n# Variance labels\n"
 	VAR.prefix <- ".VAR."
-	if (diff == FALSE) {		
+	if (is.null(groupnames)) {		
 		VARLAB <- paste(VARLAB, paste(style$familyeffect, " ~~ ", VAR.prefix, style$familyeffect, "*", style$familyeffect, "\n", sep=""))
 
 		for (p in roles) {
@@ -288,11 +291,28 @@ if (means==TRUE & is.null(groupnames)) {
 DM <- ""
 if (!is.null(groupnames)) {
 
-	if (is.null(groupnames)) stop("You must provide the names of the groups in `groupnames`.")
+	if (is.null(groupnames)) stop("You must provide the names of the groups in `group`.")
 	DM.prefix <- ".means"
 	DM.var <- ".var"
 	DM <- ""
 	DM <- "\n\n## deltamethod for comparing two groups\n"
+	
+	# ---------------------------------------------------------------------
+	#  new labels for the variances
+	
+	DM <- paste(DM, paste("\n# Variances\n"))
+
+	DM <- paste(DM, paste(style$familyeffect, " ~~ c(", paste0(DM.var, groupnames, ".", style$familyeffect, collapse=","), ")*", style$familyeffect, ifelse(drop=="family", paste0(" + c(0, 0)*", style$familyeffect), ""),"\n", sep=""))
+
+	for (p in roles) {DM <- paste(DM, style$actor, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$actor, ".", p, collapse=","), ")*", style$actor, ".", p,  ifelse(drop=="actor", paste0(" + c(0, 0)*", style$actor, ".", p), ""),"\n", sep="")}
+	for (p in roles) {DM <- paste(DM, style$partner, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$partner, ".", p, collapse=","), ")*", style$partner, ".", p, ifelse(drop=="partner", paste0(" + c(0, 0)*", style$partner, ".", p), ""),"\n", sep="")}
+
+	for (p in roles) {
+		for (t in roles) {
+			if (p != t) {DM <- paste(DM, style$relationship, ".", p, ".", t, " ~~ c(", paste0(DM.var, groupnames, ".", style$relationship, ".", p, ".", t, collapse=","), ")*", style$relationship, ".", p, ".", t, "\n", sep="")}
+		}
+	}
+	
 	
 	if (means == TRUE) {
 		DM <- "\n\n# Structured means for two groups\n"
@@ -359,20 +379,6 @@ if (!is.null(groupnames)) {
 		# ---------------------------------------------------------------------
 		# Comparison of variances and means
 
-		# new labels for the variances
-		DM <- paste(DM, paste("\n# Variances\n"))
-	
-		DM <- paste(DM, paste(style$familyeffect, " ~~ c(", paste0(DM.var, groupnames, ".", style$familyeffect, collapse=","), ")*", style$familyeffect, ifelse(drop=="family", paste0(" + c(0, 0)*", style$familyeffect), ""),"\n", sep=""))
-	
-		for (p in roles) {DM <- paste(DM, style$actor, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$actor, ".", p, collapse=","), ")*", style$actor, ".", p,  ifelse(drop=="actor", paste0(" + c(0, 0)*", style$actor, ".", p), ""),"\n", sep="")}
-		for (p in roles) {DM <- paste(DM, style$partner, ".", p, " ~~ c(", paste0(DM.var, groupnames, ".", style$partner, ".", p, collapse=","), ")*", style$partner, ".", p, ifelse(drop=="partner", paste0(" + c(0, 0)*", style$partner, ".", p), ""),"\n", sep="")}
-
-		for (p in roles) {
-			for (t in roles) {
-				if (p != t) {DM <- paste(DM, style$relationship, ".", p, ".", t, " ~~ c(", paste0(DM.var, groupnames, ".", style$relationship, ".", p, ".", t, collapse=","), ")*", style$relationship, ".", p, ".", t, "\n", sep="")}
-			}
-		}
-	
 
 		 DM <- paste(DM, "\n\n# Defined parameters for group comparison (variances)\n")
 
@@ -404,7 +410,7 @@ if (!is.null(groupnames)) {
 ## Constrain variances to be positive
 ## ======================================================================
 
-if (diff == FALSE) {
+if (is.null(groupnames)) {
 	NONEG <- "\n\n# Constraint: Variances must be positive\n"
 	NONEG <- paste0(NONEG, VAR.prefix, style$familyeffect, " > 0\n")
 
@@ -425,7 +431,7 @@ if (diff == FALSE) {
 } 
 
 
-if (diff == TRUE) {
+if (!is.null(groupnames)) {
 	NONEG <- "\n\n# Constraint: Variances in both groups must be positive\n"
 	for (g in groupnames) {
 		if (drop != "family") NONEG <- paste0(NONEG, DM.var, g, ".", style$familyeffect, " > 0\n")

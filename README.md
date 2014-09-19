@@ -12,7 +12,7 @@ The stable version can be installed from [CRAN](http://cran.r-project.org/web/pa
 
 The current development version can be installed from this repository:
 
-    install.packages(c("devtools", "lavaan", "plyr", "reshape2", "ggplot2", "grid", "scales", "foreign", "tcltk", "tcltk2"), dependencies=TRUE)
+    install.packages(c("devtools", "lavaan", "plyr", "reshape2", "ggplot2", "grid", "scales", "foreign", "tcltk", "tcltk2", "gridExtra"), dependencies=TRUE)
     library(devtools)
     install_github("fSRM", username="nicebread", subdir="package")	
 

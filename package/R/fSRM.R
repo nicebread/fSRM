@@ -22,7 +22,7 @@
 #' @param drop In three-member families at least one component has to be dropped. \code{drop} defines which one: "none": drop nothing; "family" - drop family effect; "GR" - drop generalized reciprocities; "actor" - drop actor factors and actor-partner covariances; "partner" - drop partner effects and actor-partner covariances; "default": drop nothing in >= 4 members and drop family effect with 3 members. Although usually not necessary, the drop parameter can also be applied to >= 4 member families.
 #' @param add Additional lavaan syntax pasted at the end of the generated model. Can contain, for example, user specified error correlations.
 #' @param IGSIM Define intragenerational similarity correlations. Must be a list where the levels of actor.id and partner.id are combined, e.g.: \code{IGSIM=list(c("m", "f"), c("c", "y"))}. Here "m"other and "f"ather are defined as one generation, and "y"ounger and "o"lder as the other generation.
-#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated; it is important that the variable nakes in the formula
+#' @param syntax In that variable the user can directly provide a lavaan model syntax. Then no automatical model syntax is generated.
 #' @param add.variable Not yet fully implemented: Add external variables to the model syntax.
 #' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}
 #' @param means Should the structured means of the SRM factors be calculated?
@@ -180,7 +180,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 	if (is.na(missing)) {
 		if (any(is.na(fam))) {
 			missing <- "fiml"
-			warning("There are missing values in your data set. Model is computed with option `missing = 'fiml'`. This is only valid if the data are missing completely at random (MCAR) or missing at random (MAR)! If you want to exclude families with missing values, use `missing = 'listwise'`")
+			warning("There are missing values in your data set. Model is computed with option `missing = 'fiml'`. This is only valid if the data are missing completely at random (MCAR) or missing at random (MAR)! If you want to exclude families with missing values, use `missing = 'listwise'`", call.=FALSE)
 		} else {
 			missing <- "listwise"
 		}
@@ -197,9 +197,9 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 	if (drop == "default" & length(roles) > 3 & syntax=="") {drop <- "nothing"}
 	
 	# Do some sanity checks
-	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?')}
+	if (length(roles) == 3 & drop == "nothing" & means == FALSE) {warning('Data set with 3-member-groups detected - model is not identified. Maybe you should remove the family effect (drop = "family") or one of the reciprocities?', call.=FALSE)}
 	if (!identical(sort(unique(data[, actor.id])), sort(unique(data[, partner.id])))) {
-		warning("Actor.id and Partner.id have different factor levels; results might be wrong!")
+		warning("Actor.id and Partner.id have different factor levels; results might be wrong!", call.=FALSE)
 	}
 	if (diff==TRUE & is.null(group)) stop("For comparing groups with the delta method you have to provide a `group` variable.")
 	

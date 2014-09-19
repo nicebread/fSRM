@@ -10,11 +10,7 @@ function(x, digits=3, ..., var.onesided=TRUE) {
 	cat("\n================================\n\n")
 	## The model for 4 members must have 31 free parameters and 47 df!
 	cat(paste("SRM with roles (Roles: ", paste(x$roles, collapse=", "), "); DVs = ", paste0(x$var.id, collapse=", "), "\n", sep=""))
-	if (var.onesided==TRUE) {
-		cat("CIs and p-values for variances are 95% (one-sided) and for covariances 95% (two-sided)\n----------------\n")
-	} else {
-		cat("All CIs and p-values are 95% (two-sided)\n----------------\n")
-	}
+	if (!is.null(x$group)) cat(paste0("Split by group variable `", x$group,"`\n"))
 	
 	
 	cat("\nModel summary:\n----------------\n")
@@ -88,9 +84,6 @@ function(x, group=1, digits=3, conf.level=0.95, var.onesided=TRUE) {
 	SS <- getCor(x, ops=c("~~", "~"), group=group)
 
 	cat("\n\nVariance decomposition:\n----------------\n")
-	if (var.onesided == TRUE) {
-		cat("(In this output, p-values and CIs are for one-sided tests for variances!)\n\n")
-	}
 	T <- varComp(x, group=group, conf.level=conf.level)
 	if (var.onesided == TRUE) {
 		T$p.value <- T$p.value/2
@@ -100,6 +93,10 @@ function(x, group=1, digits=3, conf.level=0.95, var.onesided=TRUE) {
 	T2 <- cbind(T[, 1:5], sig=p2star(pval), T[, 6:7])
 	T2$p.value <- p(pval, digits)
 	print(T2)
+	if (var.onesided == TRUE) {
+		cat("\n(p-values are for one-sided tests for variances; confidence level for CIs is", round(conf.level*100, 2), "%)\n\n")
+	}
+	
 	
 	cat("\n\nRelative variance decomposition:\n----------------\n")
 	print(round(percTable(x, group=group)$stand * 100))

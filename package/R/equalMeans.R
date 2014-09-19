@@ -44,6 +44,16 @@ equalMeans <- function(x, digits=3) {
 		p.value=c(1-pchisq(Wald.A, length(x$roles)-1), 1-pchisq(Wald.P, length(x$roles)-1), 1-pchisq(Wald.R, df.R)))
 	rownames(res) <- c("H0: Equal actor means", "H0: Equal partner means", "H0: Equal relationship means")
 	
-	print(round(res, digits))
-	invisible(res)
+	class(res) <- "eqM"
+	return(res)
+}
+
+#' @export
+#' @method print eqM
+print.eqM <- function(x, ...) {
+	x$sig <- p2star(x$p.value)
+	x$p.value <- p(x$p.value)
+	x$Wald <- round(x$Wald, 3)
+	class(x) <- "data.frame"
+	print(x)
 }

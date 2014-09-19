@@ -1,6 +1,11 @@
 # plot relative percentages
-plot_relvar <- function(x, bw=FALSE, onlyStable=FALSE, ...) {
-	relvar <- percTable(x)$stand
+plot_relvar <- function(x, bw=FALSE, onlyStable=FALSE, group=1, ...) {
+	relvar <- percTable(x, group=group)$stand
+	
+	if (any(relvar[, 1:4] < 0) == TRUE) {
+		warning(paste("In group", group, "some variances are negative. Plot is not well-defined, please consdier setting `noNegVar = TRUE`."), call.=FALSE)
+	}
+	
 	relvar <- relvar[1:(nrow(relvar)-1), c("Family", "Actor", "Partner", "Relationship", "Error")]
 	relvar$dyad <- rownames(relvar)
 	

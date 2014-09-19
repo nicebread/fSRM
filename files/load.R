@@ -13,6 +13,7 @@ library(reshape2)
 library(ggplot2)
 library(shape)
 library(grid)
+library(scales)
 
 # alternatively: load from GitHub
 #library(devtools)

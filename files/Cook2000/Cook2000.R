@@ -53,6 +53,7 @@ f3.2.d
 # 4 persons, 1 indicator
 f4.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators)
 f4.1
+print(f4.1, var.onesided=FALSE)
 
 # Usually, you want rather 5000 bootstrap replications than 500 ...
 f4.1.b <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, se="boot", bootstrap=500)
