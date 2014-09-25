@@ -1,4 +1,4 @@
-#' Data set on ...
+#' Data set on negativity in problematic and nonproblematic families
 
 #' A simulated dataset, mimicking the study performed by Eichelsheim et al. (2011) who investigated whether there are
 #' differences in patterns of negativity between families with and without an adolescent with externalizing problem
