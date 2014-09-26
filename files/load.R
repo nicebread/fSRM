@@ -14,6 +14,7 @@ library(ggplot2)
 library(shape)
 library(grid)
 library(scales)
+library(gridExtra)
 
 # alternatively: load from GitHub
 #library(devtools)

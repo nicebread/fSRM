@@ -70,7 +70,9 @@ f4.2 <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators)
 f4.2
 
 
-## Mean structure
+# ---------------------------------------------------------------------
+#  Mean structure
+
 # 3 persons, 1 indicator, mean structure: family effect is allowed but automatically constrained to zero
 f3.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators3, means=TRUE)
 f3.1.m
@@ -98,7 +100,7 @@ f4.1.m.pw
 # 4 persons, 2 indicators, mean structure
 f4.2.m <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 f4.2.m
-
+plot(f4.2.m, means=TRUE)
 
 ## ======================================================================
 ## other parameter tests
@@ -124,10 +126,12 @@ predict(f4.1, two.indicators[two.indicators$family.id %in% c(1, 2), ])
 f4.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 f4.1.m
 equalMeans(f4.1.m)
+plot(f4.1.m)
 
 f3.2.m <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators3, means=TRUE)
 f3.2.m
 equalMeans(f3.2.m)
+plot(f3.2.m)
 
 
 ## ======================================================================

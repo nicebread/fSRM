@@ -6,17 +6,16 @@
 data(two.groups)
 str(two.groups)
 
-E1 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups)
+E1 <- fSRM(neg ~ actor.id*partner.id | family.id, data=two.groups)
 E1
 plot(E1)
 
 # make group comparison: group = 1: non-problematic families, group = 2: problematic families
-E2 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group")
+
+data(two.groups)
+E2 <- fSRM(neg ~ actor.id*partner.id | family.id, data=two.groups, group="group")
 E2
 plot(E2)
-
-E2b <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group", noNegVar=TRUE)
-E2b
 
 
 data(two.groups)
@@ -28,16 +27,7 @@ E2
 
 
 # Compare means and differences between groups. Beware: This model takes quite long ...
-E3 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group", means=TRUE, diff=TRUE)
+E3 <- fSRM(neg ~ actor.id*partner.id | family.id, data=two.groups, group="group", means=TRUE, diff=TRUE)
 E3
-
-
-
-data(two.groups)
-clinical <- subset(two.groups, group==1)
-clinical[,7] <- rowMeans(clinical[,c(5,6)])
-colnames(clinical) <- c("family.id","actor.id","partner.id","group","neg1","neg2","neg")
-clinical <- clinical[,-c(4:6)]
-
-fSRM.4.1 <- fSRM(neg ~ actor.id*partner.id | family.id, data = clinical)
-syntax(fSRM.4.1)
+plot(E3)
+plot(E3, means=TRUE)

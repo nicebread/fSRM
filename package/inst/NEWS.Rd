@@ -12,6 +12,8 @@
 		\item Prettier output for \code{equalMeans} function.
 		\item Fixed a bug when variances where constrained to be positive in a model with group comparisons and no mean structures: In this case, only the variances of the first group were constrained. Now it's fixed: both groups are constrained.
 		\item Added new data sets: clinical, clinical.wide, two.groups, two.groups.wide
+		\item When running a two-group analysis, plots automatically show both groups
+		\item Fixed a bug where the ordering of labels in the meanstructure-plot was wrong
 	}
 }
 }

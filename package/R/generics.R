@@ -95,13 +95,36 @@ plot.fSRM <- function(x, ..., means=FALSE, bw=FALSE, onlyStable=FALSE) {
 	
 	# plot relative percentages
 	if (means == FALSE) {
-		p1 <- plot_relvar(x, bw=bw, onlyStable=onlyStable, ...)
+		if (is.null(x$group)) {
+			p1 <- plot_relvar(x, bw=bw, onlyStable=onlyStable, ...)
+			return(p1)
+		} else {
+			p1a <- plot_relvar(x, bw=bw, onlyStable=onlyStable, group=x$groupnames[1], ...) + ggtitle(paste("Group", x$groupnames[1]))
+			p1b <- plot_relvar(x, bw=bw, onlyStable=onlyStable, group=x$groupnames[2], ...) + ggtitle(paste("Group", x$groupnames[2]))
+			grid.arrange(p1a, p1b)
+		}
+		
 	}
 	
 	# plot mean structure
 	if (means == TRUE) {
-		p1 <- plot_meanstruc(x, ...)
+		if (is.null(x$group)) {
+			
+			p1 <- plot_meanstruc(x, group="")
+			return(p1)
+			
+		} else {
+			p1a <- plot_meanstruc(x, group=x$groupnames[1]) + ggtitle(paste("Group", x$groupnames[1]))
+			p1b <- plot_meanstruc(x, group=x$groupnames[2]) + ggtitle(paste("Group", x$groupnames[2]))
+			
+			# Equate y range
+			R1 <- ggplot_build(p1a)
+			R2 <- ggplot_build(p1b)
+			y_a <- R1$panel$ranges[[1]]$y.range
+			y_b <- R2$panel$ranges[[1]]$y.range
+			p1a <- p1a + coord_cartesian(ylim=c(min(y_a, y_b), max(y_a, y_b)))
+			p1b <- p1b + coord_cartesian(ylim=c(min(y_a, y_b), max(y_a, y_b)))
+			grid.arrange(p1a, p1b)
+		}
 	}
-	
-	return(p1)
 }

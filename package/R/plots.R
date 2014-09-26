@@ -3,7 +3,7 @@ plot_relvar <- function(x, bw=FALSE, onlyStable=FALSE, group=1, ...) {
 	relvar <- percTable(x, group=group)$stand
 	
 	if (any(relvar[, 1:4] < 0) == TRUE) {
-		warning(paste("In group", group, "some variances are negative. Plot is not well-defined, please consdier setting `noNegVar = TRUE`."), call.=FALSE)
+		warning(paste("In group", group, "some variances are negative. Plot is not well-defined, please consider setting `noNegVar = TRUE`."), call.=FALSE)
 	}
 	
 	relvar <- relvar[1:(nrow(relvar)-1), c("Family", "Actor", "Partner", "Relationship", "Error")]
@@ -18,7 +18,7 @@ plot_relvar <- function(x, bw=FALSE, onlyStable=FALSE, group=1, ...) {
 
 	relvar.long <- melt(relvar, id.vars="dyad")
 	relvar.long$variable <- factor(relvar.long$variable, levels=rev(c("Family", "Actor", "Partner", "Relationship", "Error")))
-	relvar.long$dyad <- gsub("_", "->\n", relvar.long$dyad, fixed=TRUE)
+	relvar.long$dyad <- gsub("_", "-", relvar.long$dyad, fixed=TRUE)
 	
 	if (bw==FALSE) {
 		colors <- c("#DDDDDD", "#7fc97f", "#beaed4", "#fdc086", "#386cb0")
@@ -26,10 +26,22 @@ plot_relvar <- function(x, bw=FALSE, onlyStable=FALSE, group=1, ...) {
 		colors <- gray(c(0.9, 0.8, 0.6, 0.4, 0.2))
 	}
 	
-	names(colors) <- rev(c("Family", "Actor", "Partner", "Relationship", "Error"))
+	if (x$latent == TRUE) {
+		names(colors) <- rev(c("Family", "Actor", "Partner", "Relationship", "Error"))
+	} else {
+		names(colors) <- rev(c("Family", "Actor", "Partner", "Relationship + Error", "Error"))
+	}
+	
 	
 	# remove non-present components
-	lablist <- c("Family", "Actor", "Partner", "Relationship", "Error")
+	if (x$latent == TRUE) {
+		lablist <- c("Family", "Actor", "Partner", "Relationship", "Error")
+	} else {
+		lablist <- c("Family", "Actor", "Partner", "Relationship + Error", "Error")
+	}
+	relvar.long$variable <- factor(relvar.long$variable, levels=rev(c("Family", "Actor", "Partner", "Relationship", "Error")), labels=rev(lablist))
+	
+	
 	for (i in c("Family", "Actor", "Partner", "Error")) {
 		if (all(relvar[, i] == 0)) {
 			lablist <- lablist[lablist != i] 
@@ -52,12 +64,16 @@ plot_relvar <- function(x, bw=FALSE, onlyStable=FALSE, group=1, ...) {
 }
 
 
-plot_meanstruc <- function(x, ...) {
+
+getMeanStrucArrows <- function(x, group="") {
 	if (x$means == FALSE) stop("You have to provide a fSRM with mean structure; use: fSRM(..., means=TRUE)")
     eff <- parameterEstimates(x$fit)
-    est_act <- eff[grepl(paste0(".means.", style$actor, "."), eff$label, fixed=TRUE), c(1, 5)]
-	est_par <- eff[grepl(paste0(".means.", style$partner, "."), eff$label, fixed=TRUE), c(1, 5)]
-	est_rel <- eff[grepl(paste0(".means.", style$relationship, "."), eff$label, fixed=TRUE), c(1, 5)]
+	
+	if (is.null(x$group)) {group <- ""}
+	
+    est_act <- eff[grepl(paste0(".means", group, ".", style$actor, "."), eff$label, fixed=TRUE), c("lhs", "est")]
+	est_par <- eff[grepl(paste0(".means", group, ".", style$partner, "."), eff$label, fixed=TRUE), c("lhs", "est")]
+	est_rel <- eff[grepl(paste0(".means", group, ".", style$relationship, "."), eff$label, fixed=TRUE), c("lhs", "est")]
   
 
   # Create axis & labels
@@ -70,18 +86,19 @@ plot_meanstruc <- function(x, ...) {
 	aR <- attr(regexpr(paste0(style$relationship, "."), est_rel$lhs, fixed=TRUE), "match.length")
 	est_rel$role <- substr(est_rel$lhs, aR+1, nchar(est_rel$lhs))	# actor labels
 
+	FE <- eff[grepl(paste0(".means", group, ".FE"), eff$label, fixed=TRUE), c("est")]
+	
 	res <- data.frame()
-	FE <- eff[grepl(".means.FE", eff$label, fixed=TRUE), c(1, 5)]$est
 	for (a in x$roles) {
 		for (p in x$roles) {
 			if (a != p) {
 			
 				# start of arrow
 				res <- rbind(res, data.frame(
-					pos="start", 
-					actor = a, 
+					pos 	= "start", 
+					actor 	= a, 
 					partner = p, 
-					dyad = paste0(a, "->\n", p),
+					dyad 	= paste0(a, "-", p),
 					a.effect = FE,
 					p.effect = FE + est_act[est_act$role==a, "est"],
 					r.effect = FE + est_act[est_act$role==a, "est"] + est_par[est_par$role==p, "est"]
@@ -89,10 +106,10 @@ plot_meanstruc <- function(x, ...) {
 			
 				# end of arrow
 				res <- rbind(res, data.frame(
-					pos="end", 
-					actor = a, 
+					pos		= "end", 
+					actor 	= a, 
 					partner = p, 
-					dyad = paste0(a, "->\n", p),
+					dyad 	= paste0(a, "-", p),
 					a.effect = FE + est_act[est_act$role==a, "est"],
 					p.effect = FE + est_act[est_act$role==a, "est"] + est_par[est_par$role==p, "est"],
 					r.effect = FE + est_act[est_act$role==a, "est"] + est_par[est_par$role==p, "est"] + est_rel[est_rel$role==paste0(a, ".", p), "est"]
@@ -103,11 +120,25 @@ plot_meanstruc <- function(x, ...) {
 
 	res2 <- melt(res, id.vars=c("actor", "partner", "dyad", "pos"))
 	res3 <- dcast(res2, variable + actor + partner + dyad ~ pos)
-	res3$variable <- factor(res3$variable, levels=c("a.effect", "p.effect", "r.effect"), labels=c("Actor effect", "Partner effect", "Relationship effect"))
+	res3$variable <- factor(res3$variable, levels=c("a.effect", "p.effect", "r.effect"), labels=c("1-Actor effect", "2-Partner effect", "3-Relationship effect"))
+	res3$dyad <- factor(as.character(res3$dyad))
 	res3$group <- res3$variable:res3$dyad
-	res3$x2 <- as.numeric(res3$dyad) + (as.numeric(res3$variable)-2)*.2  # manual dodging of arrows
+	le <- length(unique(res3$variable))
+	res3$x2 <- rep(seq(1:(nrow(res3)/le)), le) + (as.numeric(res3$variable)-2)*.2  # manual dodging of arrows
 	
-	p1 <- ggplot(res3, aes_string(x="x2", xend="x2", y="start", yend="end", group="group", linetype="variable")) + geom_segment(arrow=arrow(length = unit(0.07, "inches"), angle=20, type="closed"), linend="square") + geom_hline(yintercept=FE, linetype="dotted") + theme_bw() + scale_linetype_discrete("Component") + xlab("Dyad") + ylab(paste0("Estimated ", x$var.id)) + scale_x_discrete(labels=res3$dyad, limits=1:length(unique(res3$dyad)))
+	FE_df <- data.frame(y=FE, lty="0-Family effect (horizontal baseline)")
+	
+	return(list(arrow_list=res3, FE_list=FE_df))
+}
+
+
+
+plot_meanstruc <- function(x, group="") {
+	res <- getMeanStrucArrows(x=x, group=group)
+	
+	p1 <- ggplot(res$arrow_list, aes_string(x="x2", xend="x2", y="start", yend="end", group="group", linetype="variable")) + geom_segment(arrow=arrow(length = unit(0.07, "inches"), angle=20, type="closed"), linend="square", size=0.4) + geom_hline(data=res$FE_list, aes_string(yintercept="y", linetype="lty"), size=1) + theme_bw()+ xlab("Dyad") + ylab(paste0("Estimated ", x$var.id)) + scale_x_discrete(labels=res$arrow_list$dyad, limits=1:length(unique(res$arrow_list$dyad)))
+	
+	p1 <- p1 + scale_linetype_manual("Component", breaks=c("0-Family effect (horizontal baseline)", "1-Actor effect", "2-Partner effect", "3-Relationship effect"), values=c("dotdash", "solid", "dashed", "dotted")) 
 	
 	return(p1)
 }

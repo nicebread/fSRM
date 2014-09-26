@@ -287,7 +287,7 @@ if (means==TRUE & is.null(groupnames)) {
 ## Delta method for group comparisons
 ## ======================================================================
 
-
+#stop();
 DM <- ""
 if (!is.null(groupnames)) {
 
@@ -315,7 +315,7 @@ if (!is.null(groupnames)) {
 	
 	
 	if (means == TRUE) {
-		DM <- "\n\n# Structured means for two groups\n"
+		DM <- paste(DM, "\n\n# Structured means for two groups\n")
 
 		# define new labels for the means
 		DM <- paste(DM, paste(style$familyeffect, " ~ c(", paste0(DM.prefix, groupnames, ".", style$familyeffect, collapse=","), ")*1\n", sep=""))

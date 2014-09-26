@@ -269,6 +269,7 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 		diff	= diff,
 		group	= group,
 		groupnames = groupnames,
+		latent	= ifelse(length(var.id) == 1, FALSE, TRUE),
 		IGSIM	= IGSIM,
 		self	= self,
 		call	= call,
