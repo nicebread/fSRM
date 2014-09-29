@@ -1,3 +1,4 @@
+library(fSRM)
 load("FIRMdemo.RData")
 
 # ---------------------------------------------------------------------
@@ -7,8 +8,9 @@ dom1 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Fathe
 dom1
 cat(dom1$syntax)
 
-dom2 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), noNegVar=TRUE)
+dom2 <- fSRM(RR_dom ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")), noNegVar=TRUE, means=TRUE)
 dom2
+plot(dom2, means=TRUE)
 cat(dom2$syntax)
 
 
@@ -95,7 +97,7 @@ anovaList(list(pow2, pow2b, pow2c))
 
 # POWER: 3 indicators
 
-pow3 <- fSRM(RR_UMS1_2/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
+pow3 <- fSRM(RR_UMS1_2/RR_UMS2_1/RR_UMS2_3 ~ role.p*role.t | gid, RRdat4, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
 
 pow3r <- fSRM(RR_UMS1_2/RR_UMS2_1 ~ role.p*role.t | gid, RRdat4, reestimate=1, err=1, IGSIM=list(c("Mother", "Father"), c("Older", "Younger")))
 

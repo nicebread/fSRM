@@ -88,10 +88,10 @@ p2star <- function(val) {
 	for (i in 1:length(val)) {
 		res[i] <- ""
 		if (is.na(val[i])) next();
-		if (val[i] <= 0.1) res[i] <- "\U2020"
-		if (val[i] <= 0.05) res[i] <- "*"
-		if (val[i] <= 0.01) res[i] <- "**"
-		if (val[i] <= 0.001) res[i] <- "***"
+		if (val[i] < 0.1) res[i] <- "\U2020"
+		if (val[i] < 0.05) res[i] <- "*"
+		if (val[i] < 0.01) res[i] <- "**"
+		if (val[i] < 0.001) res[i] <- "***"
 	}
 	
 	return(res)
