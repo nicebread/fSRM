@@ -60,6 +60,7 @@ print(f4.1, var.onesided=FALSE)	# Show two-sided p-values and CIs for variances
 plot(f4.1)	# plot relative variances
 plot(f4.1, bw=TRUE)
 
+\dontrun{
 # 4 persons, 2 indicators
 f4.2 <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators)
 f4.2
@@ -71,7 +72,6 @@ f4.1.m <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRU
 f4.1.m
 plot(f4.1.m, means=TRUE)		# plot mean structure
 
-\dontrun{
 # 4 persons, 2 indicators, mean structure
 f4.2.m <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 f4.2.m
