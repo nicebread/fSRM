@@ -78,19 +78,23 @@ predict.fSRM <- function(object, newdata, ...) {
 #' @param bw Black/white plotting?
 #' @param onlyStable In case of variance plots: Should only the partitioning of the \emph{stable} variance (without error) be plotted?
 #' @examples
+#' \dontrun{
 #' data(two.indicators)
 
 #' # 4 persons, 1 indicator
-#' f4.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators)
+#' f4.1 <- fSRM(dep1 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 #' f4.1
 #' plot(f4.1)
 #' plot(f4.1, bw=TRUE)
+#' plot(f4.1, means=TRUE)
 #' 
 #' # 4 persons, 2 indicators
-#' f4.2 <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators)
+#' f4.2 <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators, means=TRUE)
 #' f4.2
 #' plot(f4.2)
 #' plot(f4.2, bw=TRUE)
+#' plot(f4.2, means=TRUE)
+#' }
 plot.fSRM <- function(x, ..., means=FALSE, bw=FALSE, onlyStable=FALSE) {
 	
 	# plot relative percentages

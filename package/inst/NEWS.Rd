@@ -4,6 +4,15 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
+\section{Version 0.6.1}{
+
+\subsection{Changes}{
+	\itemize{
+		\item Changed order of dyads in the mean-structure plot. Order now is the same as in the variance-decomposition plot.
+	}
+}
+}
+
 
 \section{Version 0.6}{
 

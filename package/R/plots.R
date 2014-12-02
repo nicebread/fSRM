@@ -3,7 +3,7 @@ plot_relvar <- function(x, bw=FALSE, onlyStable=FALSE, group=1, ...) {
 	relvar <- percTable(x, group=group)$stand
 	
 	if (any(relvar[, 1:4] < 0) == TRUE) {
-		warning(paste("In group", group, "some variances are negative. Plot is not well-defined, please consider setting `noNegVar = TRUE`."), call.=FALSE)
+		warning(paste("In group", group, "some variances are negative. Plot is not well-defined, please consider setting `noNegVar = TRUE` in the fSRM() call."), call.=FALSE)
 	}
 	
 	relvar <- relvar[1:(nrow(relvar)-1), c("Family", "Actor", "Partner", "Relationship", "Error")]
@@ -119,10 +119,11 @@ getMeanStrucArrows <- function(x, group="") {
 	}
 
 	res2 <- melt(res, id.vars=c("actor", "partner", "dyad", "pos"))
-	res3 <- dcast(res2, variable + actor + partner + dyad ~ pos)
+	res3 <- dcast(res2, variable + dyad + actor + partner ~ pos)
 	res3$variable <- factor(res3$variable, levels=c("a.effect", "p.effect", "r.effect"), labels=c("1-Actor effect", "2-Partner effect", "3-Relationship effect"))
 	res3$dyad <- factor(as.character(res3$dyad))
 	res3$group <- res3$variable:res3$dyad
+	
 	le <- length(unique(res3$variable))
 	res3$x2 <- rep(seq(1:(nrow(res3)/le)), le) + (as.numeric(res3$variable)-2)*.2  # manual dodging of arrows
 	
