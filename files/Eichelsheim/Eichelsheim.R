@@ -17,6 +17,11 @@ E2 <- fSRM(neg ~ actor.id*partner.id | family.id, data=two.groups, group="group"
 E2
 plot(E2)
 
+# Test: What if more than 2 groups are provided? Error!
+three.groups <- two.groups
+three.groups[three.groups$family.id < 5, "group"] <- 3
+E2 <- fSRM(neg ~ actor.id*partner.id | family.id, data=three.groups, group="group")
+
 
 data(two.groups)
 E2 <- fSRM(neg1 ~ actor.id*partner.id | family.id, data=two.groups, group="group", diff=TRUE, noNegVar=TRUE)

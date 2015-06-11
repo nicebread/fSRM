@@ -27,7 +27,7 @@
 #' @param ... Additional arguments passed to the \code{sem} function of \code{lavaan}
 #' @param means Should the structured means of the SRM factors be calculated?
 #' @param pairwise Compute pairwise comparison of actor and partner means between all roles? Only works when \code{means} is also set to TRUE.
-#' @param group Variable name indicating group membership
+#' @param group Variable name indicating group membership. This can be used two compare two classes of families (e.g., clinical families vs. control families). If this variable is provided, it must contain exactly two levels.
 #' @param diff Compare groups with the delta method? You need to specify a group identifier in parameter \code{group}. If \code{diff = TRUE} and \code{means = FALSE}, only variances are compared between groups. If \code{diff = TRUE} and \code{means = TRUE}, variances and means are compared between groups.
 #' @param noNegVar Should variance estimates be constrained to be positive?
 #' @param missing Handling of missing values. By default (\code{NA}), Full Information Maximum Likelihood (FIML) is employed in case of missing values. If families with missing values should be excluded, use \code{missing = "listwise"}
@@ -90,6 +90,9 @@
 #' f4.1.m
 #' equalMeans(f4.1.m)
 #' 
+#' # construct a 3-person data set
+#' two.indicators3 <- 
+#' two.indicators[two.indicators$actor.id != "y" & two.indicators$partner.id != "y", ]
 #' f3.2.m <- fSRM(dep1/dep2 ~ actor.id*partner.id | family.id, two.indicators3, means=TRUE)
 #' f3.2.m
 #' equalMeans(f3.2.m)
@@ -109,16 +112,17 @@
 #' data(two.groups)
 #' str(two.groups)
 #' 
-#' E1 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups)
+#' E1 <- fSRM(neg ~ actor.id*partner.id | family.id, data=two.groups)
 #' E1
 #' 
 #' # make group comparison: 
 #' # group = 1: non-problematic families, group = 2: problematic families
-#' E2 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, data=two.groups, group="group")
+#' # The data set must contain exactly two groups, otherwise an error is printed
+#' E2 <- fSRM(neg ~ actor.id*partner.id | family.id, data=two.groups, group="group")
 #' E2
 #' 
 #' # Compare means and differences between groups. Beware: This model takes *really* long ...
-#' E3 <- fSRM(neg1/neg2 ~ actor.id*partner.id | family.id, 
+#' E3 <- fSRM(neg ~ actor.id*partner.id | family.id, 
 #'            data=two.groups, group="group", means=TRUE, diff=TRUE)
 #' E3
 #' 
@@ -165,6 +169,9 @@ function(formula=NULL, data, drop="default", add="", means=FALSE, pairwise=FALSE
 	
 	# add group variable (for group comparison)
 	if (!is.null(group)) {
+		# check whether exactly two groups are present in the data set
+		if (length(unique(data[, group])) != 2) stop("For group comparisons, the group variable must contain exactly two groups!")
+			
 		g2 <- ddply(data, group.id, function(x) x[1, group])
 		colnames(g2) <- c(group.id, group)
 		fam <- merge(fam, g2, by=group.id)

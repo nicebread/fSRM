@@ -4,6 +4,19 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
+
+\section{Version 0.6.2}{
+
+\subsection{Changes}{
+	\itemize{
+		\item Updated the \code{import} function so that three indicators are possible.
+		\item Fixed minor error in examples.
+		\item fSRM now gives an error if users try to compare more than two groups.
+	}
+}
+}
+
+
 \section{Version 0.6.1}{
 
 \subsection{Changes}{

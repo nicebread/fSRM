@@ -290,8 +290,7 @@ if (means==TRUE & is.null(groupnames)) {
 #stop();
 DM <- ""
 if (!is.null(groupnames)) {
-
-	if (is.null(groupnames)) stop("You must provide the names of the groups in `group`.")
+		
 	DM.prefix <- ".means"
 	DM.var <- ".var"
 	DM <- ""
