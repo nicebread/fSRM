@@ -1,4 +1,4 @@
-citHeader("To cite package 'fSRM' in publications use:")
+citHeader("To cite package 'fSRM' in publications use both:")
 
 ## R >= 2.8.0 passes package metadata to citation().
 if(!exists("meta") || is.null(meta)) meta <- packageDescription("fSRM")
@@ -7,6 +7,20 @@ year <- sub("-.*", "", meta$Date)
 title.bibtex <- paste("{fSRM}: An {R} package for {S}ocial {R}elations {M}odels with roles (version ",meta$Version,")", sep="")
 title <- paste("fSRM: An R package for Social Relations Models with roles (version ",meta$Version,").", sep="")
 
+
+citEntry(entry = "Article",
+	title = " Getting the most out of family data with the {R} package {fSRM}",
+	volume = "29",
+	doi = "10.1037/fam0000058",
+	number = {2},
+	journal = "Journal of Family Psychology",
+	author = c(as.person("Stas, L."), as.person("Schönbrodt, F. D."), as.person("Loeys, T.")),
+	year = "2015",
+	pages = "263--275",
+	
+	textVersion  = "Stas, L., Schönbrodt, F. D., & Loeys, T. (2015). Getting the most out of family data with the R package fSRM. Journal of Family Psychology, 29, 263-275. doi:10.1037/fam0000058"
+)
+
     
 citEntry(entry = "Manual",
   title = title.bibtex,
@@ -14,11 +28,11 @@ citEntry(entry = "Manual",
   			as.person("Lara Stas"),
 			as.person("Tom Loeys")),
   year = year,
-  url = "http://cran.r-project.org/web/packages/fSRM/index.html",
+  url = "http://cran.r-project.org/package=fSRM",
 
   textVersion =
   paste("Schönbrodt, F.D., Stas, L., Loeys, T.",
        sprintf("(%s).", year),
        title,
-        "Retrieved from http://cran.r-project.org/web/packages/fSRM/index.html")
+        "Retrieved from http://cran.r-project.org/package=fSRM")
 )
