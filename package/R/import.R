@@ -382,7 +382,6 @@ getImport <- function() {
         var <- substr(variable, 1, 2)
         SRMData <- as.data.frame(cbind(family.id, variable, value, actor.id, partner.id, var))
         out <- split(SRMData, f = ind)
-        str(out)
         df1 <- as.data.frame(out[1])
         df2 <- as.data.frame(out[2])
         colnames(df1) <- c("family.id","variable","value","actor.id","partner.id","var")
