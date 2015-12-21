@@ -6,21 +6,21 @@ Version: 0.6.2
 Date: 2015-06-11
 Author: Felix Schönbrodt, Lara Stas, Tom Loeys
 Maintainer: Felix Schönbrodt <felix@nicebread.de>
-Description: Social Relations Analysis with roles ("Family
-    SRM") are computed, using a structural equation modeling approach. Groups ranging from
-    three members up to an unlimited number of members are supported and the
-    mean structure can be computed. Means and variances can be compared between
-    different groups of families and between roles.
+Description: Social Relations Analysis with roles ("Family SRM") are computed,
+    using a structural equation modeling approach. Groups ranging from three members
+    up to an unlimited number of members are supported and the mean structure can
+    be computed. Means and variances can be compared between different groups of
+    families and between roles.
 Depends:
     lavaan
 Imports:
     plyr,
     reshape2,
     ggplot2,
-    grid,
     scales,
     foreign,
     tcltk,
     tcltk2,
     gridExtra
 License: GPL (>=2)
+RoxygenNote: 5.0.1

@@ -67,8 +67,6 @@ predict.fSRM <- function(object, newdata, ...) {
 #' @method plot fSRM
 #' @export
 #' @importFrom scales percent
-#' @importFrom grid arrow
-#' @importFrom grid unit
 #' @importFrom gridExtra grid.arrange
 #' @import ggplot2
 

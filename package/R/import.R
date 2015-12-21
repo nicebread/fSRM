@@ -39,7 +39,7 @@ import <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{SPSS Files} {.sav}} {{All files} *}"))
     if (name == "") return;
- 
+    
     style$MyData <- read.spss(name, use.value.labels = TRUE, to.data.frame = TRUE)
     #assign("MyData", MyData, envir = .GlobalEnv)
     # tkdestroy(tt) # zodat automatisch het venster weggaat
@@ -118,18 +118,18 @@ import <- function() {
           style$SRMData <- melt(style$MyData, id.vars=c(fam, group), measure.vars=c(DVs))       
           tclSetValue("fam", as.character(style$SRMData[,1]))     
           tclSetValue("group", as.character(style$SRMData[,2]))
-          } else {
+        } else {
           style$MyData$family.id <- 1:nrow(style$MyData)
           style$SRMData <- melt(style$MyData, id.vars=c("family.id",group), measure.vars=c(DVs))
           tclSetValue("fam", as.character(style$MyData$family.id))     
           tclSetValue("group", as.character(style$SRMData[,2]))
-           }
+        }
       } else {
-          if (fam != "") {
+        if (fam != "") {
           style$SRMData <- melt(style$MyData, id.vars=fam, measure.vars=c(DVs)) 
           tclSetValue("fam", as.character(style$SRMData[,1]))  
           tclSetValue("group", as.character( ))
-          } else {
+        } else {
           style$MyData$family.id <- 1:nrow(style$MyData)
           style$SRMData <- melt(style$MyData, id.vars="family.id", measure.vars=c(DVs))
           tclSetValue("fam", as.character(style$MyData$family.id))     
@@ -255,13 +255,13 @@ import <- function() {
     outact <- as.character(tclvalue(Entry10))
     outpar <- as.character(tclvalue(Entry11))
     outrel <- as.character(tclvalue(Entry12))
-
-	assign("actor", outact, envir=style)
-	assign("partner", outpar, envir=style)
-	assign("familyeffect", outfam, envir=style)
-	assign("relationship", outrel, envir=style)
-	
-	print("Changed output format!")
+    
+    assign("actor", outact, envir=style)
+    assign("partner", outpar, envir=style)
+    assign("familyeffect", outfam, envir=style)
+    assign("relationship", outrel, envir=style)
+    
+    print("Changed output format!")
     tkconfigure(change.but, text = "Output format confirmed")
   }
   
@@ -326,7 +326,7 @@ import <- function() {
     tclSetValue("actor", as.character(style$SRMData$actor.id))
     tclSetValue("partner", as.character(style$SRMData$partner.id))
     tclSetValue("ind", as.character(style$SRMData$ind))
-        
+    
   }))
   tkgrid( tklabel(tt,text="
                   "))
@@ -341,25 +341,60 @@ import <- function() {
 #' @import tcltk
 #' @import tcltk2
 getImport <- function() {
-	a <- tclGetValue("fam")
-	  family.id <- as.numeric(strsplit(a,"[ ]")[[1]])
-	b <- tclGetValue("DV")
-	  variable <- strsplit(b,"[ ]")[[1]]
-	c <- tclGetValue("value")
-	  value <- as.numeric(strsplit(c,"[ ]")[[1]])
-	d <- tclGetValue("actor")
-	  actor.id <- strsplit(d,"[ ]")[[1]]
-	e <- tclGetValue("partner")
-	  partner.id <- strsplit(e,"[ ]")[[1]]
-	f <- tclGetValue("ind")
-	  ind <-  strsplit(f,"[ ]")[[1]]
-
-	if  (tclGetValue("group") != "") {
-	  g <- tclGetValue("group")
-	  group <-  as.numeric(strsplit(g,"[ ]")[[1]])
-	  SRMData <- as.data.frame(cbind(family.id, group, variable, value, actor.id, partner.id, ind))
-	  } else {
-	  	SRMData <- as.data.frame(cbind(family.id, variable, value, actor.id, partner.id, ind))
-	  }
-	  return(SRMData)
+  a <- tclGetValue("fam")
+  family.id <- as.numeric(strsplit(a,"[ ]")[[1]])
+  b <- tclGetValue("DV")
+  variable <- strsplit(b,"[ ]")[[1]]
+  c <- tclGetValue("value")
+  value <- as.numeric(strsplit(c,"[ ]")[[1]])
+  d <- tclGetValue("actor")
+  actor.id <- strsplit(d,"[ ]")[[1]]
+  e <- tclGetValue("partner")
+  partner.id <- strsplit(e,"[ ]")[[1]]
+  f <- tclGetValue("ind")
+  ind <-  strsplit(f,"[ ]")[[1]]
+  
+  if  (tclGetValue("group") != "") {
+    if (tclGetValue("ind") != ""){
+        g <- tclGetValue("group")
+        group <-  as.numeric(strsplit(g,"[ ]")[[1]])      
+        var <- substr(variable, 1, 2)
+        SRMData <- as.data.frame(cbind(family.id, variable, value, actor.id, partner.id, var, group))
+        out <- split(SRMData, f = ind)
+        str(out)
+        df1 <- as.data.frame(out[1])
+        df2 <- as.data.frame(out[2])
+        colnames(df1) <- c("family.id","variable","value","actor.id","partner.id","var", "group")
+        colnames(df2) <- c("family.id","variable","value","actor.id","partner.id","var", "group")
+        x <- merge(df1,df2, by = c("family.id","var", "group", "actor.id", "partner.id"))
+        SRMData <- cbind(as.character(x$family.id), as.character(x$var), as.character(x$group), as.numeric(as.character(x$value.x)), as.numeric(as.character(x$value.y)), as.character(x$actor.id), as.character(x$partner.id))
+        colnames(SRMData) <- c("family.id","var", "group","value.1", "value.2","actor.id", "partner.id")
+        SRMData <- as.data.frame(SRMData)
+        
+        
+      } else {
+        g <- tclGetValue("group")
+        group <-  as.numeric(strsplit(g,"[ ]")[[1]])
+        SRMData <- as.data.frame(cbind(family.id, group, variable, value, actor.id, partner.id))
+      }
+    } else {
+      if (tclGetValue("ind") != ""){
+        var <- substr(variable, 1, 2)
+        SRMData <- as.data.frame(cbind(family.id, variable, value, actor.id, partner.id, var))
+        out <- split(SRMData, f = ind)
+        str(out)
+        df1 <- as.data.frame(out[1])
+        df2 <- as.data.frame(out[2])
+        colnames(df1) <- c("family.id","variable","value","actor.id","partner.id","var")
+        colnames(df2) <- c("family.id","variable","value","actor.id","partner.id","var")
+        x <- merge(df1,df2, by = c("family.id","var", "actor.id", "partner.id"))
+        SRMData <- cbind(x$family.id, x$var, as.numeric(as.character(x$value.x)), as.numeric(as.character(x$value.y)), x$actor.id, x$partner.id)
+        colnames(SRMData) <- c("family.id","var", "value.1", "value.2","actor.id", "partner.id")
+        SRMData <- as.data.frame(SRMData)
+      } else {
+      SRMData <- as.data.frame(cbind(family.id, variable, value, actor.id, partner.id))
+      }
+    }  
+  
+  return(SRMData)
 }
