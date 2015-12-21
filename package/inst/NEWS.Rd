@@ -4,6 +4,15 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
+\section{Version 0.6.3}{
+
+\subsection{Changes}{
+	\itemize{
+		\item Minor bug fix in import()
+	}
+}
+}
+
 
 \section{Version 0.6.2}{
 
