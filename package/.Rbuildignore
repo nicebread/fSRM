@@ -5,3 +5,4 @@ README.md
 .DS_Store
 .git
 .travis.yml
+cran-comments.md

@@ -4,6 +4,15 @@
 \title{News for package 'fSRM'}
 \encoding{UTF-8}
 
+\section{Version 0.6.4}{
+
+\subsection{Changes}{
+	\itemize{
+		\item Minor changes to provide a clean R CMD check
+	}
+}
+}
+
 \section{Version 0.6.3}{
 
 \subsection{Changes}{

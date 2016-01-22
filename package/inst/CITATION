@@ -31,7 +31,7 @@ citEntry(entry = "Manual",
   url = "http://cran.r-project.org/package=fSRM",
 
   textVersion =
-  paste("Schönbrodt, F.D., Stas, L., Loeys, T.",
+  paste("Schönbrodt, F. D., Stas, L., Loeys, T.",
        sprintf("(%s).", year),
        title,
         "Retrieved from http://cran.r-project.org/package=fSRM")

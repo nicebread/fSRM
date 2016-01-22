@@ -27,6 +27,6 @@ devtools::build_win()
 setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
 devtools::build()
 
-#setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-#devtools::release()
+setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
+devtools::release()
 
