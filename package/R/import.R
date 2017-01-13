@@ -1,3 +1,5 @@
+# Import function from Lara Stas
+
 #' @title Import and transform a dataset into long format
 #' @aliases import, getImport
 #' 
@@ -38,7 +40,7 @@ import <- function() {
   getSPSS <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{SPSS Files} {.sav}} {{All files} *}"))
-    if (name == "") return;
+    if (name == "") return();
     
     style$MyData <- read.spss(name, use.value.labels = TRUE, to.data.frame = TRUE)
     #assign("MyData", MyData, envir = .GlobalEnv)
@@ -50,7 +52,7 @@ import <- function() {
   getCSV <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{CSV Files} {.csv}} {{All files} *}"))
-    if (name == "") return;
+    if (name == "") return();
     style$MyData <- read.csv(name)
     #assign("MyData", MyData, envir = .GlobalEnv)
     # tkdestroy(tt)
@@ -61,8 +63,8 @@ import <- function() {
   getTXT <- function() {
     name <- tclvalue(tkgetOpenFile(
       filetypes = "{{TXT Files} {.txt}} {{All files} *}"))
-    if (name == "") return;
-    style$MyData <- read.table(name, header = T)
+    if (name == "") return();
+    style$MyData <- read.table(name, header = TRUE)
     #assign("MyData", MyData, envir = .GlobalEnv)
     # tkdestroy(tt)
     cat("Datafile is loaded\n")
