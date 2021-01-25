@@ -4,10 +4,23 @@
 \alias{buildSRMSyntax}
 \title{Build lavaan syntax for a Social Relations Model with roles ("Family SRM")}
 \usage{
-buildSRMSyntax(roles, var.id, self = FALSE, IGSIM = list(),
-  drop = "default", err = "default", means = FALSE, diff = FALSE,
-  pairwise = FALSE, groupnames = NULL, add.variable = c(),
-  selfmode = "cor", noNegVar = FALSE, rolesEqual = FALSE, ...)
+buildSRMSyntax(
+  roles,
+  var.id,
+  self = FALSE,
+  IGSIM = list(),
+  drop = "default",
+  err = "default",
+  means = FALSE,
+  diff = FALSE,
+  pairwise = FALSE,
+  groupnames = NULL,
+  add.variable = c(),
+  selfmode = "cor",
+  noNegVar = FALSE,
+  rolesEqual = FALSE,
+  ...
+)
 }
 \arguments{
 \item{roles}{A vector with all role labels.}
@@ -49,4 +62,3 @@ None.
 \references{
 Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other Perception: A Meta-Analysis. Personality and Social Psychology Review, 14(2), 196-213. doi:10.1177/1088868309353414
 }
-

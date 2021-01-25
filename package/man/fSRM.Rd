@@ -2,12 +2,26 @@
 % Please edit documentation in R/fSRM.R
 \name{fSRM}
 \alias{fSRM}
+\alias{print.fSRM}
 \title{Run a Social Relations Model with roles ("Family SRM")}
 \usage{
-fSRM(formula = NULL, data, drop = "default", add = "", means = FALSE,
-  pairwise = FALSE, diff = FALSE, IGSIM = list(), add.variable = c(),
-  syntax = "", group = NULL, noNegVar = FALSE, rolesEqual = FALSE,
-  missing = NA, ...)
+fSRM(
+  formula = NULL,
+  data,
+  drop = "default",
+  add = "",
+  means = FALSE,
+  pairwise = FALSE,
+  diff = FALSE,
+  IGSIM = list(),
+  add.variable = c(),
+  syntax = "",
+  group = NULL,
+  noNegVar = FALSE,
+  rolesEqual = FALSE,
+  missing = NA,
+  ...
+)
 }
 \arguments{
 \item{formula}{A formula that defines the variable names. Should be in one of following formats: (1) Single manifest dependent variable: DV ~ actor.id * partner.id | group.id, (2) Multiple indicators for dependent variable: DV1/DV2/DV3 ~ actor.id * parter.id | group.id.}
@@ -138,4 +152,3 @@ Kenny, D. A., & West, T. V. (2010). Similarity and Agreement in Self-and Other P
 \seealso{
 \code{\link{plot.fSRM}}, \code{\link{equalMeans}}, \code{\link{mod}}
 }
-

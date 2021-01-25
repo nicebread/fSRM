@@ -10,7 +10,9 @@ measuring attachment dependency in family relationships is
 included in this dataset. Four roles are present (i.e. two parents and two children):
 mothers "m", fathers "f", the older
 child as "c", and the younger child "y".}
-\format{A data frame with 2496 rows and 4 variables (208 families with 4 members each, round-robin design)}
+\format{
+A data frame with 2496 rows and 4 variables (208 families with 4 members each, round-robin design)
+}
 \description{
 The variables are as follows:
 }
@@ -31,4 +33,3 @@ head(two.indicators)
 Cook, W. L. (2000). Understanding attachment security in family context. \emph{Journal of Personality and Social Psychology, 78}, 285-294. doi:10.1037/0022-3514.78.2.285
 }
 \keyword{datasets}
-

@@ -12,21 +12,14 @@ install.packages("roxygen2", type="source")
 library(devtools)
 
 
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-devtools::document()
+devtools::document("package")
+devtools::check("package")
+devtools::check_win_release("package")
+devtools::check_win_devel("package")
+devtools::check_rhub("package")
 
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-devtools::check()
+# everything OK? Install locally
+devtools::install("package")
 
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-devtools::install()
-
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-devtools::build_win()
-
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-devtools::build()
-
-setwd("/Users/Felix/Documents/R/Funktionen/GitHub/fSRM/package")
-devtools::release()
-
+# Finally: Release to CRAN, and pray
+devtools::release("package")

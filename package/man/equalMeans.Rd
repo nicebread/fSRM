@@ -14,4 +14,3 @@ equalMeans(x, digits = 3)
 \description{
 Test actor and partner means for equality, using a Wald test.
 }
-

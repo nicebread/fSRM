@@ -28,11 +28,11 @@ citEntry(entry = "Manual",
   			as.person("Lara Stas"),
 			as.person("Tom Loeys")),
   year = year,
-  url = "http://cran.r-project.org/package=fSRM",
+  url = "https://cran.r-project.org/package=fSRM",
 
   textVersion =
   paste("Schönbrodt, F. D., Stas, L., Loeys, T.",
        sprintf("(%s).", year),
        title,
-        "Retrieved from http://cran.r-project.org/package=fSRM")
+        "Retrieved from https://cran.r-project.org/package=fSRM")
 )

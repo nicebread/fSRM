@@ -16,4 +16,3 @@
 \description{
 Predict new cases based on a fitted fSRM model
 }
-

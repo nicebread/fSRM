@@ -14,4 +14,3 @@ mod(x, minMI = 10)
 \description{
 Get modification indices for a fSRM object.
 }
-

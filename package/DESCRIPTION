@@ -3,7 +3,7 @@ Package: fSRM
 Type: Package
 Title: Social Relations Analyses with Roles ("Family SRM")
 Version: 0.6.5
-Date: 2016-11-14
+Date: 2021-01-25
 Author: Felix Schönbrodt, Lara Stas, Tom Loeys
 Maintainer: Felix Schönbrodt <felix@nicebread.de>
 Description: Social Relations Analysis with roles ("Family SRM") are computed,
@@ -24,4 +24,4 @@ Imports:
     gridExtra,
 	methods
 License: GPL (>=2)
-RoxygenNote: 5.0.1
+RoxygenNote: 7.1.1

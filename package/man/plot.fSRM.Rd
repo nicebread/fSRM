@@ -40,4 +40,3 @@ plot(f4.2, bw=TRUE)
 plot(f4.2, means=TRUE)
 }
 }
-

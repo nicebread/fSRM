@@ -4,6 +4,12 @@
 
 The package computes Social Relations Analysis with roles ("Family SRM"), using a structural equation modeling approach. Groups ranging from three members up to an unlimited number of members are supported and the mean structure can be computed. A delta method approach allows the comparison of means and variances between two groups of families, a Wald statistic tests the hypothesis that actor or partner means are equal across roles.
 
+The package is described in this paper:
+
+Stas, L., Schönbrodt, F. D., & Loeys, T. (2015). Getting the most out of family data with the R package fSRM. *Journal of Family Psychology, 29*, 263–275. doi:10.1037/fam0000058 [Free PDF version](https://osf.io/swgyj/)
+
+Please cite the paper when you use the package in your research.
+
 ## Installation
 
 The stable version can be installed from [CRAN](http://cran.r-project.org/web/packages/fSRM/index.html):

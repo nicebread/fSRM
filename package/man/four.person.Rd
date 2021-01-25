@@ -4,7 +4,9 @@
 \name{four.person}
 \alias{four.person}
 \title{Data set on attachment anxiety in four person families (Cook, 2000)}
-\format{A data frame with 2497 rows and 4 variables (208 families with 4 members each, round-robin design)}
+\format{
+A data frame with 2497 rows and 4 variables (208 families with 4 members each, round-robin design)
+}
 \source{
 This dataset was retrieved from \url{http://davidakenny.net/kkc/c9/c9.htm} in wide format and converted to an R dataset in long format.
 }
@@ -34,4 +36,3 @@ Cook, W. L. (2000). Understanding attachment security in family context. \emph{J
 Collins, N. L., & Read, S. J. (1990, April). Adult attachment, working models, and relationship quality in dating couples. Journal of Personality and Social Psychology, 58, 644-663.
 }
 \keyword{datasets}
-
